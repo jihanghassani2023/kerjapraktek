@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -18,23 +18,28 @@ Route::get('/unauthorized', function () {
 
 // Protected routes for admin, kepala toko, and teknisi
 Route::middleware(['auth', 'role'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/login', [LoginController::class, 'index'])->name('Login');
 
     // Admin specific routes
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/admin/users', [DashboardController::class, 'users'])->name('admin.users');
+        Route::get('/admin/users', [LoginController::class, 'users'])->name('admin.users');
         // More admin routes...
     });
 
     // Kepala Toko specific routes
     Route::middleware(['role:kepala_toko'])->group(function () {
-        Route::get('/kepala-toko/reports', [DashboardController::class, 'reports'])->name('kepala.reports');
+        Route::get('/kepala-toko/reports', [LoginController::class, 'reports'])->name('kepala.reports');
         // More kepala toko routes...
     });
 
     // Teknisi specific routes
     Route::middleware(['role:teknisi'])->group(function () {
-        Route::get('/teknisi/tasks', [DashboardController::class, 'tasks'])->name('teknisi.tasks');
+        Route::get('/teknisi/tasks', [LoginController::class, 'tasks'])->name('teknisi.tasks');
         // More teknisi routes...
     });
+
+    Route::get('/login', [LoginController::class, 'index'])
+    ->middleware(['auth', 'role:admin,kepala_toko,teknisi']);
+
+
 });
