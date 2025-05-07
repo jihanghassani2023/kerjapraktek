@@ -256,7 +256,6 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'><rect width=\'80\' height=\'80\' fill=\'%238c3a3a\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'white\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
-            <span>TECH</span>
         </div>
         <a href="{{ route('teknisi.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -684,7 +683,6 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'><rect width=\'80\' height=\'80\' fill=\'%238c3a3a\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'white\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
-            <span>TECH</span>
         </div>
         <a href="{{ route('teknisi.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -709,7 +707,7 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">TAMBAH PERBAIKAN</h1>
+            <h1 class="page-title">TAMBAH PERBAIKAN <span>TEKNISI</span></h1>
             <div class="user-info">
                 <div class="user-name">
                     <div>{{ $user->name }}</div>
@@ -871,13 +869,13 @@
                 return isValid;
             }
         });
-    </script>
+        
+        return isValid;
+    }
+});
+</script>
 </body>
 </html>
-                
-                return isValid;
-            }
-        });
     </script>
 </body>
 </html>

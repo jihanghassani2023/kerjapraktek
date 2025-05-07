@@ -181,7 +181,7 @@
         }
         @media (max-width: 768px) {
             .sidebar {
-                <h2>Detail Karyawan</h2>
+                <h2></h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">

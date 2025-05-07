@@ -227,7 +227,6 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
-            <span>MG TECH</span>
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -253,7 +252,7 @@
     <div class="main-content">
         <div class="header">
             <div>
-                <h2>Edit Karyawan</h2>
+                <h2></h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">

@@ -266,7 +266,6 @@
     <div class="main-content">
         <div class="header">
             <div>
-                <h2>Dashboard <span class="user-role">Kepala Toko</span></h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -278,11 +277,9 @@
                 </div>
             </div>
         </div>
-
         <div class="dashboard-title">
             Dashboard <span>Kepala Toko</span>
         </div>
-
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-icon teknisi">
@@ -376,32 +373,6 @@
                             @endif
                         </td>
                         <td>Rp. 350.000</td>
-                        <td><span class="status-active">Selesai</span></td>
-                    </tr>
-                    <tr>
-                        <td>#TRX002</td>
-                        <td>{{ date('d M Y') }}</td>
-                        <td>
-                            @if($teknisi->count() > 1)
-                                {{ $teknisi[1]->nama_karyawan }}
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td>Rp. 250.000</td>
-                        <td><span class="status-active">Selesai</span></td>
-                    </tr>
-                    <tr>
-                        <td>#TRX003</td>
-                        <td>{{ date('d M Y', strtotime('-1 day')) }}</td>
-                        <td>
-                            @if($teknisi->count() > 2)
-                                {{ $teknisi[2]->nama_karyawan }}
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td>Rp. 200.000</td>
                         <td><span class="status-active">Selesai</span></td>
                     </tr>
                 </tbody>
