@@ -186,7 +186,6 @@
         }
         .form-control:disabled {
             background-color: #e9ecef;
-            cursor: not-allowed;
         }
         textarea.form-control {
             min-height: 100px;
@@ -227,6 +226,7 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <span>MG TECH</span>
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -252,7 +252,7 @@
     <div class="main-content">
         <div class="header">
             <div>
-                <h2></h2>
+                <h2>Edit Karyawan</h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -288,8 +288,7 @@
                 @method('PUT')
                 <div class="form-group">
                     <label for="id_karyawan">ID Karyawan</label>
-                    <input type="text" class="form-control" id="id_karyawan" name="id_karyawan" value="{{ $karyawan->id_karyawan }}" disabled>
-                    <small class="text-muted">ID Karyawan tidak dapat diubah</small>
+                    <input type="text" class="form-control" id="id_karyawan" name="id_karyawan" value="{{ $karyawan->id_karyawan }}" readonly>
                 </div>
 
                 <div class="form-group">

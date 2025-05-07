@@ -184,6 +184,9 @@
             outline: none;
             box-shadow: 0 0 0 0.2rem rgba(140, 58, 58, 0.25);
         }
+        .form-control:disabled {
+            background-color: #e9ecef;
+        }
         textarea.form-control {
             min-height: 100px;
         }
@@ -223,6 +226,7 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <span>MG TECH</span>
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -248,7 +252,7 @@
     <div class="main-content">
         <div class="header">
             <div>
-                <h2></h2>
+                <h2>Tambah Karyawan</h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -283,7 +287,7 @@
                 @csrf
                 <div class="form-group">
                     <label for="id_karyawan">ID Karyawan</label>
-                    <input type="text" class="form-control @error('id_karyawan') is-invalid @enderror" id="id_karyawan" name="id_karyawan" value="{{ old('id_karyawan') }}" required>
+                    <input type="text" class="form-control @error('id_karyawan') is-invalid @enderror" id="id_karyawan" name="id_karyawan" value="{{ $newId }}" readonly>
                     @error('id_karyawan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -334,6 +338,23 @@
                         <option value="Tetap" {{ old('status') == 'Tetap' ? 'selected' : '' }}>Tetap</option>
                     </select>
                     @error('status')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Email dan Password untuk login -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
+                    @error('email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
+                    @error('password')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

@@ -183,7 +183,7 @@
             width: 100%;
             border-collapse: collapse;
         }
-        table th,
+        table th, 
         table td {
             text-align: left;
             padding: 12px 15px;
@@ -196,11 +196,12 @@
         }
         table tr:hover {
             background-color: #f5f5f5;
+            cursor: pointer;
         }
         .action-buttons {
             display: flex;
             gap: 5px;
-            justify-content: center;
+            justify-content: flex-end;
         }
         .action-btn {
             padding: 6px 10px;
@@ -210,6 +211,8 @@
             text-decoration: none;
             font-size: 0.9em;
             transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
         }
         .action-btn:hover {
             background-color: #dee2e6;
@@ -253,6 +256,7 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <span>MG TECH</span>
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -278,7 +282,7 @@
     <div class="main-content">
         <div class="header">
             <div>
-                <h2></h2>
+                <h2>Data Karyawan</h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -290,6 +294,7 @@
                 </div>
             </div>
         </div>
+
         <div class="title-section">
             <h1 class="page-title">Data Karyawan</h1>
             <a href="{{ route('karyawan.create') }}" class="btn btn-primary">
@@ -320,7 +325,7 @@
                     </thead>
                     <tbody>
                         @forelse($karyawan as $index => $k)
-                            <tr>
+                            <tr onclick="window.location='{{ route('karyawan.show', $k->id) }}';" style="cursor: pointer;">
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $k->id_karyawan }}</td>
                                 <td>{{ $k->nama_karyawan }}</td>
@@ -328,10 +333,7 @@
                                 <td>{{ $k->alamat }}</td>
                                 <td>{{ $k->jabatan }}</td>
                                 <td>{{ $k->status }}</td>
-                                <td class="action-buttons">
-                                    <a href="{{ route('karyawan.show', $k->id) }}" class="action-btn" title="Detail">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
+                                <td class="action-buttons" onclick="event.stopPropagation();">
                                     <a href="{{ route('karyawan.edit', $k->id) }}" class="action-btn" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>

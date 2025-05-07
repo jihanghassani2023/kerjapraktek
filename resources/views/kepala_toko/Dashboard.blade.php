@@ -21,7 +21,7 @@
             width: 220px;
             background-color: #8c3a3a;
             color: white;
-            padding: 5px 0;
+            padding: 20px 0;
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -29,11 +29,11 @@
             overflow-y: auto;
         }
         .sidebar-logo {
-            padding: 15px 20px 15px;
+            padding: 15px 20px 30px;
             text-align: center;
         }
         .sidebar-logo img {
-            width: 120px;
+            width: 80px;
             height: auto;
         }
         .sidebar-logo span {
@@ -149,7 +149,7 @@
             justify-content: center;
             margin-right: 15px;
         }
-        .stat-icon.teknisi {
+        .stat-icon.karyawan {
             background-color: #f0e5e5;
         }
         .stat-icon.harian {
@@ -161,7 +161,7 @@
         .stat-icon i {
             font-size: 24px;
         }
-        .stat-icon.teknisi i {
+        .stat-icon.karyawan i {
             color: #8c3a3a;
         }
         .stat-icon.harian i {
@@ -241,6 +241,7 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <span>MG TECH</span>
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item active">
             <i class="fas fa-home"></i>
@@ -266,6 +267,7 @@
     <div class="main-content">
         <div class="header">
             <div>
+                <h2>Dashboard <span class="user-role">Kepala Toko</span></h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -277,17 +279,19 @@
                 </div>
             </div>
         </div>
+
         <div class="dashboard-title">
             Dashboard <span>Kepala Toko</span>
         </div>
+
         <div class="stats-container">
             <div class="stat-card">
-                <div class="stat-icon teknisi">
+                <div class="stat-icon karyawan">
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>Total Teknisi</h3>
-                    <p>{{ App\Models\Karyawan::where('jabatan', 'Teknisi')->count() }}</p>
+                    <h3>Total Karyawan</h3>
+                    <p>{{ App\Models\Karyawan::count() }}</p>
                 </div>
             </div>
 
@@ -297,7 +301,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Total Transaksi Harian</h3>
-                    <p>Rp. 800.000</p>
+                    <p>Rp. {{ number_format(App\Models\Perbaikan::whereDate('tanggal_perbaikan', date('Y-m-d'))->sum('harga'), 0, ',', '.') }}</p>
                 </div>
             </div>
 
@@ -307,7 +311,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Total Transaksi Bulanan</h3>
-                    <p>Rp. 2.900.000</p>
+                    <p>Rp. {{ number_format(App\Models\Perbaikan::whereMonth('tanggal_perbaikan', date('m'))->whereYear('tanggal_perbaikan', date('Y'))->sum('harga'), 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
@@ -315,31 +319,31 @@
         @if($user->isKepalaToko())
         <div class="content-section">
             <div class="section-header">
-                <h3 class="section-title">Daftar Teknisi</h3>
+                <h3 class="section-title">Daftar Karyawan</h3>
                 <a href="{{ route('karyawan.index') }}" class="section-action">Lihat Semua</a>
             </div>
             <table>
                 <thead>
                     <tr>
                         <th>Nama</th>
+                        <th>Jabatan</th>
                         <th>Status</th>
-                        <th>Transaksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @php
-                        $teknisi = App\Models\Karyawan::where('jabatan', 'Teknisi')->take(3)->get();
+                        $karyawan = App\Models\Karyawan::orderBy('created_at', 'desc')->take(3)->get();
                     @endphp
                     
-                    @forelse ($teknisi as $t)
+                    @forelse ($karyawan as $k)
                     <tr>
-                        <td>{{ $t->nama_karyawan }}</td>
-                        <td><span class="status-active">{{ $t->status }}</span></td>
-                        <td>0 transaksi</td>
+                        <td><a href="{{ route('karyawan.show', $k->id) }}" style="text-decoration: none; color: inherit;">{{ $k->nama_karyawan }}</a></td>
+                        <td>{{ $k->jabatan }}</td>
+                        <td><span class="status-active">{{ $k->status }}</span></td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="3" style="text-align: center;">Tidak ada data teknisi</td>
+                        <td colspan="3" style="text-align: center;">Tidak ada data karyawan</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -362,19 +366,23 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $perbaikan = App\Models\Perbaikan::with('user')->orderBy('created_at', 'desc')->take(3)->get();
+                    @endphp
+                    
+                    @forelse ($perbaikan as $p)
                     <tr>
-                        <td>#TRX001</td>
-                        <td>{{ date('d M Y') }}</td>
-                        <td>
-                            @if($teknisi->isNotEmpty())
-                                {{ $teknisi->first()->nama_karyawan }}
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td>Rp. 350.000</td>
-                        <td><span class="status-active">Selesai</span></td>
+                        <td>{{ $p->kode_perbaikan }}</td>
+                        <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('d M Y') }}</td>
+                        <td>{{ $p->user->name ?? 'N/A' }}</td>
+                        <td>Rp. {{ number_format($p->harga, 0, ',', '.') }}</td>
+                        <td><span class="status-{{ strtolower($p->status) === 'selesai' ? 'active' : 'inactive' }}">{{ $p->status }}</span></td>
                     </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Tidak ada data transaksi</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
