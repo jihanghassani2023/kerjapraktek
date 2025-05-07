@@ -20,21 +20,17 @@ class RoleAccess
         ],
     ];
 
-    protected $passwords = [
-        'admin' => 'AdminMg-Tech1',
-        'kepala_toko' => 'KepalaTokoMg-Tech1',
-        'teknisi' => 'TeknisiMg-Tech1',
-    ];
-
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         $user = Auth::user();
-        $allowedRoles = ['admin', 'teknisi', 'kepala_toko'];
 
-        if ($user && in_array($user->role, $allowedRoles)) {
-            return $next($request);
+        if (Auth::check()) {
+            Auth::logout();  // Logout pengguna yang sudah login
+            $request->session()->invalidate();  // Hancurkan sesi
+            $request->session()->regenerateToken();  // Regenerasi token sesi
         }
 
-        abort(403, 'Akses ditolak.');
+        // Jika email atau role tidak sesuai, redirect ke login
+        return redirect()->route('login');
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>MG Tech Palembang</title>
     <style>
         body {
             margin: 0;
@@ -82,6 +82,28 @@
             font-size: 14px;
             margin-top: 5px;
         }
+
+        /* Style for the password input and eye icon */
+        .password-container {
+            position: relative;
+        }
+
+        #password {
+            width: 100%;
+            padding: 8px 30px 8px 10px;  /* Padding for the eye icon */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .eye-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
@@ -94,7 +116,7 @@
         <div class="right-panel">
             <div class="login-form">
                 <h2>LOGIN</h2>
-                <form method="POST" action="{{ route('login') }}">
+                <form method="POST" action="{{ route('login.submit') }}">
                     @csrf
                     <div class="form-group">
                         <label for="email">EMAIL</label>
@@ -105,7 +127,10 @@
                     </div>
                     <div class="form-group">
                         <label for="password">PASSWORD</label>
-                        <input type="password" id="password" name="password" required placeholder="Password">
+                        <div class="password-container">
+                            <input type="password" id="password" name="password" required placeholder="Password">
+                            <span class="eye-icon" id="eye-icon" onclick="togglePassword()">👁️</span>
+                        </div>
                         @error('password')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
@@ -117,5 +142,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById("password");
+            const eyeIcon = document.getElementById("eye-icon");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                eyeIcon.textContent = "🙈";
+            } else {
+                passwordInput.type = "password";
+                eyeIcon.textContent = "👁️";
+            }
+        }
+    </script>
 </body>
 </html>

@@ -3,30 +3,50 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+    // Middleware wajib login
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    // Menentukan redirect ke dashboard berdasarkan role
     public function index()
     {
-        $user = auth()->user();
-        return view('dashboard', compact('user'));
+        $user = Auth::user();
+
+        if ($user->role == 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->role == 'kepala_toko') {
+            return redirect()->route('kepala-toko.dashboard');
+        } elseif ($user->role == 'teknisi') {
+            return redirect()->route('teknisi.dashboard');
+        }
+
+        return redirect()->route('login');
     }
 
-    public function users()
+    // Dashboard untuk admin
+    public function adminDashboard()
     {
-        // Admin function to manage users
-        return view('admin.users');
+        $user = Auth::user();
+        return view('admin.dashboard', compact('user'));
     }
 
-    public function reports()
+    // Dashboard untuk kepala toko
+    public function kepalaDashboard()
     {
-        // Kepala Toko function to view reports
-        return view('kepala.reports');
+        $user = Auth::user();
+        return view('kepala_toko.dashboard', compact('user'));
     }
 
-    public function tasks()
+    // Dashboard untuk teknisi
+    public function teknisiDashboard()
     {
-        // Teknisi function to manage tasks
-        return view('teknisi.tasks');
+        $user = Auth::user();
+        return view('teknisi.dashboard', compact('user'));
     }
 }

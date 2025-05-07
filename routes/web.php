@@ -1,45 +1,41 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/unauthorized', function () {
-    return view('unauthorized');
-})->name('unauthorized');
+// Dashboard routes
+Route::middleware(['auth'])->group(function () {
+    // Rute default dashboard yang akan melakukan redirect sesuai role
+    Route::get('/dashboard', function () {
+        // Menggunakan Auth::user()->role langsung
+        $role = Auth::user()->role;
+        
+        if ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($role === 'kepala_toko') {
+            return redirect()->route('kepala-toko.dashboard');
+        } elseif ($role === 'teknisi') {
+            return redirect()->route('teknisi.dashboard');
+        } else {
+            return redirect()->route('login');
+        }
+    })->name('dashboard');
 
-// Protected routes for admin, kepala toko, and teknisi
-Route::middleware(['auth', 'role'])->group(function () {
-    Route::get('/login', [LoginController::class, 'index'])->name('Login');
+    Route::get('/admin/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
 
-    // Admin specific routes
-    Route::middleware(['role:admin'])->group(function () {
-        Route::get('/admin/users', [LoginController::class, 'users'])->name('admin.users');
-        // More admin routes...
-    });
+    Route::get('/kepala-toko/dashboard', function () {
+        $user = Auth::user(); // Tambahkan ini
+        return view('kepala_toko.dashboard', ['user' => $user]); // Kirim user ke view
+    })->name('kepala-toko.dashboard');
 
-    // Kepala Toko specific routes
-    Route::middleware(['role:kepala_toko'])->group(function () {
-        Route::get('/kepala-toko/reports', [LoginController::class, 'reports'])->name('kepala.reports');
-        // More kepala toko routes...
-    });
-
-    // Teknisi specific routes
-    Route::middleware(['role:teknisi'])->group(function () {
-        Route::get('/teknisi/tasks', [LoginController::class, 'tasks'])->name('teknisi.tasks');
-        // More teknisi routes...
-    });
-
-    Route::get('/login', [LoginController::class, 'index'])
-    ->middleware(['auth', 'role:admin,kepala_toko,teknisi']);
-
-
+    Route::get('/teknisi/dashboard', function () {
+        return view('teknisi.dashboard');
+    })->name('teknisi.dashboard');
 });
