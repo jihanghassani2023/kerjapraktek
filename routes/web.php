@@ -2,7 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\PerbaikanController;
 use Illuminate\Support\Facades\Auth;
+
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
@@ -27,15 +33,46 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
+        $user = Auth::user();
+        return view('admin.dashboard', compact('user'));
     })->name('admin.dashboard');
 
     Route::get('/kepala-toko/dashboard', function () {
-        $user = Auth::user(); // Tambahkan ini
-        return view('kepala_toko.dashboard', ['user' => $user]); // Kirim user ke view
+        $user = Auth::user(); 
+        return view('kepala_toko.dashboard', ['user' => $user]); 
     })->name('kepala-toko.dashboard');
 
-    Route::get('/teknisi/dashboard', function () {
-        return view('teknisi.dashboard');
-    })->name('teknisi.dashboard');
+    // Karyawan routes - for kepala toko
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('karyawan', KaryawanController::class);
+    });
+
+    // Teknisi routes
+    Route::prefix('teknisi')->middleware(['auth'])->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [PerbaikanController::class, 'index'])->name('teknisi.dashboard');
+        
+        // Progress page
+        Route::get('/progress', [PerbaikanController::class, 'progress'])->name('teknisi.progress');
+        
+        // Laporan page
+        Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('teknisi.laporan');
+        
+        // Perbaikan routes
+        Route::get('/perbaikan/create', [PerbaikanController::class, 'create'])->name('perbaikan.create');
+        Route::post('/perbaikan', [PerbaikanController::class, 'store'])->name('perbaikan.store');
+        Route::get('/perbaikan/{id}', [PerbaikanController::class, 'show'])->name('perbaikan.show');
+        Route::get('/perbaikan/{id}/edit', [PerbaikanController::class, 'edit'])->name('perbaikan.edit');
+        Route::put('/perbaikan/{id}', [PerbaikanController::class, 'update'])->name('perbaikan.update');
+        Route::delete('/perbaikan/{id}', [PerbaikanController::class, 'destroy'])->name('perbaikan.destroy');
+        
+        // Generate key for repairs
+        Route::get('/generate-key', [PerbaikanController::class, 'generateKey'])->name('perbaikan.generate-key');
+        
+        // Update status with AJAX
+        Route::put('/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
+        
+        // Confirm status change
+        Route::get('/perbaikan/{id}/confirm-status/{status}', [PerbaikanController::class, 'confirmStatus'])->name('perbaikan.confirm-status');
+    });
 });

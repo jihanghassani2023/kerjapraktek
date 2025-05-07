@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dashboard Teknisi - MG TECH</title>
+    <title>Progress Perbaikan - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -128,63 +128,10 @@
             height: 100%;
             object-fit: cover;
         }
-        .stats-container {
-            display: flex;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        .stat-card {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            border-left: 5px solid #8c3a3a;
-        }
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            background-color: rgba(140, 58, 58, 0.1);
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-        }
-        .stat-icon i {
-            color: #8c3a3a;
-            font-size: 24px;
-        }
-        .stat-info h3 {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        .stat-info p {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        .action-button {
-            display: inline-block;
-            padding: 10px 15px;
-            background-color: #8c3a3a;
-            color: white;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            margin: 20px 0;
-            border: none;
-            cursor: pointer;
-        }
-        .action-button:hover {
-            background-color: #6d2d2d;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 20px;
         }
         thead {
             background-color: #f5f5f5;
@@ -196,13 +143,16 @@
         }
         th {
             color: #666;
-            font-weight: normal;
+            font-weight: bold;
         }
         .status {
+            display: inline-block;
             padding: 5px 10px;
             border-radius: 3px;
             font-size: 12px;
             font-weight: bold;
+            cursor: pointer;
+            margin-right: 5px;
         }
         .status-menunggu {
             background-color: #ffeaea;
@@ -229,52 +179,22 @@
         }
         .modal-content {
             background-color: #fff;
-            margin: 10% auto;
+            margin: 15% auto;
             padding: 20px;
             border-radius: 5px;
-            width: 400px;
+            width: 300px;
             max-width: 90%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            text-align: center;
         }
         .modal-title {
-            font-size: 20px;
+            font-size: 18px;
             color: #333;
-        }
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close:hover {
-            color: #333;
-        }
-        .modal-body {
             margin-bottom: 20px;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
-        }
-        .form-control {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .modal-footer {
-            text-align: right;
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
         .btn {
             padding: 8px 15px;
@@ -282,36 +202,48 @@
             cursor: pointer;
             font-size: 14px;
             border: none;
+            font-weight: bold;
         }
-        .btn-primary {
-            background-color: #8c3a3a;
+        .btn-yes {
+            background-color: #28a745;
             color: white;
         }
-        .btn-primary:hover {
-            background-color: #6d2d2d;
-        }
-        .btn-secondary {
-            background-color: #f5f5f5;
-            color: #666;
-        }
-        .btn-secondary:hover {
-            background-color: #e5e5e5;
-        }
-        .actions {
-            display: flex;
-            gap: 5px;
+        .btn-no {
+            background-color: #ff6b6b;
+            color: white;
         }
         .btn-action {
             padding: 5px 10px;
             border-radius: 3px;
             cursor: pointer;
             font-size: 12px;
-            color: #666;
-            background-color: #f5f5f5;
             border: none;
+            transition: background-color 0.3s;
         }
-        .btn-action:hover {
-            background-color: #e5e5e5;
+        .btn-process {
+            background-color: #fff4e0;
+            color: #ffaa00;
+        }
+        .btn-process:hover {
+            background-color: #ffe6c0;
+        }
+        .btn-complete {
+            background-color: #e7f9e7;
+            color: #28a745;
+        }
+        .btn-complete:hover {
+            background-color: #d0f0d0;
+        }
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .alert-success {
+            background-color: #e7f9e7;
+            color: #28a745;
+            border: 1px solid #d0f0d0;
         }
     </style>
 </head>
@@ -319,8 +251,9 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'><rect width=\'80\' height=\'80\' fill=\'%238c3a3a\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'white\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
+            <span>TECH</span>
         </div>
-        <a href="{{ route('teknisi.dashboard') }}" class="menu-item active">
+        <a href="{{ route('teknisi.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
@@ -328,7 +261,7 @@
             <i class="fas fa-clipboard-list"></i>
             <span>Laporan</span>
         </a>
-        <a href="{{ route('teknisi.progress') }}" class="menu-item">
+        <a href="{{ route('teknisi.progress') }}" class="menu-item active">
             <i class="fas fa-tools"></i>
             <span>Progres</span>
         </a>
@@ -343,7 +276,7 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">Dashboard <span>TEKNISI</span></h1>
+            <h1 class="page-title">Progres <span>TEKNISI</span></h1>
             <div class="user-info">
                 <div class="user-name">
                     <div>{{ $user->name }}</div>
@@ -355,39 +288,11 @@
             </div>
         </div>
 
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Sedang Menunggu</h3>
-                    <p>{{ $sedangMenunggu }}</p>
-                </div>
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Perbaikan Selesai Hari Ini</h3>
-                    <p>{{ $perbaikanSelesaiHari }}</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-tasks"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Perbaikan Selesai Bulan Ini</h3>
-                    <p>{{ $perbaikanSelesaiBulan }}</p>
-                </div>
-            </div>
-        </div>
-
-        <a href="{{ route('perbaikan.create') }}" class="action-button">
-            <i class="fas fa-plus"></i> Tambah Perbaikan
-        </a>
+        @endif
 
         <table>
             <thead>
@@ -409,7 +314,15 @@
                     <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('l, j F Y') }}</td>
                     <td>{{ $p->masalah }}</td>
                     <td>
-                        <span class="status status-{{ strtolower($p->status) }}">{{ $p->status }}</span>
+                        @if($p->status == 'Menunggu')
+                            <span class="status status-menunggu">{{ $p->status }}</span>
+                            <button class="btn-action btn-process" data-id="{{ $p->id }}" data-status="Proses">Proses</button>
+                        @elseif($p->status == 'Proses')
+                            <span class="status status-proses">{{ $p->status }}</span>
+                            <button class="btn-action btn-complete" data-id="{{ $p->id }}" data-status="Selesai">Selesai</button>
+                        @else
+                            <span class="status status-selesai">{{ $p->status }}</span>
+                        @endif
                     </td>
                 </tr>
                 @empty
@@ -420,5 +333,97 @@
             </tbody>
         </table>
     </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">APAKAH DEVICE INI AKAN ANDA KERJAKAN?</h3>
+            <div class="modal-buttons">
+                <button id="confirmYes" class="btn btn-yes">YA</button>
+                <button id="confirmNo" class="btn btn-no">TIDAK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusButtons = document.querySelectorAll('.btn-action');
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmYes = document.getElementById('confirmYes');
+            const confirmNo = document.getElementById('confirmNo');
+            let currentButton = null;
+            let currentId = null;
+            let currentStatus = null;
+            
+            // Add click event to all status buttons
+            statusButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    currentButton = this;
+                    currentId = this.dataset.id;
+                    currentStatus = this.dataset.status;
+                    
+                    // Update dialog text based on status
+                    const statusText = currentStatus === 'Proses' ? 'KERJAKAN' : 'SELESAIKAN';
+                    document.querySelector('.modal-title').textContent = `APAKAH DEVICE INI AKAN ANDA ${statusText}?`;
+                    
+                    // Show modal
+                    confirmModal.style.display = 'block';
+                });
+            });
+            
+            // Confirm button (Yes)
+            confirmYes.addEventListener('click', function() {
+                if (currentId && currentStatus) {
+                    updateStatus(currentId, currentStatus);
+                }
+                confirmModal.style.display = 'none';
+            });
+            
+            // Cancel button (No)
+            confirmNo.addEventListener('click', function() {
+                confirmModal.style.display = 'none';
+            });
+            
+            // Close modal if clicked outside
+            window.addEventListener('click', function(event) {
+                if (event.target === confirmModal) {
+                    confirmModal.style.display = 'none';
+                }
+            });
+            
+            // Function to update status
+            function updateStatus(id, status) {
+                // Get CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                // Send AJAX request
+                fetch(`/teknisi/perbaikan/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({ status: status })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Reload page to show updated status
+                        window.location.reload();
+                    } else {
+                        alert('Gagal mengubah status. Silakan coba lagi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating status:', error);
+                    alert('Terjadi kesalahan. Silakan coba lagi.');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

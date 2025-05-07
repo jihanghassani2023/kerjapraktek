@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dashboard Teknisi - MG TECH</title>
+    <title>Laporan Perbaikan - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -128,63 +128,10 @@
             height: 100%;
             object-fit: cover;
         }
-        .stats-container {
-            display: flex;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        .stat-card {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            border-left: 5px solid #8c3a3a;
-        }
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            background-color: rgba(140, 58, 58, 0.1);
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-        }
-        .stat-icon i {
-            color: #8c3a3a;
-            font-size: 24px;
-        }
-        .stat-info h3 {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        .stat-info p {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        .action-button {
-            display: inline-block;
-            padding: 10px 15px;
-            background-color: #8c3a3a;
-            color: white;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            margin: 20px 0;
-            border: none;
-            cursor: pointer;
-        }
-        .action-button:hover {
-            background-color: #6d2d2d;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 20px;
         }
         thead {
             background-color: #f5f5f5;
@@ -196,122 +143,82 @@
         }
         th {
             color: #666;
-            font-weight: normal;
+            font-weight: bold;
         }
         .status {
+            display: inline-block;
             padding: 5px 10px;
             border-radius: 3px;
             font-size: 12px;
             font-weight: bold;
-        }
-        .status-menunggu {
-            background-color: #ffeaea;
-            color: #ff6b6b;
-        }
-        .status-proses {
-            background-color: #fff4e0;
-            color: #ffaa00;
         }
         .status-selesai {
             background-color: #e7f9e7;
             color: #28a745;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fff;
-            margin: 10% auto;
-            padding: 20px;
-            border-radius: 5px;
-            width: 400px;
-            max-width: 90%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .modal-header {
+        .filter-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin: 20px 0;
         }
-        .modal-title {
-            font-size: 20px;
-            color: #333;
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close:hover {
-            color: #333;
-        }
-        .modal-body {
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
+        .filter-label {
+            font-size: 14px;
             color: #666;
         }
-        .form-control {
-            width: 100%;
+        .filter-select {
             padding: 8px 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+            min-width: 150px;
         }
-        .modal-footer {
-            text-align: right;
-        }
-        .btn {
+        .btn-filter {
             padding: 8px 15px;
+            background-color: #8c3a3a;
+            color: white;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            border: none;
+            font-weight: bold;
         }
-        .btn-primary {
-            background-color: #8c3a3a;
-            color: white;
-        }
-        .btn-primary:hover {
+        .btn-filter:hover {
             background-color: #6d2d2d;
         }
-        .btn-secondary {
-            background-color: #f5f5f5;
-            color: #666;
-        }
-        .btn-secondary:hover {
-            background-color: #e5e5e5;
-        }
-        .actions {
+        .btn-export {
+            padding: 8px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
             display: flex;
+            align-items: center;
             gap: 5px;
         }
-        .btn-action {
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-            color: #666;
-            background-color: #f5f5f5;
-            border: none;
+        .btn-export:hover {
+            background-color: #218838;
         }
-        .btn-action:hover {
-            background-color: #e5e5e5;
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #888;
+        }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        .empty-state-text {
+            font-size: 16px;
         }
     </style>
 </head>
@@ -319,12 +226,13 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'><rect width=\'80\' height=\'80\' fill=\'%238c3a3a\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'white\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
+            <span>TECH</span>
         </div>
-        <a href="{{ route('teknisi.dashboard') }}" class="menu-item active">
+        <a href="{{ route('teknisi.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('teknisi.laporan') }}" class="menu-item">
+        <a href="{{ route('teknisi.laporan') }}" class="menu-item active">
             <i class="fas fa-clipboard-list"></i>
             <span>Laporan</span>
         </a>
@@ -343,7 +251,7 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">Dashboard <span>TEKNISI</span></h1>
+            <h1 class="page-title">Laporan <span>TEKNISI</span></h1>
             <div class="user-info">
                 <div class="user-name">
                     <div>{{ $user->name }}</div>
@@ -355,40 +263,38 @@
             </div>
         </div>
 
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Sedang Menunggu</h3>
-                    <p>{{ $sedangMenunggu }}</p>
-                </div>
+        <div class="filter-container">
+            <div class="filter-group">
+                <div class="filter-label">Filter:</div>
+                <select class="filter-select" id="monthFilter">
+                    <option value="">Semua Bulan</option>
+                    <option value="1" {{ request('month') == '1' ? 'selected' : '' }}>Januari</option>
+                    <option value="2" {{ request('month') == '2' ? 'selected' : '' }}>Februari</option>
+                    <option value="3" {{ request('month') == '3' ? 'selected' : '' }}>Maret</option>
+                    <option value="4" {{ request('month') == '4' ? 'selected' : '' }}>April</option>
+                    <option value="5" {{ request('month') == '5' ? 'selected' : '' }}>Mei</option>
+                    <option value="6" {{ request('month') == '6' ? 'selected' : '' }}>Juni</option>
+                    <option value="7" {{ request('month') == '7' ? 'selected' : '' }}>Juli</option>
+                    <option value="8" {{ request('month') == '8' ? 'selected' : '' }}>Agustus</option>
+                    <option value="9" {{ request('month') == '9' ? 'selected' : '' }}>September</option>
+                    <option value="10" {{ request('month') == '10' ? 'selected' : '' }}>Oktober</option>
+                    <option value="11" {{ request('month') == '11' ? 'selected' : '' }}>November</option>
+                    <option value="12" {{ request('month') == '12' ? 'selected' : '' }}>Desember</option>
+                </select>
+                <select class="filter-select" id="yearFilter">
+                    <option value="">Semua Tahun</option>
+                    <option value="2023" {{ request('year') == '2023' ? 'selected' : '' }}>2023</option>
+                    <option value="2024" {{ request('year') == '2024' ? 'selected' : '' }}>2024</option>
+                    <option value="2025" {{ request('year') == '2025' ? 'selected' : '' }}>2025</option>
+                </select>
+                <button type="button" id="applyFilterBtn" class="btn-filter">Terapkan</button>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Perbaikan Selesai Hari Ini</h3>
-                    <p>{{ $perbaikanSelesaiHari }}</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-tasks"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Perbaikan Selesai Bulan Ini</h3>
-                    <p>{{ $perbaikanSelesaiBulan }}</p>
-                </div>
-            </div>
+            <button type="button" id="exportBtn" class="btn-export">
+                <i class="fas fa-file-export"></i> Export
+            </button>
         </div>
 
-        <a href="{{ route('perbaikan.create') }}" class="action-button">
-            <i class="fas fa-plus"></i> Tambah Perbaikan
-        </a>
-
+        @if($perbaikan->count() > 0)
         <table>
             <thead>
                 <tr>
@@ -401,24 +307,53 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($perbaikan as $index => $p)
+                @foreach($perbaikan as $index => $p)
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $p->kode_perbaikan }}</td>
                     <td>{{ $p->nama_barang }}</td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('l, j F Y') }}</td>
                     <td>{{ $p->masalah }}</td>
-                    <td>
-                        <span class="status status-{{ strtolower($p->status) }}">{{ $p->status }}</span>
-                    </td>
+                    <td><span class="status status-selesai">{{ $p->status }}</span></td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="6" style="text-align: center;">Tidak ada data perbaikan</td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
+        @else
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <p class="empty-state-text">Belum ada data perbaikan yang selesai</p>
+        </div>
+        @endif
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const applyFilterBtn = document.getElementById('applyFilterBtn');
+            const monthFilter = document.getElementById('monthFilter');
+            const yearFilter = document.getElementById('yearFilter');
+            
+            applyFilterBtn.addEventListener('click', function() {
+                const month = monthFilter.value;
+                const year = yearFilter.value;
+                
+                // Build query string
+                let queryString = '';
+                if (month) queryString += `month=${month}`;
+                if (year) {
+                    queryString += queryString ? `&year=${year}` : `year=${year}`;
+                }
+                
+                // Redirect with filters
+                window.location.href = `${window.location.pathname}${queryString ? '?' + queryString : ''}`;
+            });
+            
+            // Export button
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                // In a real application, this would trigger a download
+                alert('Export functionality would be implemented here in a production environment.');
+            });
+        });
+    </script>
 </body>
 </html>

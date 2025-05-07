@@ -21,7 +21,7 @@
             width: 220px;
             background-color: #8c3a3a;
             color: white;
-            padding: 20px 0;
+            padding: 5px 0;
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -29,11 +29,11 @@
             overflow-y: auto;
         }
         .sidebar-logo {
-            padding: 15px 20px 30px;
+            padding: 15px 20px 15px;
             text-align: center;
         }
         .sidebar-logo img {
-            width: 80px;
+            width: 120px;
             height: auto;
         }
         .sidebar-logo span {
@@ -240,14 +240,13 @@
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="{{ asset('images/mgtech-logo.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
-            <span>MG TECH</span>
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
         </div>
-        <a href="{{ route('dashboard') }}" class="menu-item active">
+        <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item active">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="#" class="menu-item">
+        <a href="{{ route('karyawan.index') }}" class="menu-item">
             <i class="fas fa-users"></i>
             <span>Data Karyawan</span>
         </a>
@@ -291,7 +290,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Total Teknisi</h3>
-                    <p>5</p>
+                    <p>{{ App\Models\Karyawan::where('jabatan', 'Teknisi')->count() }}</p>
                 </div>
             </div>
 
@@ -320,7 +319,7 @@
         <div class="content-section">
             <div class="section-header">
                 <h3 class="section-title">Daftar Teknisi</h3>
-                <a href="#" class="section-action">Lihat Semua</a>
+                <a href="{{ route('karyawan.index') }}" class="section-action">Lihat Semua</a>
             </div>
             <table>
                 <thead>
@@ -331,21 +330,21 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $teknisi = App\Models\Karyawan::where('jabatan', 'Teknisi')->take(3)->get();
+                    @endphp
+                    
+                    @forelse ($teknisi as $t)
                     <tr>
-                        <td>Tengku H</td>
-                        <td><span class="status-active">Aktif</span></td>
-                        <td>12 transaksi</td>
+                        <td>{{ $t->nama_karyawan }}</td>
+                        <td><span class="status-active">{{ $t->status }}</span></td>
+                        <td>0 transaksi</td>
                     </tr>
+                    @empty
                     <tr>
-                        <td>Budi Santoso</td>
-                        <td><span class="status-active">Aktif</span></td>
-                        <td>8 transaksi</td>
+                        <td colspan="3" style="text-align: center;">Tidak ada data teknisi</td>
                     </tr>
-                    <tr>
-                        <td>Andi Wijaya</td>
-                        <td><span class="status-inactive">Tidak Aktif</span></td>
-                        <td>5 transaksi</td>
-                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -369,21 +368,39 @@
                     <tr>
                         <td>#TRX001</td>
                         <td>{{ date('d M Y') }}</td>
-                        <td>Tengku H</td>
+                        <td>
+                            @if($teknisi->isNotEmpty())
+                                {{ $teknisi->first()->nama_karyawan }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>Rp. 350.000</td>
                         <td><span class="status-active">Selesai</span></td>
                     </tr>
                     <tr>
                         <td>#TRX002</td>
                         <td>{{ date('d M Y') }}</td>
-                        <td>Budi Santoso</td>
+                        <td>
+                            @if($teknisi->count() > 1)
+                                {{ $teknisi[1]->nama_karyawan }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>Rp. 250.000</td>
                         <td><span class="status-active">Selesai</span></td>
                     </tr>
                     <tr>
                         <td>#TRX003</td>
                         <td>{{ date('d M Y', strtotime('-1 day')) }}</td>
-                        <td>Andi Wijaya</td>
+                        <td>
+                            @if($teknisi->count() > 2)
+                                {{ $teknisi[2]->nama_karyawan }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>Rp. 200.000</td>
                         <td><span class="status-active">Selesai</span></td>
                     </tr>

@@ -32,8 +32,8 @@ class UserSeeder extends Seeder
         User::firstOrCreate([
             'email' => 'tengkuh@teknisi.mgtech',
         ], [
-            'name' => 'Tengku H',
-            'password' => Hash::make('Teknis_mgtech1'),
+            'name' => 'Tengkuh',
+            'password' => Hash::make('Teknisi_mgtech1'),
             'role' => 'teknisi',
         ]);
     }
