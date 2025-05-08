@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\PerbaikanController;
+use App\Http\Controllers\TransaksiController;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
@@ -37,10 +38,15 @@ Route::middleware(['auth'])->group(function () {
         return view('admin.dashboard', compact('user'));
     })->name('admin.dashboard');
 
-    Route::get('/kepala-toko/dashboard', function () {
-        $user = Auth::user(); 
-        return view('kepala_toko.dashboard', ['user' => $user]); 
-    })->name('kepala-toko.dashboard');
+    // Kepala toko routes
+    Route::get('/kepala-toko/dashboard', [TransaksiController::class, 'dashboard'])->name('kepala-toko.dashboard');
+    Route::get('/kepala-toko/transaksi', [TransaksiController::class, 'index'])->name('kepala-toko.transaksi');
+    // Transaksi routes for kepala toko
+    Route::prefix('transaksi')->name('transaksi.')->middleware(['auth'])->group(function () {
+        Route::get('/', [TransaksiController::class, 'index'])->name('index');
+        Route::get('/export', [TransaksiController::class, 'export'])->name('export');
+        Route::get('/{id}', [TransaksiController::class, 'show'])->name('show')->where('id', '[0-9]+');
+    });
 
     // Karyawan routes - for kepala toko
     Route::middleware(['auth'])->group(function () {

@@ -149,7 +149,7 @@
             justify-content: center;
             margin-right: 15px;
         }
-        .stat-icon.karyawan {
+        .stat-icon.teknisi {
             background-color: #f0e5e5;
         }
         .stat-icon.harian {
@@ -161,7 +161,7 @@
         .stat-icon i {
             font-size: 24px;
         }
-        .stat-icon.karyawan i {
+        .stat-icon.teknisi i {
             color: #8c3a3a;
         }
         .stat-icon.harian i {
@@ -218,6 +218,11 @@
         .status-inactive {
             color: #8c3a3a;
         }
+        .chart-container {
+            height: 300px;
+            width: 100%;
+            margin-top: 20px;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -251,7 +256,7 @@
             <i class="fas fa-users"></i>
             <span>Data Karyawan</span>
         </a>
-        <a href="#" class="menu-item">
+        <a href="{{ route('transaksi.index') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
@@ -286,12 +291,12 @@
 
         <div class="stats-container">
             <div class="stat-card">
-                <div class="stat-icon karyawan">
+                <div class="stat-icon teknisi">
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>Total Karyawan</h3>
-                    <p>{{ App\Models\Karyawan::count() }}</p>
+                    <h3>Total Teknisi</h3>
+                    <p>{{ $teknisiCount }}</p>
                 </div>
             </div>
 
@@ -301,7 +306,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Total Transaksi Harian</h3>
-                    <p>Rp. {{ number_format(App\Models\Perbaikan::whereDate('tanggal_perbaikan', date('Y-m-d'))->sum('harga'), 0, ',', '.') }}</p>
+                    <p>Rp. {{ number_format($totalTransaksiHariIni, 0, ',', '.') }}</p>
                 </div>
             </div>
 
@@ -311,15 +316,23 @@
                 </div>
                 <div class="stat-info">
                     <h3>Total Transaksi Bulanan</h3>
-                    <p>Rp. {{ number_format(App\Models\Perbaikan::whereMonth('tanggal_perbaikan', date('m'))->whereYear('tanggal_perbaikan', date('Y'))->sum('harga'), 0, ',', '.') }}</p>
+                    <p>Rp. {{ number_format($totalTransaksiBulanIni, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
 
-        @if($user->isKepalaToko())
         <div class="content-section">
             <div class="section-header">
-                <h3 class="section-title">Daftar Karyawan</h3>
+                <h3 class="section-title">Statistik Perbaikan Bulanan ({{ date('Y') }})</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="monthlyRepairChart"></canvas>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div class="section-header">
+                <h3 class="section-title">Daftar Teknisi</h3>
                 <a href="{{ route('karyawan.index') }}" class="section-action">Lihat Semua</a>
             </div>
             <table>
@@ -331,19 +344,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php
-                        $karyawan = App\Models\Karyawan::orderBy('created_at', 'desc')->take(3)->get();
-                    @endphp
-                    
-                    @forelse ($karyawan as $k)
-                    <tr>
-                        <td><a href="{{ route('karyawan.show', $k->id) }}" style="text-decoration: none; color: inherit;">{{ $k->nama_karyawan }}</a></td>
-                        <td>{{ $k->jabatan }}</td>
-                        <td><span class="status-active">{{ $k->status }}</span></td>
+                    @forelse ($karyawan->filter(function($k) { return in_array($k->jabatan, ['Teknisi', 'Kepala Teknisi']); }) as $t)
+                    <tr onclick="window.location='{{ route('karyawan.show', $t->id) }}';" style="cursor: pointer;">
+                        <td>{{ $t->nama_karyawan }}</td>
+                        <td>{{ $t->jabatan }}</td>
+                        <td><span class="status-active">{{ $t->status }}</span></td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="3" style="text-align: center;">Tidak ada data karyawan</td>
+                        <td colspan="3" style="text-align: center;">Tidak ada data teknisi</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -353,7 +362,7 @@
         <div class="content-section">
             <div class="section-header">
                 <h3 class="section-title">Transaksi Terbaru</h3>
-                <a href="#" class="section-action">Lihat Semua</a>
+                <a href="{{ route('transaksi.index') }}" class="section-action">Lihat Semua</a>
             </div>
             <table>
                 <thead>
@@ -366,17 +375,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php
-                        $perbaikan = App\Models\Perbaikan::with('user')->orderBy('created_at', 'desc')->take(3)->get();
-                    @endphp
-                    
-                    @forelse ($perbaikan as $p)
-                    <tr>
-                        <td>{{ $p->kode_perbaikan }}</td>
-                        <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('d M Y') }}</td>
-                        <td>{{ $p->user->name ?? 'N/A' }}</td>
-                        <td>Rp. {{ number_format($p->harga, 0, ',', '.') }}</td>
-                        <td><span class="status-{{ strtolower($p->status) === 'selesai' ? 'active' : 'inactive' }}">{{ $p->status }}</span></td>
+                    @forelse ($latestTransaksi as $t)
+                    <tr onclick="window.location='{{ route('transaksi.show', $t->id) }}';" style="cursor: pointer;">
+                        <td>{{ $t->kode_perbaikan }}</td>
+                        <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y') }}</td>
+                        <td>{{ $t->user->name ?? 'N/A' }}</td>
+                        <td>Rp. {{ number_format($t->harga, 0, ',', '.') }}</td>
+                        <td><span class="status-active">{{ $t->status }}</span></td>
                     </tr>
                     @empty
                     <tr>
@@ -386,7 +391,44 @@
                 </tbody>
             </table>
         </div>
-        @endif
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data for monthly repair chart
+            const monthlyData = @json($monthlyRepairCounts);
+            
+            const labels = monthlyData.map(item => item.month);
+            const counts = monthlyData.map(item => item.count);
+            
+            const ctx = document.getElementById('monthlyRepairChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Jumlah Perbaikan',
+                        data: counts,
+                        backgroundColor: '#8c3a3a',
+                        borderColor: '#6d2d2d',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

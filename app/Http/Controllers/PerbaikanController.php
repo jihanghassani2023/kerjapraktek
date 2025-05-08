@@ -23,7 +23,7 @@ class PerbaikanController extends Controller
         
         $perbaikanSelesaiHari = Perbaikan::where('user_id', $user->id)
             ->where('status', 'Selesai')
-            ->where('tanggal_perbaikan', date('Y-m-d'))
+            ->whereDate('tanggal_perbaikan', date('Y-m-d'))
             ->count();
             
         $perbaikanSelesaiBulan = Perbaikan::where('user_id', $user->id)
