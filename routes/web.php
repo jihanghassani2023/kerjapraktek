@@ -5,17 +5,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\TransaksiController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Auth;
 
-// Halaman utama adalah tracking
-Route::get('/', [TrackingController::class, 'index'])->name('tracking');
+// Route halaman tracking untuk pelanggan
+Route::get('/', [TrackingController::class, 'index'])->name('tracking.index');
+Route::post('/check', [TrackingController::class, 'check'])->name('tracking.check');
 
-// API untuk tracking
-Route::get('/api/tracking/{kode}', [TrackingController::class, 'search']);
-
-// Auth routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -38,21 +34,14 @@ Route::middleware(['auth'])->group(function () {
         }
     })->name('dashboard');
 
-    // Admin routes
-    Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-        Route::get('/dashboard', function () {
-            $user = Auth::user();
-            return view('admin.dashboard', compact('user'));
-        })->name('dashboard');
-        
-        // Tambahkan rute untuk transaksi admin
-        Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi');
-        Route::get('/transaksi/{id}', [AdminController::class, 'showTransaksi'])->name('transaksi.show');
-    });
+    Route::get('/admin/dashboard', function () {
+        $user = Auth::user();
+        return view('admin.dashboard', compact('user'));
+    })->name('admin.dashboard');
 
     // Kepala toko routes
     Route::get('/kepala-toko/dashboard', [TransaksiController::class, 'dashboard'])->name('kepala-toko.dashboard');
-    
+    Route::get('/kepala-toko/transaksi', [TransaksiController::class, 'index'])->name('kepala-toko.transaksi');
     // Transaksi routes for kepala toko
     Route::prefix('transaksi')->name('transaksi.')->middleware(['auth'])->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('index');

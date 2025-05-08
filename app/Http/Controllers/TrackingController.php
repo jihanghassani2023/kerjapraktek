@@ -2,62 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Perbaikan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use App\Models\Perbaikan;
 
 class TrackingController extends Controller
 {
     /**
-     * Tampilkan halaman pelacakan
+     * Menampilkan halaman tracking
      */
     public function index()
     {
-        // Jika sudah login, redirect ke dashboard sesuai role
-        if (Auth::check()) {
-            $role = Auth::user()->role;
-            
-            if ($role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            } elseif ($role === 'kepala_toko') {
-                return redirect()->route('kepala-toko.dashboard');
-            } elseif ($role === 'teknisi') {
-                return redirect()->route('teknisi.dashboard');
-            }
-        }
-        
-        // Jika belum login, tampilkan halaman tracking
         return view('tracking.index');
     }
-    
+
     /**
-     * Mencari data perbaikan berdasarkan kode
+     * Memeriksa kode perbaikan dan menampilkan hasilnya
      */
-    public function search($kode)
+    public function check(Request $request)
     {
-        // Cari perbaikan berdasarkan kode (make sure to trim the input)
-        $perbaikan = Perbaikan::where('kode_perbaikan', trim($kode))->first();
-        
-        if (!$perbaikan) {
-            return response()->json(['error' => 'Kode perbaikan tidak ditemukan'], 404);
-        }
-        
-        // Ambil nama teknisi
-        $teknisi = $perbaikan->user ? $perbaikan->user->name : 'Belum ditugaskan';
-        
-        // Format tanggal ke format Indonesia
-        $tanggal = Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y');
-        
-        return response()->json([
-            'kode_perbaikan' => $perbaikan->kode_perbaikan,
-            'nama_barang' => $perbaikan->nama_barang,
-            'tanggal_perbaikan' => $perbaikan->tanggal_perbaikan,
-            'masalah' => $perbaikan->masalah,
-            'nama_pelanggan' => $perbaikan->nama_pelanggan,
-            'status' => $perbaikan->status,
-            'teknisi' => $teknisi,
-            'tanggal_formatted' => $tanggal
+        $request->validate([
+            'key' => 'required|string',
         ]);
+
+        // Cari data perbaikan berdasarkan kode
+        $perbaikan = Perbaikan::where('kode_perbaikan', $request->key)
+            ->with('user')
+            ->first();
+
+        if (!$perbaikan) {
+            return redirect()->route('tracking.index')
+                ->with('error', 'Kode perbaikan tidak ditemukan. Mohon periksa kembali kode Anda.');
+        }
+
+        return view('tracking.index', compact('perbaikan'));
     }
 }

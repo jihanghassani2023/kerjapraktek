@@ -7,6 +7,7 @@
     <title>Tambah Perbaikan - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* CSS yang sudah ada tetap sama */
         * {
             margin: 0;
             padding: 0;
@@ -306,7 +307,7 @@
             <h2 class="form-header">Tambah Perbaikan</h2>
             <form id="perbaikanForm" action="{{ route('perbaikan.store') }}" method="POST">
                 @csrf
-                <input type="hidden" name="kode_perbaikan" id="kode_perbaikan" value="">
+                <input type="hidden" name="kode_perbaikan" id="kode_perbaikan" value="{{ old('kode_perbaikan') }}">
 
                 <div class="form-group">
                     <label for="nama_pelanggan">Nama</label>
@@ -363,88 +364,125 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // PERBAIKAN: Definisikan URL sebagai variabel global
+        const generateKeyUrl = "{{ route('perbaikan.generate-key') }}";
+        
+        // Fungsi untuk melakukan AJAX request dan generate key
+        function fetchGenerateKey() {
+            // Dapatkan CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            // Buat konfigurasi untuk request
+            const requestOptions = {
+                method: 'GET', // Atau 'POST' tergantung pada setup route Anda
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            // Lakukan fetch request
+            return fetch(generateKeyUrl, requestOptions)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.status);
+                    }
+                    return response.json();
+                });
+        }
+        
+        // Fungsi untuk validasi form
+        function validateForm() {
+            let isValid = true;
+            const requiredFields = ['nama_pelanggan', 'nama_barang', 'nomor_telp', 'masalah'];
+            
+            requiredFields.forEach(field => {
+                const input = document.getElementById(field);
+                if (!input.value.trim()) {
+                    input.style.borderColor = '#ff6b6b';
+                    isValid = false;
+                } else {
+                    input.style.borderColor = '#ddd';
+                }
+            });
+            
+            if (!isValid) {
+                alert('Mohon lengkapi semua field yang diperlukan');
+            }
+            
+            return isValid;
+        }
+        
+        // Fungsi untuk setup event listeners
+        function setupEventListeners() {
             const generateKeyBtn = document.getElementById('generateKeyBtn');
             const keyModal = document.getElementById('keyModal');
             const generatedKeyEl = document.getElementById('generatedKey');
             const saveKeyBtn = document.getElementById('saveKeyBtn');
             const kodeInput = document.getElementById('kode_perbaikan');
             const form = document.getElementById('perbaikanForm');
-
-            // Generate key button click
-            generateKeyBtn.addEventListener('click', function() {
-                // Validate form fields first
-                if (!validateForm()) {
-                    return;
-                }
-
-                // Get CSRF token
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-                // Get generate key from server
-                fetch('{{ route("perbaikan.generate-key") }}', {
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+            
+            // Event listener untuk tombol Generate Key
+            if (generateKeyBtn) {
+                generateKeyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Validasi form terlebih dahulu
+                    if (!validateForm()) {
+                        return;
                     }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Generated key:', data);
-                    generatedKeyEl.textContent = data.kode;
-                    keyModal.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error generating key:', error);
-                    alert('Gagal generate key. Silakan coba lagi.');
+                    
+                    // Lakukan request untuk generate key
+                    fetchGenerateKey()
+                        .then(data => {
+                            console.log('Generated key:', data);
+                            if (data && data.kode) {
+                                generatedKeyEl.textContent = data.kode;
+                                kodeInput.value = data.kode; // Set nilai input hidden juga
+                                keyModal.style.display = 'block';
+                            } else {
+                                throw new Error('Invalid key data received');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error generating key:', error);
+                            alert('Gagal generate key. Silakan coba lagi.');
+                        });
                 });
-            });
-
-            // Save key button click
-            saveKeyBtn.addEventListener('click', function() {
-                const generatedKey = generatedKeyEl.textContent;
-                kodeInput.value = generatedKey;
-                keyModal.style.display = 'none';
-                
-                // Submit the form
-                form.submit();
-            });
-
-            // Close modal if user clicks outside of it
+            }
+            
+            // Event listener untuk tombol Save
+            if (saveKeyBtn) {
+                saveKeyBtn.addEventListener('click', function() {
+                    const generatedKey = generatedKeyEl.textContent;
+                    kodeInput.value = generatedKey;
+                    keyModal.style.display = 'none';
+                    
+                    // Submit form
+                    form.submit();
+                });
+            }
+            
+            // Event listener untuk menutup modal saat klik di luar
             window.addEventListener('click', function(event) {
                 if (event.target === keyModal) {
                     keyModal.style.display = 'none';
                 }
             });
-
-            // Validate form
-            function validateForm() {
-                let isValid = true;
-                const requiredFields = ['nama_pelanggan', 'nama_barang', 'nomor_telp', 'masalah'];
-                
-                requiredFields.forEach(field => {
-                    const input = document.getElementById(field);
-                    if (!input.value.trim()) {
-                        input.style.borderColor = '#ff6b6b';
-                        isValid = false;
-                    } else {
-                        input.style.borderColor = '#ddd';
-                    }
-                });
-                
-                if (!isValid) {
-                    alert('Mohon lengkapi semua field yang diperlukan');
-                }
-                
-                return isValid;
-            }
+        }
+        
+        // PERBAIKAN: Jalankan setup event listeners saat DOM sudah siap
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
         });
+        
+        // PERBAIKAN: Tambahkan event listener untuk turbolinks jika menggunakan Laravel dengan Turbolinks
+        if (typeof Turbolinks !== 'undefined') {
+            document.addEventListener('turbolinks:load', function() {
+                setupEventListeners();
+            });
+        }
     </script>
 </body>
 </html>

@@ -3,363 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MG TECH Palembang</title>
+    <title>MG Tech - Tracking Perbaikan</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
-        
         body {
-            height: 100vh;
+            background-color: #f0f0f0;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, #8c3a3a 50%, #f5f5f5 50%);
-            background-attachment: fixed;
         }
-        
-        .container {
+        .header {
+            background-color: #8c3a3a;
+            padding: 20px;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            height: 100%;
-            width: 100%;
         }
-        
-        .logo-container {
+        .logo {
             display: flex;
             align-items: center;
-            justify-content: center;
         }
-        
-        .logo-text {
-            margin-left: 15px;
+        .logo img {
+            height: 40px;
+            margin-right: 10px;
         }
-        
-        .logo-mg {
-            width: 200px;
-            height: auto;
-        }
-        
-        .logo-tech {
+        .logo span {
+            color: white;
             font-size: 24px;
             font-weight: bold;
-            color: #000;
-            margin-left: 5px;
         }
-        
-        .card {
-            background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 320px;
-            text-align: center;
-        }
-        
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 50px;
-            background-color: #f3f3f3;
-            font-size: 14px;
-            text-align: center;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: #8c3a3a;
-        }
-        
-        .btn-submit {
-            background-color: #8c3a3a;
+        .login-btn {
+            background-color: transparent;
             color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 10px 25px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .btn-submit:hover {
-            background-color: #6d2d2d;
-        }
-        
-        .login-link {
-            margin-top: 30px;
-            font-size: 14px;
-        }
-        
-        .login-link a {
-            color: #8c3a3a;
+            border: 2px solid white;
+            padding: 10px 15px;
+            border-radius: 4px;
             text-decoration: none;
             font-weight: bold;
         }
-        
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-        
-        .error-message {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        /* Track Result Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
+        .login-btn:hover {
             background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
+            color: #8c3a3a;
         }
-        
-        .modal-header {
+        .main-content {
+            flex: 1;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
+            justify-content: center;
             align-items: center;
+            padding: 40px 20px;
         }
-        
-        .modal-title {
+        .tracking-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .tracking-header {
+            background-color: #8c3a3a;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .tracking-header img {
+            height: 60px;
+            margin-bottom: 10px;
+        }
+        .tracking-header h2 {
+            font-size: 20px;
+        }
+        .tracking-body {
+            padding: 30px;
+        }
+        .tracking-form {
+            text-align: center;
+        }
+        .tracking-title {
             font-size: 18px;
             font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
         }
-        
-        .close-button {
-            font-size: 24px;
-            cursor: pointer;
-            color: #888;
-        }
-        
-        .track-info {
+        .input-group {
             margin-bottom: 20px;
         }
-        
-        .info-item {
-            display: flex;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+        .input-control {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
         }
-        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #8c3a3a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background-color: #6d2d2d;
+        }
+        .alert {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .result-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .result-header {
+            background-color: #8c3a3a;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .result-header h2 {
+            font-size: 20px;
+        }
+        .result-body {
+            padding: 30px;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
         .info-label {
-            width: 140px;
+            width: 150px;
             font-weight: bold;
             color: #555;
         }
-        
         .info-value {
             flex: 1;
-            text-align: right;
+            color: #333;
         }
-        
         .status-badge {
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 12px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
             font-weight: bold;
-            color: white;
+            margin-top: 20px;
         }
-        
         .status-menunggu {
-            background-color: #ff6b6b;
+            background-color: #ffeaea;
+            color: #ff6b6b;
         }
-        
         .status-proses {
-            background-color: #ffaa00;
+            background-color: #fff4e0;
+            color: #ffaa00;
         }
-        
         .status-selesai {
-            background-color: #28a745;
+            background-color: #e7f9e7;
+            color: #28a745;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #f0f0f0;
+            color: #333;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        .back-btn:hover {
+            background-color: #e0e0e0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo-container">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="Apple Logo" class="logo-mg" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg'">
+    <div class="header">
+        <div class="logo">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><rect width=\'40\' height=\'40\' fill=\'%23ffffff\'/><text x=\'50%\' y=\'50%\' font-size=\'20\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
+            <span>MG TECH</span>
         </div>
-        
-        <div class="card">
-            <h2 class="card-title">SILAHKAN MASUKAN KEY</h2>
-            <div class="form-group">
-                <input type="text" id="tracking-key" class="form-control" placeholder="Key Anda">
-                <div class="error-message" id="error-message">Kode perbaikan tidak ditemukan</div>
-            </div>
-            <button id="submit-button" class="btn-submit">SUBMIT</button>
-        </div>
-        
-        <div class="login-link">
-            <a href="{{ route('login') }}">Login untuk Petugas</a>
-        </div>
+        <a href="{{ route('login') }}" class="login-btn">LOGIN</a>
     </div>
-    
-    <!-- Track Result Modal -->
-    <div class="modal" id="result-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Informasi Perbaikan</h3>
-                <span class="close-button" id="close-modal">&times;</span>
-            </div>
-            
-            <div class="track-info" id="track-info">
-                <!-- Data will be filled via JavaScript -->
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const submitButton = document.getElementById('submit-button');
-            const trackingKey = document.getElementById('tracking-key');
-            const errorMessage = document.getElementById('error-message');
-            const resultModal = document.getElementById('result-modal');
-            const closeModal = document.getElementById('close-modal');
-            const trackInfo = document.getElementById('track-info');
-            
-            submitButton.addEventListener('click', function() {
-                // Reset display
-                errorMessage.style.display = 'none';
-                
-                const key = trackingKey.value.trim();
-                if (!key) {
-                    errorMessage.textContent = 'Silakan masukkan kode perbaikan';
-                    errorMessage.style.display = 'block';
-                    return;
-                }
-                
-                // Call the API to search for the tracking code
-                fetch(`/api/tracking/${key}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Kode perbaikan tidak ditemukan');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        displayResult(data);
-                        resultModal.style.display = 'flex';
-                    })
-                    .catch(error => {
-                        errorMessage.textContent = error.message;
-                        errorMessage.style.display = 'block';
-                    });
-                
-                // This is a simulation for demo - remove in production
-                simulateTracking(key);
-            });
-            
-            closeModal.addEventListener('click', function() {
-                resultModal.style.display = 'none';
-            });
-            
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === resultModal) {
-                    resultModal.style.display = 'none';
-                }
-            });
-            
-            // Simulation function for demo - remove in production
-            function simulateTracking(key) {
-                setTimeout(() => {
-                    if (key.toUpperCase().startsWith('MG')) {
-                        // Simulate found data
-                        const mockData = {
-                            kode_perbaikan: key.toUpperCase(),
-                            nama_barang: "iPhone 13 Pro",
-                            tanggal_perbaikan: "2025-05-07",
-                            masalah: "Layar retak",
-                            nama_pelanggan: "Budi Santoso",
-                            status: "Proses",
-                            teknisi: "Tengkuh"
-                        };
-                        
-                        displayResult(mockData);
-                        resultModal.style.display = 'flex';
-                    } else {
-                        // Simulate not found
-                        errorMessage.textContent = 'Kode perbaikan tidak ditemukan';
-                        errorMessage.style.display = 'block';
-                    }
-                }, 500);
-            }
-            
-            function displayResult(data) {
-                // Create result HTML
-                let html = `
-                <div class="info-item">
-                    <div class="info-label">Kode Perbaikan</div>
-                    <div class="info-value">${data.kode_perbaikan}</div>
+
+    <div class="main-content">
+        @if(session('error'))
+            <div class="tracking-container">
+                <div class="tracking-header">
+                    <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\' viewBox=\'0 0 60 60\'><rect width=\'60\' height=\'60\' fill=\'%23ffffff\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
+                    <h2>Tracking Perbaikan</h2>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Nama Barang</div>
-                    <div class="info-value">${data.nama_barang}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Tanggal</div>
-                    <div class="info-value">${formatDate(data.tanggal_perbaikan)}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Masalah</div>
-                    <div class="info-value">${data.masalah}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Pelanggan</div>
-                    <div class="info-value">${data.nama_pelanggan}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value">
-                        <span class="status-badge status-${data.status.toLowerCase()}">${data.status}</span>
+                <div class="tracking-body">
+                    <div class="alert">
+                        {{ session('error') }}
+                    </div>
+                    <div class="tracking-form">
+                        <div class="tracking-title">SILAHKAN MASUKAN KEY</div>
+                        <form action="{{ route('tracking.check') }}" method="POST">
+                            @csrf
+                            <div class="input-group">
+                                <input type="text" name="key" class="input-control" placeholder="Masukkan kode perbaikan Anda" required>
+                            </div>
+                            <button type="submit" class="submit-btn">SUBMIT</button>
+                        </form>
                     </div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Teknisi</div>
-                    <div class="info-value">${data.teknisi}</div>
-                </div>`;
-                
-                trackInfo.innerHTML = html;
-            }
-            
-            function formatDate(dateString) {
-                const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                return new Date(dateString).toLocaleDateString('id-ID', options);
-            }
-        });
-    </script>
+            </div>
+        @elseif(isset($perbaikan))
+            <div class="result-container">
+                <div class="result-header">
+                    <h2>SELAMAT DATANG iGENGS!</h2>
+                </div>
+                <div class="result-body">
+                    <div class="info-row">
+                        <div class="info-label">Nama Customer</div>
+                        <div class="info-value">{{ $perbaikan->nama_pelanggan }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">No. HP</div>
+                        <div class="info-value">{{ $perbaikan->nomor_telp }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ $perbaikan->email ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">ID Teknisi</div>
+                        <div class="info-value">{{ $perbaikan->user_id ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Nama Teknisi</div>
+                        <div class="info-value">{{ $perbaikan->user->name ?? 'Tidak ada' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Device</div>
+                        <div class="info-value">{{ $perbaikan->nama_barang }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Deskripsi Masalah</div>
+                        <div class="info-value">{{ $perbaikan->masalah }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Tanggal Perbaikan</div>
+                        <div class="info-value">{{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y') }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Lama Garansi</div>
+                        <div class="info-value">{{ $perbaikan->garansi ?? '1 Tahun' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Total Harga</div>
+                        <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}</div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <span class="status-badge status-{{ strtolower($perbaikan->status) }}">
+                            Perbaikan device kamu lagi {{ $perbaikan->status }}
+                        </span>
+                        
+                        <div>
+                            <a href="{{ route('tracking.index') }}" class="back-btn">
+                                <i class="fas fa-arrow-left"></i> Kembali
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="tracking-container">
+                <div class="tracking-header">
+                    <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\' viewBox=\'0 0 60 60\'><rect width=\'60\' height=\'60\' fill=\'%23ffffff\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
+                    <h2>Tracking Perbaikan</h2>
+                </div>
+                <div class="tracking-body">
+                    <div class="tracking-form">
+                        <div class="tracking-title">SILAHKAN MASUKAN KEY</div>
+                        <form action="{{ route('tracking.check') }}" method="POST">
+                            @csrf
+                            <div class="input-group">
+                                <input type="text" name="key" class="input-control" placeholder="Masukkan kode perbaikan Anda" required>
+                            </div>
+                            <button type="submit" class="submit-btn">SUBMIT</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
 </body>
 </html>
