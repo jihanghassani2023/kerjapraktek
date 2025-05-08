@@ -226,7 +226,6 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
-            <span>MG TECH</span>
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>

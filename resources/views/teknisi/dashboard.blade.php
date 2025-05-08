@@ -324,13 +324,13 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('teknisi.laporan') }}" class="menu-item">
-            <i class="fas fa-clipboard-list"></i>
-            <span>Laporan</span>
-        </a>
         <a href="{{ route('teknisi.progress') }}" class="menu-item">
             <i class="fas fa-tools"></i>
             <span>Progres</span>
+        </a>
+        <a href="{{ route('teknisi.laporan') }}" class="menu-item">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Laporan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf

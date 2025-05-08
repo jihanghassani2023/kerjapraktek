@@ -257,7 +257,6 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
-            <span>MG TECH</span>
         </div>
         <a href="{{ route('admin.dashboard') }}" class="menu-item active">
             <i class="fas fa-home"></i>
@@ -288,11 +287,6 @@
                     <i class="fas fa-user"></i>
                 </div>
             </div>
-        </div>
-
-        <div class="welcome-message">
-            <h2>Selamat Datang, {{ $user->name }}</h2>
-            <p>Anda login sebagai Admin. Anda dapat mengakses dan mengelola data transaksi.</p>
         </div>
 
         <div class="stats-container">

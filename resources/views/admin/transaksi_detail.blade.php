@@ -348,8 +348,6 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'><rect width=\'80\' height=\'80\' fill=\'%23ffffff\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
-            <h3>MG TECH</h3>
-            <p>Admin Panel</p>
         </div>
         <div class="sidebar-menu">
             <div class="menu-header">MENU UTAMA</div>
