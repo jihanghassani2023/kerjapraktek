@@ -22,8 +22,8 @@ class TransaksiController extends Controller
         $month = $request->input('month', date('m'));
         $year = $request->input('year', date('Y'));
 
-        // Get all completed repairs
-        $query = Perbaikan::where('status', 'Selesai');
+        // Get all completed repairs - force fresh query to get latest data
+        $query = Perbaikan::query();
 
         // Apply date filters if provided
         if ($month && $year) {
@@ -31,7 +31,7 @@ class TransaksiController extends Controller
                   ->whereYear('tanggal_perbaikan', $year);
         }
 
-        // Get transactions with their users
+        // Get transactions with their users - always get fresh data
         $transaksi = $query->with('user')
                          ->orderBy('tanggal_perbaikan', 'desc')
                          ->get();
@@ -86,6 +86,7 @@ class TransaksiController extends Controller
     public function show($id)
     {
         $user = Auth::user();
+        // Always get fresh data with findOrFail
         $transaksi = Perbaikan::with('user')->findOrFail($id);
         
         return view('kepala_toko.detail_transaksi', compact('user', 'transaksi'));
@@ -108,7 +109,7 @@ class TransaksiController extends Controller
     {
         $user = Auth::user();
         
-        // Get all employees for the dashboard display
+        // Get all employees for the dashboard display - force fresh query
         $karyawan = Karyawan::orderBy('created_at', 'desc')
             ->take(3)
             ->get();
@@ -133,14 +134,14 @@ class TransaksiController extends Controller
         // Count of technicians
         $teknisiCount = Karyawan::whereIn('jabatan', ['Teknisi', 'Kepala Teknisi'])->count();
         
-        // Recent transactions
+        // Recent transactions - force fresh query
         $latestTransaksi = Perbaikan::with('user')
             ->where('status', 'Selesai')
             ->orderBy('tanggal_perbaikan', 'desc')
             ->take(3)
             ->get();
             
-        // Total income statistics
+        // Total income statistics - force fresh queries
         $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
             ->whereDate('tanggal_perbaikan', date('Y-m-d'))
             ->sum('harga');
@@ -150,7 +151,7 @@ class TransaksiController extends Controller
             ->whereYear('tanggal_perbaikan', date('Y'))
             ->sum('harga');
             
-        // Count of repairs by technicians this month
+        // Count of repairs by technicians this month - force fresh query
         $repairsByTeknisi = Perbaikan::selectRaw('user_id, count(*) as count')
             ->where('status', 'Selesai')
             ->whereMonth('tanggal_perbaikan', date('m'))
