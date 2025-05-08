@@ -276,7 +276,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Total Karyawan</h3>
-                    <p>{{ $karyawanCount }}</p>
+                    <p>{{ $karyawanCount ?? 0 }}</p>
                 </div>
             </div>
 
@@ -286,7 +286,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Total Transaksi Harian</h3>
-                    <p>Rp. {{ number_format($totalTransaksiHariIni, 0, ',', '.') }}</p>
+                    <p>Rp. {{ number_format($totalTransaksiHariIni ?? 0, 0, ',', '.') }}</p>
                 </div>
             </div>
 
@@ -296,7 +296,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Total Transaksi Bulanan</h3>
-                    <p>Rp. {{ number_format($totalTransaksiBulanIni, 0, ',', '.') }}</p>
+                    <p>Rp. {{ number_format($totalTransaksiBulanIni ?? 0, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
@@ -315,7 +315,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Data for monthly repair chart
-            const monthlyData = @json($monthlyRepairCounts);
+            const monthlyData = @json($monthlyRepairCounts ?? []);
             
             const labels = monthlyData.map(item => item.month);
             const counts = monthlyData.map(item => item.count);
@@ -326,7 +326,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Jumlah Perbalabel: 'Jumlah Perbaikan',
+                        label: 'Jumlah Perbaikan',
                         data: counts,
                         backgroundColor: '#8c3a3a',
                         borderColor: '#6d2d2d',
