@@ -5,11 +5,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Auth;
 
-// Route halaman tracking untuk pelanggan
-Route::get('/', [TrackingController::class, 'index'])->name('tracking.index');
+// Route halaman tracking untuk pelanggan 
+Route::get('/', [TrackingController::class, 'index'])->name('tracking.index'); 
 Route::post('/check', [TrackingController::class, 'check'])->name('tracking.check');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -34,10 +35,17 @@ Route::middleware(['auth'])->group(function () {
         }
     })->name('dashboard');
 
-    Route::get('/admin/dashboard', function () {
-        $user = Auth::user();
-        return view('admin.dashboard', compact('user'));
-    })->name('admin.dashboard');
+    // Admin routes
+    Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+        Route::get('/dashboard', function () {
+            $user = Auth::user();
+            return view('admin.dashboard', compact('user'));
+        })->name('dashboard');
+        
+        // Tambahkan rute untuk transaksi admin
+        Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi');
+        Route::get('/transaksi/{id}', [AdminController::class, 'showTransaksi'])->name('transaksi.show');
+    });
 
     // Kepala toko routes
     Route::get('/kepala-toko/dashboard', [TransaksiController::class, 'dashboard'])->name('kepala-toko.dashboard');
