@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Perbaikan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class TrackingController extends Controller
 {
@@ -27,7 +28,6 @@ class TrackingController extends Controller
         }
         
         // Jika belum login, tampilkan halaman tracking
-        // Pastikan view yang benar digunakan
         return view('tracking.index');
     }
     
@@ -36,8 +36,8 @@ class TrackingController extends Controller
      */
     public function search($kode)
     {
-        // Cari perbaikan berdasarkan kode
-        $perbaikan = Perbaikan::where('kode_perbaikan', $kode)->first();
+        // Cari perbaikan berdasarkan kode (make sure to trim the input)
+        $perbaikan = Perbaikan::where('kode_perbaikan', trim($kode))->first();
         
         if (!$perbaikan) {
             return response()->json(['error' => 'Kode perbaikan tidak ditemukan'], 404);
@@ -47,7 +47,7 @@ class TrackingController extends Controller
         $teknisi = $perbaikan->user ? $perbaikan->user->name : 'Belum ditugaskan';
         
         // Format tanggal ke format Indonesia
-        $tanggal = \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y');
+        $tanggal = Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y');
         
         return response()->json([
             'kode_perbaikan' => $perbaikan->kode_perbaikan,

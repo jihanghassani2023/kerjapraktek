@@ -52,7 +52,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Kepala toko routes
     Route::get('/kepala-toko/dashboard', [TransaksiController::class, 'dashboard'])->name('kepala-toko.dashboard');
-    Route::get('/kepala-toko/transaksi', [TransaksiController::class, 'index'])->name('kepala-toko.transaksi');
     
     // Transaksi routes for kepala toko
     Route::prefix('transaksi')->name('transaksi.')->middleware(['auth'])->group(function () {

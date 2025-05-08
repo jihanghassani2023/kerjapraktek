@@ -1,3 +1,4 @@
+<!-- resources/views/kepala_toko/Dashboard.blade.php -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -149,7 +150,7 @@
             justify-content: center;
             margin-right: 15px;
         }
-        .stat-icon.teknisi {
+        .stat-icon.karyawan {
             background-color: #f0e5e5;
         }
         .stat-icon.harian {
@@ -161,7 +162,7 @@
         .stat-icon i {
             font-size: 24px;
         }
-        .stat-icon.teknisi i {
+        .stat-icon.karyawan i {
             color: #8c3a3a;
         }
         .stat-icon.harian i {
@@ -196,27 +197,6 @@
         .section-title {
             font-size: 1.2em;
             color: #333;
-        }
-        .section-action {
-            color: #8c3a3a;
-            text-decoration: none;
-            font-size: 0.9em;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        table th, 
-        table td {
-            text-align: left;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .status-active {
-            color: #3a8c3a;
-        }
-        .status-inactive {
-            color: #8c3a3a;
         }
         .chart-container {
             height: 300px;
@@ -291,12 +271,12 @@
 
         <div class="stats-container">
             <div class="stat-card">
-                <div class="stat-icon teknisi">
+                <div class="stat-icon karyawan">
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>Total Teknisi</h3>
-                    <p>{{ $teknisiCount }}</p>
+                    <h3>Total Karyawan</h3>
+                    <p>{{ $karyawanCount }}</p>
                 </div>
             </div>
 
@@ -329,68 +309,6 @@
                 <canvas id="monthlyRepairChart"></canvas>
             </div>
         </div>
-
-        <div class="content-section">
-            <div class="section-header">
-                <h3 class="section-title">Daftar Teknisi</h3>
-                <a href="{{ route('karyawan.index') }}" class="section-action">Lihat Semua</a>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Jabatan</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($karyawan->filter(function($k) { return in_array($k->jabatan, ['Teknisi', 'Kepala Teknisi']); }) as $t)
-                    <tr onclick="window.location='{{ route('karyawan.show', $t->id) }}';" style="cursor: pointer;">
-                        <td>{{ $t->nama_karyawan }}</td>
-                        <td>{{ $t->jabatan }}</td>
-                        <td><span class="status-active">{{ $t->status }}</span></td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="3" style="text-align: center;">Tidak ada data teknisi</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <div class="content-section">
-            <div class="section-header">
-                <h3 class="section-title">Transaksi Terbaru</h3>
-                <a href="{{ route('transaksi.index') }}" class="section-action">Lihat Semua</a>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Tanggal</th>
-                        <th>Teknisi</th>
-                        <th>Jumlah</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($latestTransaksi as $t)
-                    <tr onclick="window.location='{{ route('transaksi.show', $t->id) }}';" style="cursor: pointer;">
-                        <td>{{ $t->kode_perbaikan }}</td>
-                        <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y') }}</td>
-                        <td>{{ $t->user->name ?? 'N/A' }}</td>
-                        <td>Rp. {{ number_format($t->harga, 0, ',', '.') }}</td>
-                        <td><span class="status-active">{{ $t->status }}</span></td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" style="text-align: center;">Tidak ada data transaksi</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -408,7 +326,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Jumlah Perbaikan',
+                        label: 'Jumlah Perbalabel: 'Jumlah Perbaikan',
                         data: counts,
                         backgroundColor: '#8c3a3a',
                         borderColor: '#6d2d2d',

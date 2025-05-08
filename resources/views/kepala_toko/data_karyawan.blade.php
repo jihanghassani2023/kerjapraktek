@@ -1,3 +1,4 @@
+<!-- resources/views/kepala_toko/data_karyawan.blade.php -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,6 +7,7 @@
     <title>Data Karyawan - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Keep the same styles */
         * {
             margin: 0;
             padding: 0;
@@ -221,20 +223,19 @@
             font-size: 14px;
         }
         .alert {
-            padding: 12px 15px;
-            margin-bottom: 20px;
+            padding: 15px;
             border-radius: 5px;
-            border-left: 4px solid;
+            margin-bottom: 20px;
         }
         .alert-success {
             background-color: #d4edda;
-            border-color: #28a745;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
         .alert-danger {
             background-color: #f8d7da;
-            border-color: #dc3545;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
         @media (max-width: 768px) {
             .sidebar {
@@ -266,7 +267,7 @@
             <i class="fas fa-users"></i>
             <span>Data Karyawan</span>
         </a>
-        <a href="#" class="menu-item">
+        <a href="{{ route('transaksi.index') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
