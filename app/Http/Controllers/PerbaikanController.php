@@ -114,17 +114,17 @@ class PerbaikanController extends Controller
      * Display the specified resource.
      */
     public function show($id)
-    {
-        $user = Auth::user();
-        $perbaikan = Perbaikan::findOrFail($id);
-        
-        // Make sure the repair belongs to the logged-in user
-        if ($perbaikan->user_id != $user->id) {
-            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses');
-        }
-        
-        return view('teknisi.detail_perbaikan', compact('user', 'perbaikan'));
+{
+    $user = Auth::user();
+    $perbaikan = Perbaikan::findOrFail($id);
+    
+    // Make sure the repair belongs to the logged-in user
+    if ($perbaikan->user_id != $user->id && $user->role !== 'admin' && $user->role !== 'kepala_toko') {
+        return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
     }
+    
+    return view('teknisi.detail_perbaikan', compact('user', 'perbaikan'));
+}
 
     /**
      * Show the form for editing the specified resource.

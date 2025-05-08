@@ -42,14 +42,15 @@ Route::middleware(['auth'])->group(function () {
             return view('admin.dashboard', compact('user'));
         })->name('dashboard');
         
-        // Tambahkan rute untuk transaksi admin
+        // Transaksi admin routes
         Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi');
         Route::get('/transaksi/{id}', [AdminController::class, 'showTransaksi'])->name('transaksi.show');
+        Route::put('/transaksi/{id}/status', [AdminController::class, 'updateStatus'])->name('transaksi.update-status');
     });
 
     // Kepala toko routes
     Route::get('/kepala-toko/dashboard', [TransaksiController::class, 'dashboard'])->name('kepala-toko.dashboard');
-    Route::get('/kepala-toko/transaksi', [TransaksiController::class, 'index'])->name('kepala-toko.transaksi');
+    
     // Transaksi routes for kepala toko
     Route::prefix('transaksi')->name('transaksi.')->middleware(['auth'])->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('index');

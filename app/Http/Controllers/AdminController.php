@@ -86,4 +86,24 @@ class AdminController extends Controller
         
         return view('admin.detail_transaksi', compact('user', 'transaksi'));
     }
+
+    /**
+     * Update status transaksi untuk admin.
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $transaksi = Perbaikan::findOrFail($id);
+        
+        // Validate status
+        $request->validate([
+            'status' => 'required|in:Menunggu,Proses,Selesai',
+        ]);
+
+        // Update status
+        $transaksi->status = $request->status;
+        $transaksi->save();
+        
+        return redirect()->route('admin.transaksi.show', $id)
+            ->with('success', 'Status berhasil diperbarui');
+    }
 }
