@@ -198,6 +198,13 @@
             color: #666;
             font-weight: normal;
         }
+        tbody tr {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
         .status {
             padding: 5px 10px;
             border-radius: 3px;
@@ -402,7 +409,7 @@
             </thead>
             <tbody>
                 @forelse($perbaikan as $index => $p)
-                <tr>
+                <tr onclick="window.location.href='{{ route('perbaikan.show', $p->id) }}';">
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $p->kode_perbaikan }}</td>
                     <td>{{ $p->nama_barang }}</td>

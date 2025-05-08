@@ -306,7 +306,7 @@
             </thead>
             <tbody>
                 @forelse($perbaikan as $index => $p)
-                <tr>
+                <tr onclick="window.location.href='{{ route('perbaikan.show', $p->id) }}';">
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $p->kode_perbaikan }}</td>
                     <td>{{ $p->nama_barang }}</td>

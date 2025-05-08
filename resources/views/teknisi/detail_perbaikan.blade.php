@@ -103,8 +103,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e3e3e3;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .page-title {
             font-size: 24px;
@@ -146,6 +148,17 @@
         .content-wrapper {
             padding: 30px 0;
         }
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .content-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
         .card {
             background-color: white;
             border-radius: 10px;
@@ -162,7 +175,7 @@
             align-items: center;
         }
         .card-title {
-            font-size: 18px;
+            font-size: 1.1rem;
             font-weight: bold;
             color: #333;
             margin: 0;
@@ -294,6 +307,13 @@
         .btn-selesai:hover {
             background-color: #d0f0d0;
         }
+        .btn-print {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-print:hover {
+            background-color: #5a6268;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -367,9 +387,16 @@
         </div>
 
         <div class="content-wrapper">
+            <div class="content-header">
+                <h2 class="content-title">Perbaikan #{{ $perbaikan->kode_perbaikan }}</h2>
+                <a href="javascript:window.print()" class="btn btn-print">
+                    <i class="fas fa-print"></i> Cetak
+                </a>
+            </div>
+
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Informasi Perbaikan #{{ $perbaikan->kode_perbaikan }}</h3>
+                    <h3 class="card-title">Detail Perbaikan</h3>
                     <div>
                         <span class="status-badge status-{{ strtolower($perbaikan->status) }}">{{ $perbaikan->status }}</span>
                     </div>
@@ -439,18 +466,6 @@
                 </div>
             </div>
 
-            <div class="actions">
-                <a href="{{ route('perbaikan.edit', $perbaikan->id) }}" class="btn btn-primary">
-                    <i class="fas fa-edit"></i> Edit Data
-                </a>
-                <form action="{{ route('perbaikan.destroy', $perbaikan->id) }}" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
-                        <i class="fas fa-trash"></i> Hapus
-                    </button>
-                </form>
-            </div>
         </div>
     </div>
 
@@ -469,7 +484,12 @@
                     },
                     body: JSON.stringify({ status: status })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         // Reload page to show updated status
@@ -484,6 +504,27 @@
                 });
             }
         }
+        
+        // Print function styling
+        document.addEventListener('DOMContentLoaded', function() {
+            window.addEventListener('beforeprint', function() {
+                document.querySelector('.sidebar').style.display = 'none';
+                document.querySelector('.main-content').style.marginLeft = '0';
+                document.querySelector('.header').style.display = 'none';
+                document.querySelector('.content-header .btn-print').style.display = 'none';
+                document.querySelector('.status-actions').style.display = 'none';
+                document.querySelector('.actions').style.display = 'none';
+            });
+            
+            window.addEventListener('afterprint', function() {
+                document.querySelector('.sidebar').style.display = 'flex';
+                document.querySelector('.main-content').style.marginLeft = '150px';
+                document.querySelector('.header').style.display = 'flex';
+                document.querySelector('.content-header .btn-print').style.display = 'inline-flex';
+                document.querySelector('.status-actions').style.display = 'block';
+                document.querySelector('.actions').style.display = 'flex';
+            });
+        });
     </script>
 </body>
 </html>
