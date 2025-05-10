@@ -9,32 +9,24 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
-    /**
-     * Menampilkan daftar transaksi.
-     */
     public function transaksi(Request $request)
     {
         $user = Auth::user();
 
-        // Filter berdasarkan bulan dan tahun
         $month = $request->input('month', date('m'));
         $year = $request->input('year', date('Y'));
 
-        // Ambil semua data perbaikan
         $query = Perbaikan::query();
 
-        // Terapkan filter tanggal jika disediakan
         if ($month && $year) {
             $query->whereMonth('tanggal_perbaikan', $month)
                   ->whereYear('tanggal_perbaikan', $year);
         }
 
-        // Ambil transaksi dengan data teknisi
         $transaksi = $query->with('user')
                          ->orderBy('tanggal_perbaikan', 'desc')
                          ->get();
 
-        // Hitung ringkasan statistik
         $totalTransaksi = $transaksi->sum('harga');
         $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
                                         ->whereDate('tanggal_perbaikan', date('Y-m-d'))
@@ -44,7 +36,6 @@ class AdminController extends Controller
                                          ->whereYear('tanggal_perbaikan', date('Y'))
                                          ->sum('harga');
 
-        // Data teknisi dengan jumlah perbaikan
         $teknisi = User::where('role', 'teknisi')->get();
         $teknisiStats = [];
 
@@ -53,7 +44,7 @@ class AdminController extends Controller
                                   ->whereMonth('tanggal_perbaikan', $month)
                                   ->whereYear('tanggal_perbaikan', $year)
                                   ->count();
-                                  
+
             $teknisiStats[] = [
                 'name' => $t->name,
                 'repair_count' => $repairCount,
@@ -65,10 +56,10 @@ class AdminController extends Controller
         }
 
         return view('admin.transaksi', compact(
-            'user', 
-            'transaksi', 
-            'totalTransaksi', 
-            'totalTransaksiHariIni', 
+            'user',
+            'transaksi',
+            'totalTransaksi',
+            'totalTransaksiHariIni',
             'totalTransaksiBulanIni',
             'teknisiStats',
             'month',
@@ -76,33 +67,25 @@ class AdminController extends Controller
         ));
     }
 
-    /**
-     * Menampilkan detail transaksi tertentu.
-     */
     public function showTransaksi($id)
     {
         $user = Auth::user();
         $transaksi = Perbaikan::with('user')->findOrFail($id);
-        
+
         return view('admin.detail_transaksi', compact('user', 'transaksi'));
     }
 
-    /**
-     * Update status transaksi untuk admin.
-     */
     public function updateStatus(Request $request, $id)
     {
         $transaksi = Perbaikan::findOrFail($id);
-        
-        // Validate status
+
         $request->validate([
             'status' => 'required|in:Menunggu,Proses,Selesai',
         ]);
 
-        // Update status
         $transaksi->status = $request->status;
         $transaksi->save();
-        
+
         return redirect()->route('admin.transaksi.show', $id)
             ->with('success', 'Status berhasil diperbarui');
     }

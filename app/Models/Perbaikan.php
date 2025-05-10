@@ -10,19 +10,17 @@ class Perbaikan extends Model
     use HasFactory;
 
     protected $table = 'perbaikan';
-    
+
     protected $fillable = [
         'kode_perbaikan',
         'nama_barang',
         'tanggal_perbaikan',
         'masalah',
-        'nama_pelanggan',
-        'nomor_telp',
-        'email',
         'harga',
         'garansi',
         'status',
-        'user_id'
+        'user_id',
+        'pelanggan_id'
     ];
 
     // Make sure created_at and updated_at are used
@@ -32,5 +30,11 @@ class Perbaikan extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Relationship to Pelanggan
+    public function pelanggan()
+    {
+        return $this->belongsTo(Pelanggan::class);
     }
 }

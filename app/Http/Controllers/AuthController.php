@@ -8,16 +8,13 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // Tampilkan form login
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // Proses login
     public function login(Request $request)
     {
-        // Validasi input
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
@@ -29,14 +26,11 @@ class AuthController extends Controller
                 ->withInput($request->only('email'));
         }
 
-        // Ambil kredensial
         $credentials = $request->only('email', 'password');
 
-        // Coba login
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Cek role dan arahkan ke dashboard sesuai
             $role = Auth::user()->role;
 
             switch ($role) {
@@ -52,13 +46,11 @@ class AuthController extends Controller
             }
         }
 
-        // Jika gagal login
         return redirect()->back()
             ->withErrors(['email' => 'Email atau password salah.'])
             ->withInput($request->only('email'));
     }
 
-    // Proses logout
     public function logout(Request $request)
     {
         Auth::logout();

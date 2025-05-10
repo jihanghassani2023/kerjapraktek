@@ -26,7 +26,7 @@ class TrackingController extends Controller
 
         // Cari data perbaikan berdasarkan kode
         $perbaikan = Perbaikan::where('kode_perbaikan', $request->key)
-            ->with('user')
+            ->with(['user', 'pelanggan'])
             ->first();
 
         if (!$perbaikan) {

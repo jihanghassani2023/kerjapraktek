@@ -6,11 +6,12 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Auth;
 
-// Route halaman tracking untuk pelanggan 
-Route::get('/', [TrackingController::class, 'index'])->name('tracking.index'); 
+// Route halaman tracking untuk pelanggan
+Route::get('/', [TrackingController::class, 'index'])->name('tracking.index');
 Route::post('/check', [TrackingController::class, 'check'])->name('tracking.check');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -23,7 +24,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         // Menggunakan Auth::user()->role langsung
         $role = Auth::user()->role;
-        
+
         if ($role === 'admin') {
             return redirect()->route('admin.dashboard');
         } elseif ($role === 'kepala_toko') {
@@ -41,16 +42,28 @@ Route::middleware(['auth'])->group(function () {
             $user = Auth::user();
             return view('admin.dashboard', compact('user'));
         })->name('dashboard');
-        
+
         // Transaksi admin routes
         Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi');
         Route::get('/transaksi/{id}', [AdminController::class, 'showTransaksi'])->name('transaksi.show');
         Route::put('/transaksi/{id}/status', [AdminController::class, 'updateStatus'])->name('transaksi.update-status');
     });
 
+
+
+    // Pelanggan routes
+    Route::resource('pelanggan', PelangganController::class);
+
+    // Special routes for two-step form
+    Route::get('/perbaikan/create-pelanggan', [PerbaikanController::class, 'createPelanggan'])->name('perbaikan.create-pelanggan');
+    Route::post('/perbaikan/store-pelanggan', [PerbaikanController::class, 'storePelanggan'])->name('perbaikan.store-pelanggan');
+    Route::get('/perbaikan/{id}/edit-pelanggan', [PerbaikanController::class, 'editPelanggan'])->name('perbaikan.edit-pelanggan');
+    Route::put('/perbaikan/update-pelanggan/{id}', [PerbaikanController::class, 'updatePelanggan'])->name('perbaikan.update-pelanggan');
+
+
     // Kepala toko routes
     Route::get('/kepala-toko/dashboard', [TransaksiController::class, 'dashboard'])->name('kepala-toko.dashboard');
-    
+
     // Transaksi routes for kepala toko
     Route::prefix('transaksi')->name('transaksi.')->middleware(['auth'])->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('index');
@@ -67,13 +80,13 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('teknisi')->middleware(['auth'])->group(function () {
         // Dashboard
         Route::get('/dashboard', [PerbaikanController::class, 'index'])->name('teknisi.dashboard');
-        
+
         // Progress page
         Route::get('/progress', [PerbaikanController::class, 'progress'])->name('teknisi.progress');
-        
+
         // Laporan page
         Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('teknisi.laporan');
-        
+
         // Perbaikan routes
         Route::get('/perbaikan/create', [PerbaikanController::class, 'create'])->name('perbaikan.create');
         Route::post('/perbaikan', [PerbaikanController::class, 'store'])->name('perbaikan.store');
@@ -81,13 +94,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/perbaikan/{id}/edit', [PerbaikanController::class, 'edit'])->name('perbaikan.edit');
         Route::put('/perbaikan/{id}', [PerbaikanController::class, 'update'])->name('perbaikan.update');
         Route::delete('/perbaikan/{id}', [PerbaikanController::class, 'destroy'])->name('perbaikan.destroy');
-        
+
         // Generate key for repairs
         Route::get('/generate-key', [PerbaikanController::class, 'generateKey'])->name('perbaikan.generate-key');
-        
+
         // Update status with AJAX
         Route::put('/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
-        
+
         // Confirm status change
         Route::get('/perbaikan/{id}/confirm-status/{status}', [PerbaikanController::class, 'confirmStatus'])->name('perbaikan.confirm-status');
     });

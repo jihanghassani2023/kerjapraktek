@@ -7,13 +7,11 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    // Middleware wajib login
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    // Menentukan redirect ke dashboard berdasarkan role
     public function index()
     {
         $user = Auth::user();
@@ -29,21 +27,18 @@ class LoginController extends Controller
         return redirect()->route('login');
     }
 
-    // Dashboard untuk admin
     public function adminDashboard()
     {
         $user = Auth::user();
         return view('admin.dashboard', compact('user'));
     }
 
-    // Dashboard untuk kepala toko
     public function kepalaDashboard()
     {
         $user = Auth::user();
         return view('kepala_toko.dashboard', compact('user'));
     }
 
-    // Dashboard untuk teknisi
     public function teknisiDashboard()
     {
         $user = Auth::user();

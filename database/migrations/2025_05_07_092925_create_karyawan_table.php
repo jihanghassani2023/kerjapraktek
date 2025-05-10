@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::create('karyawan', function (Blueprint $table) {
@@ -18,14 +16,11 @@ return new class extends Migration
             $table->string('ttl'); // Tanggal dan tempat lahir
             $table->text('alamat');
             $table->string('jabatan'); // Kepala Teknisi, Teknisi, Admin
-            $table->string('status')->default('Kontrak'); // Kontrak, Tetap, dll
+            $table->string('status')->default('Kontrak'); // Kontrak, Tetap
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('karyawan');

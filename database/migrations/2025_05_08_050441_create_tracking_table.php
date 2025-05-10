@@ -11,12 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Kita tidak perlu membuat tabel khusus, karena menggunakan tabel perbaikan yang sudah ada
-        // Namun kita bisa menambahkan kolom tambahan jika diperlukan
-        Schema::table('perbaikan', function (Blueprint $table) {
-            // Pastikan kode_perbaikan sudah memiliki index untuk pencarian yang lebih cepat
-            $table->index('kode_perbaikan');
-        });
+        // Periksa apakah tabel perbaikan sudah ada
+        if (Schema::hasTable('perbaikan')) {
+            // Periksa apakah index sudah ada
+            $sm = Schema::getConnection()->getDoctrineSchemaManager();
+            $indexes = $sm->listTableIndexes('perbaikan');
+            if (!array_key_exists('perbaikan_kode_perbaikan_index', $indexes)) {
+                Schema::table('perbaikan', function (Blueprint $table) {
+                    $table->index('kode_perbaikan');
+                });
+            }
+        }
     }
 
     /**
@@ -24,8 +29,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('perbaikan', function (Blueprint $table) {
-            $table->dropIndex(['kode_perbaikan']);
-        });
+        if (Schema::hasTable('perbaikan')) {
+            Schema::table('perbaikan', function (Blueprint $table) {
+                $table->dropIndex(['kode_perbaikan']);
+            });
+        }
     }
 };

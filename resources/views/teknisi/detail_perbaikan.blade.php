@@ -357,12 +357,12 @@
             <i class="fas fa-clipboard-list"></i>
             <span>Laporan</span>
         </a>
-        
+
         <a href="{{ route('teknisi.progress') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali</span>
         </a>
-        
+
         <form method="POST" action="{{ route('logout') }}" style="margin-top: 0;">
             @csrf
             <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
@@ -426,18 +426,18 @@
                         <div class="info-label">Garansi</div>
                         <div class="info-value">{{ $perbaikan->garansi ?: 'Tidak ada' }}</div>
                     </div>
-                    
+
                     <div class="status-actions">
                         <div class="status-title">Ubah Status Perbaikan</div>
                         <div class="status-buttons">
                             @if($perbaikan->status != 'Menunggu')
                             <button type="button" class="btn-status btn-menunggu" onclick="updateStatus('Menunggu')">Menunggu</button>
                             @endif
-                            
+
                             @if($perbaikan->status != 'Proses')
                             <button type="button" class="btn-status btn-proses" onclick="updateStatus('Proses')">Proses</button>
                             @endif
-                            
+
                             @if($perbaikan->status != 'Selesai')
                             <button type="button" class="btn-status btn-selesai" onclick="updateStatus('Selesai')">Selesai</button>
                             @endif
@@ -453,19 +453,23 @@
                 <div class="card-body">
                     <div class="info-row">
                         <div class="info-label">Nama Pelanggan</div>
-                        <div class="info-value">{{ $perbaikan->nama_pelanggan }}</div>
+                        <div class="info-value">{{ $perbaikan->pelanggan->nama_pelanggan }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Nomor Telepon</div>
-                        <div class="info-value">{{ $perbaikan->nomor_telp }}</div>
+                        <div class="info-value">{{ $perbaikan->pelanggan->nomor_telp }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Email</div>
-                        <div class="info-value">{{ $perbaikan->email ?: '-' }}</div>
+                        <div class="info-value">{{ $perbaikan->pelanggan->email ?: '-' }}</div>
+                    </div>
+                    <div class="action-button">
+                        <a href="{{ route('perbaikan.edit-pelanggan', $perbaikan->id) }}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Edit Data Pelanggan
+                        </a>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -474,7 +478,7 @@
             if (confirm('Apakah Anda yakin ingin mengubah status menjadi ' + status + '?')) {
                 // Get CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                
+
                 // Send AJAX request
                 fetch('/teknisi/perbaikan/{{ $perbaikan->id }}/status', {
                     method: 'PUT',
@@ -504,7 +508,7 @@
                 });
             }
         }
-        
+
         // Print function styling
         document.addEventListener('DOMContentLoaded', function() {
             window.addEventListener('beforeprint', function() {
@@ -515,7 +519,7 @@
                 document.querySelector('.status-actions').style.display = 'none';
                 document.querySelector('.actions').style.display = 'none';
             });
-            
+
             window.addEventListener('afterprint', function() {
                 document.querySelector('.sidebar').style.display = 'flex';
                 document.querySelector('.main-content').style.marginLeft = '150px';

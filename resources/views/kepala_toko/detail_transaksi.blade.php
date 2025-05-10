@@ -280,12 +280,12 @@
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
-        
+
         <a href="{{ route('transaksi.index') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali</span>
         </a>
-        
+
         <form method="POST" action="{{ route('logout') }}" style="margin-top: 0;">
             @csrf
             <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
@@ -399,14 +399,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Print function styling
+
             window.addEventListener('beforeprint', function() {
                 document.querySelector('.sidebar').style.display = 'none';
                 document.querySelector('.main-content').style.marginLeft = '0';
                 document.querySelector('.header').style.display = 'none';
                 document.querySelector('.content-header').style.display = 'none';
             });
-            
+
             window.addEventListener('afterprint', function() {
                 document.querySelector('.sidebar').style.display = 'flex';
                 document.querySelector('.main-content').style.marginLeft = '220px';

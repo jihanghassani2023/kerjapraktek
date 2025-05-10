@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Tambah Perbaikan - MG TECH</title>
+    <title>Tambah Pelanggan - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Gunakan CSS yang sama seperti pada tambah_pelanggan.blade.php */
+        /* Gunakan CSS yang sama seperti tambah_perbaikan.blade.php */
         * {
             margin: 0;
             padding: 0;
@@ -140,8 +140,7 @@
             font-size: 20px;
             color: #333;
             margin-bottom: 20px;
-            text-align: center;
-        }
+            text-align: center;}
         .form-group {
             margin-bottom: 15px;
         }
@@ -198,11 +197,6 @@
             color: #ff6b6b;
             border: 1px solid #ffd0d0;
         }
-        .alert-success {
-            background-color: #e7f9e7;
-            color: #28a745;
-            border: 1px solid #d0f0d0;
-        }
         .steps-container {
             display: flex;
             margin-bottom: 20px;
@@ -248,29 +242,6 @@
         .step.active .step-text {
             color: #333;
             font-weight: bold;
-        }
-        .customer-info {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border: 1px solid #eee;
-        }
-        .customer-title {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #555;
-        }
-        .customer-details {
-            font-size: 14px;
-        }
-        .customer-details p {
-            margin-bottom: 5px;
-        }
-        .customer-details strong {
-            font-weight: 600;
-            color: #333;
         }
     </style>
 </head>
@@ -319,11 +290,11 @@
         </div>
 
         <div class="steps-container">
-            <div class="step">
+            <div class="step active">
                 <div class="step-number">1</div>
                 <div class="step-text">Data Pelanggan</div>
             </div>
-            <div class="step active">
+            <div class="step">
                 <div class="step-number">2</div>
                 <div class="step-text">Data Perbaikan</div>
             </div>
@@ -339,183 +310,31 @@
             </div>
         @endif
 
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <div class="customer-info">
-            <div class="customer-title">Informasi Pelanggan</div>
-            <div class="customer-details">
-                <p><strong>Nama:</strong> {{ $pelanggan->nama_pelanggan }}</p>
-                <p><strong>No. Telepon:</strong> {{ $pelanggan->nomor_telp }}</p>
-                @if($pelanggan->email)
-                <p><strong>Email:</strong> {{ $pelanggan->email }}</p>
-                @endif
-            </div>
-        </div>
-
         <div class="form-container">
-            <h2 class="form-header">Form Data Perbaikan</h2>
-            <form id="perbaikanForm" action="{{ route('perbaikan.store') }}" method="POST">
+            <h2 class="form-header">Form Data Pelanggan</h2>
+            <form id="pelangganForm" action="{{ route('pelanggan.store') }}" method="POST">
                 @csrf
-                <input type="hidden" name="pelanggan_id" value="{{ $pelanggan->id }}">
-                <input type="hidden" name="kode_perbaikan" id="kode_perbaikan" value="{{ old('kode_perbaikan') }}">
-
                 <div class="form-group">
-                    <label for="nama_barang">Nama Barang</label>
-                    <input type="text" id="nama_barang" name="nama_barang" class="form-control" value="{{ old('nama_barang') }}" required>
+                    <label for="nama_pelanggan">Nama Pelanggan</label>
+                    <input type="text" id="nama_pelanggan" name="nama_pelanggan" class="form-control" value="{{ old('nama_pelanggan') }}" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="masalah">Masalah</label>
-                    <textarea id="masalah" name="masalah" class="form-control" required>{{ old('masalah') }}</textarea>
+                    <label for="nomor_telp">Nomor Telepon</label>
+                    <input type="text" id="nomor_telp" name="nomor_telp" class="form-control" value="{{ old('nomor_telp') }}" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="harga">Harga (opsional)</label>
-                    <input type="number" id="harga" name="harga" class="form-control" value="{{ old('harga') }}">
-                </div>
-
-                <div class="form-group">
-                    <label for="garansi">Garansi (opsional)</label>
-                    <input type="text" id="garansi" name="garansi" class="form-control" value="{{ old('garansi') }}">
+                    <label for="email">Email (Opsional)</label>
+                    <input type="email" id="email" name="email" class="form-control" value="{{ old('email') }}">
                 </div>
 
                 <div class="form-footer">
-                    <a href="{{ route('pelanggan.create') }}" class="btn btn-secondary" style="margin-right: 10px;">Kembali</a>
-                    <button type="button" id="generateKeyBtn" class="btn btn-primary">Generate Key</button>
+                    <a href="{{ route('teknisi.progress') }}" class="btn btn-secondary" style="margin-right: 10px;">Batal</a>
+                    <button type="submit" class="btn btn-primary">Selanjutnya</button>
                 </div>
             </form>
         </div>
     </div>
-
-    <div id="keyModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-        <div class="modal-content" style="background-color: #fff; margin: 10% auto; padding: 20px; border-radius: 5px; width: 400px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.2); text-align: center;">
-            <div class="modal-header" style="margin-bottom: 20px;">
-                <h2 class="modal-title" style="font-size: 20px; color: #333;">GENERATE KEY</h2>
-            </div>
-            <div class="modal-body">
-                <div id="generatedKey" class="generated-key" style="font-size: 24px; font-weight: bold; margin: 20px 0;"></div>
-            </div>
-            <button id="saveKeyBtn" class="btn btn-primary" style="width: 100%;">SIMPAN</button>
-        </div>
-    </div>
-
-    <script>
-        // Definisikan URL sebagai variabel global
-        const generateKeyUrl = "{{ route('perbaikan.generate-key') }}";
-
-        // Fungsi untuk melakukan AJAX request dan generate key
-        function fetchGenerateKey() {
-            // Dapatkan CSRF token
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-            // Buat konfigurasi untuk request
-            const requestOptions = {
-                method: 'GET', // Atau 'POST' tergantung pada setup route Anda
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            };
-
-            // Lakukan fetch request
-            return fetch(generateKeyUrl, requestOptions)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok: ' + response.status);
-                    }
-                    return response.json();
-                });
-        }
-
-        // Fungsi untuk validasi form
-        function validateForm() {
-            let isValid = true;
-            const requiredFields = ['nama_barang', 'masalah'];
-
-            requiredFields.forEach(field => {
-                const input = document.getElementById(field);
-                if (!input.value.trim()) {
-                    input.style.borderColor = '#ff6b6b';
-                    isValid = false;
-                } else {
-                    input.style.borderColor = '#ddd';
-                }
-            });
-
-            if (!isValid) {
-                alert('Mohon lengkapi semua field yang diperlukan');
-            }
-
-            return isValid;
-        }
-
-        // Fungsi untuk setup event listeners
-        function setupEventListeners() {
-            const generateKeyBtn = document.getElementById('generateKeyBtn');
-            const keyModal = document.getElementById('keyModal');
-            const generatedKeyEl = document.getElementById('generatedKey');
-            const saveKeyBtn = document.getElementById('saveKeyBtn');
-            const kodeInput = document.getElementById('kode_perbaikan');
-            const form = document.getElementById('perbaikanForm');
-
-            // Event listener untuk tombol Generate Key
-            if (generateKeyBtn) {
-                generateKeyBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-
-                    // Validasi form terlebih dahulu
-                    if (!validateForm()) {
-                        return;
-                    }
-
-                    // Lakukan request untuk generate key
-                    fetchGenerateKey()
-                        .then(data => {
-                            console.log('Generated key:', data);
-                            if (data && data.kode) {
-                                generatedKeyEl.textContent = data.kode;
-                                kodeInput.value = data.kode; // Set nilai input hidden juga
-                                keyModal.style.display = 'block';
-                            } else {
-                                throw new Error('Invalid key data received');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error generating key:', error);
-                            alert('Gagal generate key. Silakan coba lagi.');
-                        });
-                });
-            }
-
-            // Event listener untuk tombol Save
-            if (saveKeyBtn) {
-                saveKeyBtn.addEventListener('click', function() {
-                    const generatedKey = generatedKeyEl.textContent;
-                    kodeInput.value = generatedKey;
-                    keyModal.style.display = 'none';
-
-                    // Submit form
-                    form.submit();
-                });
-            }
-
-            // Event listener untuk menutup modal saat klik di luar
-            window.addEventListener('click', function(event) {
-                if (event.target === keyModal) {
-                    keyModal.style.display = 'none';
-                }
-            });
-        }
-
-        // Jalankan setup event listeners saat DOM sudah siap
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-        });
-    </script>
 </body>
 </html>

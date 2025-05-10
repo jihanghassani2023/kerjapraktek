@@ -227,7 +227,7 @@
                     </div>
                 </div>
             </div>
-        @elseif(isset($perbaikan))
+            @elseif(isset($perbaikan))
             <div class="result-container">
                 <div class="result-header">
                     <h2>SELAMAT DATANG iGENGS!</h2>
@@ -235,15 +235,15 @@
                 <div class="result-body">
                     <div class="info-row">
                         <div class="info-label">Nama Customer</div>
-                        <div class="info-value">{{ $perbaikan->nama_pelanggan }}</div>
+                        <div class="info-value">{{ $perbaikan->pelanggan->nama_pelanggan }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">No. HP</div>
-                        <div class="info-value">{{ $perbaikan->nomor_telp }}</div>
+                        <div class="info-value">{{ $perbaikan->pelanggan->nomor_telp }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Email</div>
-                        <div class="info-value">{{ $perbaikan->email ?? '-' }}</div>
+                        <div class="info-value">{{ $perbaikan->pelanggan->email ?? '-' }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">ID Teknisi</div>
@@ -278,7 +278,7 @@
                         <span class="status-badge status-{{ strtolower($perbaikan->status) }}">
                             Perbaikan device kamu lagi {{ $perbaikan->status }}
                         </span>
-                        
+
                         <div>
                             <a href="{{ route('tracking.index') }}" class="back-btn">
                                 <i class="fas fa-arrow-left"></i> Kembali

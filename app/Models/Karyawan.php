@@ -20,6 +20,5 @@ class Karyawan extends Model
         'status'
     ];
 
-    // Make sure created_at and updated_at are used
     public $timestamps = true;
 }

@@ -17,13 +17,11 @@ return new class extends Migration
             $table->string('nama_barang');
             $table->date('tanggal_perbaikan');
             $table->string('masalah');
-            $table->string('nama_pelanggan');
-            $table->string('nomor_telp');
-            $table->string('email')->nullable();
             $table->decimal('harga', 15, 2)->nullable();
             $table->string('garansi')->nullable();
             $table->enum('status', ['Menunggu', 'Proses', 'Selesai'])->default('Menunggu');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('pelanggan_id')->nullable()->constrained('pelanggan');
             $table->timestamps();
         });
     }

@@ -11,7 +11,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Atribut yang dapat diisi secara massal.
+     *  diisi secara massal.
      *
      * @var array<int, string>
      */
@@ -23,7 +23,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Atribut yang harus disembunyikan untuk serialisasi.
+     * disembunyikan untuk serialisasi.
      *
      * @var array<int, string>
      */
@@ -33,7 +33,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Atribut yang harus dikonversi tipenya.
+     * A dikonversi tipenya.
      *
      * @var array<string, string>
      */
@@ -43,7 +43,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Cek apakah pengguna adalah admin
+     * pengguna adalah admin
      *
      * @return bool
      */
@@ -53,7 +53,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Cek apakah pengguna adalah kepala toko
+     *  pengguna adalah kepala toko
      *
      * @return bool
      */
@@ -63,7 +63,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Cek apakah pengguna adalah teknisi
+     * engguna adalah teknisi
      *
      * @return bool
      */
@@ -73,7 +73,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Cek apakah pengguna memiliki akses ke sistem
+     * engguna memiliki akses ke sistem
      *
      * @return bool
      */
