@@ -207,7 +207,7 @@
             width: 100%;
             border-collapse: collapse;
         }
-        table th, 
+        table th,
         table td {
             text-align: left;
             padding: 10px;
@@ -234,6 +234,39 @@
             color: #333;
             margin-bottom: 0;
         }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn i {
+            margin-right: 8px;
+        }
+        .btn-primary {
+            background-color: #8c3a3a;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #6d2d2d;
+        }
+        .btn-secondary {
+            background-color: #3a8c3a;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #2d6d2d;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -250,6 +283,9 @@
             .stats-container {
                 flex-direction: column;
             }
+            .action-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -257,6 +293,7 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <span>MG TECH</span>
         </div>
         <a href="{{ route('admin.dashboard') }}" class="menu-item active">
             <i class="fas fa-home"></i>
@@ -265,6 +302,14 @@
         <a href="{{ route('admin.transaksi') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
+        </a>
+        <a href="{{ route('admin.pelanggan') }}" class="menu-item">
+            <i class="fas fa-users"></i>
+            <span>Pelanggan</span>
+        </a>
+        <a href="{{ route('admin.perbaikan.create') }}" class="menu-item">
+            <i class="fas fa-tools"></i>
+            <span>Tambah Perbaikan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
@@ -289,6 +334,20 @@
             </div>
         </div>
 
+        <div class="welcome-message">
+            <h2>Selamat Datang, {{ $user->name }}!</h2>
+            <p>Sebagai admin, Anda dapat mengelola data pelanggan, membuat perbaikan baru, dan melihat progress perbaikan yang dilakukan oleh teknisi.</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ route('admin.pelanggan.create') }}" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Tambah Pelanggan
+            </a>
+            <a href="{{ route('admin.perbaikan.create') }}" class="btn btn-secondary">
+                <i class="fas fa-tools"></i> Tambah Perbaikan
+            </a>
+        </div>
+
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-icon teknisi">
@@ -296,7 +355,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Jumlah Teknisi</h3>
-                    <p>{{ \App\Models\User::where('role', 'teknisi')->count() }}</p>
+                    <p>{{ $totalTeknisi ?? \App\Models\User::where('role', 'teknisi')->count() }}</p>
                 </div>
             </div>
 
@@ -306,7 +365,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Transaksi Hari Ini</h3>
-                    <p>Rp. {{ number_format(\App\Models\Perbaikan::whereDate('tanggal_perbaikan', date('Y-m-d'))->sum('harga'), 0, ',', '.') }}</p>
+                    <p>Rp. {{ number_format($totalTransaksiHariIni ?? \App\Models\Perbaikan::whereDate('tanggal_perbaikan', date('Y-m-d'))->sum('harga'), 0, ',', '.') }}</p>
                 </div>
             </div>
 
@@ -316,7 +375,7 @@
                 </div>
                 <div class="stat-info">
                     <h3>Transaksi Bulan Ini</h3>
-                    <p>Rp. {{ number_format(\App\Models\Perbaikan::whereMonth('tanggal_perbaikan', date('m'))->whereYear('tanggal_perbaikan', date('Y'))->sum('harga'), 0, ',', '.') }}</p>
+                    <p>Rp. {{ number_format($totalTransaksiBulanIni ?? \App\Models\Perbaikan::whereMonth('tanggal_perbaikan', date('m'))->whereYear('tanggal_perbaikan', date('Y'))->sum('harga'), 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
@@ -333,21 +392,23 @@
                         <th>Tanggal</th>
                         <th>Pelanggan</th>
                         <th>Barang</th>
+                        <th>Teknisi</th>
                         <th>Status</th>
                         <th>Harga</th>
                     </tr>
                 </thead>
                 <tbody>
                     @php
-                        $latestTransaksi = \App\Models\Perbaikan::orderBy('created_at', 'desc')->take(5)->get();
+                        $latestTransaksi = $latestTransaksi ?? \App\Models\Perbaikan::with(['user', 'pelanggan'])->orderBy('created_at', 'desc')->take(5)->get();
                     @endphp
-                    
+
                     @forelse($latestTransaksi as $t)
                     <tr onclick="window.location='{{ route('admin.transaksi.show', $t->id) }}';" style="cursor: pointer;">
                         <td>{{ $t->kode_perbaikan }}</td>
                         <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d/m/Y') }}</td>
-                        <td>{{ $t->nama_pelanggan }}</td>
+                        <td>{{ $t->pelanggan->nama_pelanggan ?? '-' }}</td>
                         <td>{{ $t->nama_barang }}</td>
+                        <td>{{ $t->user->name ?? '-' }}</td>
                         <td>
                             <span class="{{ $t->status == 'Selesai' ? 'status-active' : 'status-inactive' }}">
                                 {{ $t->status }}
@@ -357,7 +418,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" style="text-align: center;">Tidak ada data transaksi</td>
+                        <td colspan="7" style="text-align: center;">Tidak ada data transaksi</td>
                     </tr>
                     @endforelse
                 </tbody>

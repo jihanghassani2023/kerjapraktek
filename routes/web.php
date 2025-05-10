@@ -6,7 +6,6 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\TrackingController;
 use Illuminate\Support\Facades\Auth;
 
@@ -37,29 +36,29 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     // Admin routes
-    Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-        Route::get('/dashboard', function () {
-            $user = Auth::user();
-            return view('admin.dashboard', compact('user'));
-        })->name('dashboard');
-
+        Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::put('/admin/perbaikan/{id}/status', [AdminController::class, 'updateStatus'])->name('admin.perbaikan.update-status');
+        // Tambahkan di bagian routes admin
+        Route::get('/admin/pelanggan/{id}/edit-pelanggan', [AdminController::class, 'editPelanggan'])->name('perbaikan.edit-pelanggan');
         // Transaksi admin routes
         Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi');
         Route::get('/transaksi/{id}', [AdminController::class, 'showTransaksi'])->name('transaksi.show');
         Route::put('/transaksi/{id}/status', [AdminController::class, 'updateStatus'])->name('transaksi.update-status');
+
+        // Pelanggan management
+        Route::get('/pelanggan', [AdminController::class, 'pelanggan'])->name('pelanggan');
+        Route::get('/pelanggan/create', [AdminController::class, 'createPelanggan'])->name('pelanggan.create');
+        Route::post('/pelanggan', [AdminController::class, 'storePelanggan'])->name('pelanggan.store');
+        Route::get('/pelanggan/{id}/edit', [AdminController::class, 'editPelanggan'])->name('pelanggan.edit');
+        Route::put('/pelanggan/{id}', [AdminController::class, 'updatePelanggan'])->name('pelanggan.update');
+        Route::delete('/pelanggan/{id}', [AdminController::class, 'destroyPelanggan'])->name('pelanggan.destroy');
+
+        // Perbaikan management
+        Route::get('/perbaikan/create', [AdminController::class, 'createPerbaikan'])->name('perbaikan.create');
+        Route::post('/perbaikan', [AdminController::class, 'storePerbaikan'])->name('perbaikan.store');
+        Route::get('/generate-key', [AdminController::class, 'generateKey'])->name('perbaikan.generate-key');
     });
-
-
-
-    // Pelanggan routes
-    Route::resource('pelanggan', PelangganController::class);
-
-    // Special routes for two-step form
-    Route::get('/perbaikan/create-pelanggan', [PerbaikanController::class, 'createPelanggan'])->name('perbaikan.create-pelanggan');
-    Route::post('/perbaikan/store-pelanggan', [PerbaikanController::class, 'storePelanggan'])->name('perbaikan.store-pelanggan');
-    Route::get('/perbaikan/{id}/edit-pelanggan', [PerbaikanController::class, 'editPelanggan'])->name('perbaikan.edit-pelanggan');
-    Route::put('/perbaikan/update-pelanggan/{id}', [PerbaikanController::class, 'updatePelanggan'])->name('perbaikan.update-pelanggan');
-
 
     // Kepala toko routes
     Route::get('/kepala-toko/dashboard', [TransaksiController::class, 'dashboard'])->name('kepala-toko.dashboard');
@@ -87,17 +86,11 @@ Route::middleware(['auth'])->group(function () {
         // Laporan page
         Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('teknisi.laporan');
 
-        // Perbaikan routes
-        Route::get('/perbaikan/create', [PerbaikanController::class, 'create'])->name('perbaikan.create');
-        Route::post('/perbaikan', [PerbaikanController::class, 'store'])->name('perbaikan.store');
+        // Perbaikan routes (hanya untuk view, edit, dan update status)
         Route::get('/perbaikan/{id}', [PerbaikanController::class, 'show'])->name('perbaikan.show');
         Route::get('/perbaikan/{id}/edit', [PerbaikanController::class, 'edit'])->name('perbaikan.edit');
         Route::put('/perbaikan/{id}', [PerbaikanController::class, 'update'])->name('perbaikan.update');
-        Route::delete('/perbaikan/{id}', [PerbaikanController::class, 'destroy'])->name('perbaikan.destroy');
-
-        // Generate key for repairs
-        Route::get('/generate-key', [PerbaikanController::class, 'generateKey'])->name('perbaikan.generate-key');
-
+        Route::put('/teknisi/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
         // Update status with AJAX
         Route::put('/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
 

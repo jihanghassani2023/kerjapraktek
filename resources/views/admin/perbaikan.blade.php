@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Data Pelanggan - MG TECH</title>
+    <title>Data Perbaikan - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -19,7 +19,7 @@
             min-height: 100vh;
         }
         .sidebar {
-            width: 150px;
+            width: 220px;
             background-color: #8c3a3a;
             color: white;
             padding: 20px 0;
@@ -34,17 +34,17 @@
             text-align: center;
         }
         .sidebar-logo img {
-            width: 70px;
+            width: 80px;
             height: auto;
         }
         .sidebar-logo span {
             display: block;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 20px;
             margin-top: 10px;
         }
         .menu-item {
-            padding: 15px 15px;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
             color: white;
@@ -81,79 +81,61 @@
         }
         .main-content {
             flex: 1;
-            margin-left: 150px;
+            margin-left: 220px;
             padding: 20px;
         }
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e3e3e3;
-        }
-        .page-title {
-            font-size: 24px;
-            color: #8c3a3a;
-        }
-        .page-title span {
-            font-size: 14px;
-            color: #888;
-            margin-left: 10px;
-            font-weight: normal;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .user-info {
-            display: flex;
-            align-items: center;
+            text-align: right;
         }
         .user-name {
-            text-align: right;
-            margin-right: 10px;
+            color: #8c3a3a;
+            font-weight: bold;
         }
         .user-role {
-            color: #999;
-            font-size: 14px;
+            color: #888;
+            font-size: 0.9em;
         }
         .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: #f5f5f5;
-            display: flex;
+            background-color: #f0f0f0;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            margin-left: 15px;
         }
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .user-avatar i {
+            color: #8c3a3a;
+            font-size: 20px;
         }
-        .table-container {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .table-header {
+        .title-section {
+            margin: 25px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
         }
-        .table-title {
-            font-size: 18px;
-            font-weight: bold;
+        .page-title {
+            font-size: 1.5em;
             color: #333;
         }
         .btn {
             padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            border: none;
+            border-radius: 5px;
             font-weight: bold;
             text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: none;
             display: inline-flex;
             align-items: center;
         }
@@ -167,6 +149,16 @@
         .btn-primary:hover {
             background-color: #6d2d2d;
         }
+        .content-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .table-container {
+            overflow-x: auto;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -175,8 +167,8 @@
             background-color: #f5f5f5;
         }
         th, td {
-            padding: 12px 15px;
             text-align: left;
+            padding: 12px 15px;
             border-bottom: 1px solid #eee;
         }
         tbody tr {
@@ -186,16 +178,34 @@
         tbody tr:hover {
             background-color: #f5f5f5;
         }
-        .alert {
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 14px;
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
         }
-        .alert-success {
+        .status-menunggu {
+            background-color: #ffeaea;
+            color: #ff6b6b;
+        }
+        .status-proses {
+            background-color: #fff4e0;
+            color: #ffaa00;
+        }
+        .status-selesai {
             background-color: #e7f9e7;
             color: #28a745;
-            border: 1px solid #d0f0d0;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
         .empty-state {
             text-align: center;
@@ -207,28 +217,42 @@
             margin-bottom: 20px;
             color: #ddd;
         }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            .sidebar-logo span,
+            .menu-item span,
+            .logout span {
+                display: none;
+            }
+            .main-content {
+                margin-left: 70px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\' viewBox=\'0 0 80 80\'><rect width=\'80\' height=\'80\' fill=\'%238c3a3a\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'white\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
         </div>
-        <a href="{{ route('teknisi.dashboard') }}" class="menu-item">
+        <a href="{{ route('admin.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('teknisi.progress') }}" class="menu-item">
-            <i class="fas fa-tools"></i>
-            <span>Progres</span>
-        </a>
-        <a href="{{ route('teknisi.laporan') }}" class="menu-item">
-            <i class="fas fa-clipboard-list"></i>
-            <span>Laporan</span>
-        </a>
-        <a href="{{ route('pelanggan.index') }}" class="menu-item active">
+        <a href="{{ route('admin.pelanggan') }}" class="menu-item">
             <i class="fas fa-users"></i>
-            <span>Pelanggan</span>
+            <span>Data Pelanggan</span>
+        </a>
+        <a href="{{ route('admin.perbaikan') }}" class="menu-item active">
+            <i class="fas fa-tools"></i>
+            <span>Data Perbaikan</span>
+        </a>
+        <a href="{{ route('admin.transaksi') }}" class="menu-item">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Transaksi</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
@@ -241,64 +265,70 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">DATA PELANGGAN <span>TEKNISI</span></h1>
-            <div class="user-info">
-                <div class="user-name">
-                    <div>{{ $user->name }}</div>
-                    <div class="user-role">{{ $user->role }}</div>
+            <div>
+                <h2>Data Perbaikan</h2>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <div class="user-info">
+                    <div class="user-name">{{ $user->name }}</div>
+                    <div class="user-role">Admin</div>
                 </div>
                 <div class="user-avatar">
-                    <img src="{{ asset('img/user.png') }}" alt="User" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%23f5f5f5\'/><text x=\'50%\' y=\'50%\' font-size=\'20\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>{{ substr($user->name, 0, 1) }}</text></svg>'">
+                    <i class="fas fa-user"></i>
                 </div>
             </div>
         </div>
 
-        @if (session('success'))
+        <div class="title-section">
+            <h1 class="page-title">Data Perbaikan</h1>
+            <a href="{{ route('admin.pelanggan.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Tambah Perbaikan
+            </a>
+        </div>
+
+        @if(session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
 
-        <div class="table-container">
-            <div class="table-header">
-                <div class="table-title">Daftar Pelanggan</div>
-                <a href="{{ route('pelanggan.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Tambah Pelanggan
-                </a>
-            </div>
-
-            @if(count($pelanggan) > 0)
+        <div class="content-section">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>Nama Pelanggan</th>
-                            <th>Nomor Telepon</th>
-                            <th>Email</th>
-                            <th>Jumlah Perbaikan</th>
+                            <th>Kode Perbaikan</th>
+                            <th>Nama Barang</th>
+                            <th>Pelanggan</th>
+                            <th>Teknisi</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($pelanggan as $index => $p)
-                        <tr onclick="window.location.href='{{ route('pelanggan.show', $p->id) }}';">
+                        @forelse($perbaikan as $index => $p)
+                        <tr onclick="window.location.href='{{ route('admin.perbaikan.show', $p->id) }}';">
                             <td>{{ $index + 1 }}</td>
-                            <td>{{ $p->nama_pelanggan }}</td>
-                            <td>{{ $p->nomor_telp }}</td>
-                            <td>{{ $p->email ?: '-' }}</td>
-                            <td>{{ $p->perbaikan->count() }}</td>
+                            <td>{{ $p->kode_perbaikan }}</td>
+                            <td>{{ $p->nama_barang }}</td>
+                            <td>{{ $p->pelanggan->nama_pelanggan }}</td>
+                            <td>{{ $p->user->name ?? 'Belum ditugaskan' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('d/m/Y') }}</td>
+                            <td>
+                                <span class="status status-{{ strtolower($p->status) }}">
+                                    {{ $p->status }}
+                                </span>
+                            </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Tidak ada data perbaikan</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
-            @else
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <p>Belum ada data pelanggan</p>
-                    <a href="{{ route('pelanggan.create') }}" class="btn btn-primary" style="margin-top: 15px;">
-                        <i class="fas fa-plus"></i> Tambah Pelanggan Pertama
-                    </a>
-                </div>
-            @endif
+            </div>
         </div>
     </div>
 </body>

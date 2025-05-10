@@ -463,11 +463,11 @@
                         <div class="info-label">Email</div>
                         <div class="info-value">{{ $perbaikan->pelanggan->email ?: '-' }}</div>
                     </div>
-                    <div class="action-button">
+                    {{-- <div class="action-button">
                         <a href="{{ route('perbaikan.edit-pelanggan', $perbaikan->id) }}" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit Data Pelanggan
                         </a>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         </div>

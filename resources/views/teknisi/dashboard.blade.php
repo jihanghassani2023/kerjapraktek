@@ -166,25 +166,10 @@
             font-weight: bold;
             color: #333;
         }
-        .action-button {
-            display: inline-block;
-            padding: 10px 15px;
-            background-color: #8c3a3a;
-            color: white;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            margin: 20px 0;
-            border: none;
-            cursor: pointer;
-        }
-        .action-button:hover {
-            background-color: #6d2d2d;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 20px;
         }
         thead {
             background-color: #f5f5f5;
@@ -196,7 +181,7 @@
         }
         th {
             color: #666;
-            font-weight: normal;
+            font-weight: bold;
         }
         tbody tr {
             cursor: pointer;
@@ -223,102 +208,22 @@
             background-color: #e7f9e7;
             color: #28a745;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
+        .welcome-box {
             background-color: #fff;
-            margin: 10% auto;
-            padding: 20px;
+            border-left: 5px solid #8c3a3a;
+            padding: 15px;
+            margin-top: 20px;
             border-radius: 5px;
-            width: 400px;
-            max-width: 90%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        .welcome-title {
+            font-size: 18px;
+            color: #8c3a3a;
+            margin-bottom: 10px;
         }
-        .modal-title {
-            font-size: 20px;
-            color: #333;
-        }
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close:hover {
-            color: #333;
-        }
-        .modal-body {
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
+        .welcome-text {
             color: #666;
-        }
-        .form-control {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .modal-footer {
-            text-align: right;
-        }
-        .btn {
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            border: none;
-        }
-        .btn-primary {
-            background-color: #8c3a3a;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #6d2d2d;
-        }
-        .btn-secondary {
-            background-color: #f5f5f5;
-            color: #666;
-        }
-        .btn-secondary:hover {
-            background-color: #e5e5e5;
-        }
-        .actions {
-            display: flex;
-            gap: 5px;
-        }
-        .btn-action {
-            padding: 5px 10px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-            color: #666;
-            background-color: #f5f5f5;
-            border: none;
-        }
-        .btn-action:hover {
-            background-color: #e5e5e5;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -362,6 +267,13 @@
             </div>
         </div>
 
+        <div class="welcome-box">
+            <h2 class="welcome-title">Selamat Datang, {{ $user->name }}!</h2>
+            <p class="welcome-text">
+                Anda melihat daftar perbaikan yang ditugaskan kepada Anda. Silakan lihat status perbaikan dan update progres pekerjaan Anda.
+            </p>
+        </div>
+
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-icon">
@@ -392,9 +304,7 @@
             </div>
         </div>
 
-        <a href="{{ route('perbaikan.create') }}" class="action-button">
-            <i class="fas fa-plus"></i> Tambah Perbaikan
-        </a>
+        <h2 style="margin-top: 30px;">Daftar Perbaikan Yang Ditugaskan</h2>
 
         <table>
             <thead>
@@ -421,7 +331,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align: center;">Tidak ada data perbaikan</td>
+                    <td colspan="6" style="text-align: center;">Tidak ada perbaikan yang ditugaskan kepada Anda</td>
                 </tr>
                 @endforelse
             </tbody>
