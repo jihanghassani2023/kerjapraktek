@@ -189,6 +189,7 @@
         }
         textarea.form-control {
             min-height: 100px;
+            resize: vertical;
         }
         .invalid-feedback {
             color: #dc3545;
@@ -226,6 +227,7 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <span>MG TECH</span>
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -301,14 +303,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="ttl">Tempat, Tanggal Lahir</label>
-                    <input type="text" class="form-control @error('ttl') is-invalid @enderror" id="ttl" name="ttl" value="{{ old('ttl') }}" placeholder="Contoh: Palembang, 21 Februari 1989" required>
-                    @error('ttl')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="form-group">
                     <label for="alamat">Alamat</label>
                     <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat" required>{{ old('alamat') }}</textarea>
                     @error('alamat')
@@ -325,18 +319,6 @@
                         <option value="Admin" {{ old('jabatan') == 'Admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                     @error('jabatan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select class="form-control @error('status') is-invalid @enderror" id="status" name="status" required>
-                        <option value="">Pilih Status</option>
-                        <option value="Kontrak" {{ old('status') == 'Kontrak' ? 'selected' : '' }}>Kontrak</option>
-                        <option value="Tetap" {{ old('status') == 'Tetap' ? 'selected' : '' }}>Tetap</option>
-                    </select>
-                    @error('status')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

@@ -14,10 +14,8 @@ class Karyawan extends Model
     protected $fillable = [
         'id_karyawan',
         'nama_karyawan',
-        'ttl',
         'alamat',
         'jabatan',
-        'status'
     ];
 
     public $timestamps = true;

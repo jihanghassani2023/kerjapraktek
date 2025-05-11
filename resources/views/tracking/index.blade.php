@@ -125,7 +125,7 @@
         }
         .result-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -143,17 +143,37 @@
         .result-body {
             padding: 30px;
         }
+        .customer-info {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .customer-info h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .repair-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #8c3a3a;
+        }
+        .repair-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .info-row {
             display: flex;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-        }
-        .info-row:last-child {
-            border-bottom: none;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
         .info-label {
-            width: 150px;
+            width: 130px;
             font-weight: bold;
             color: #555;
         }
@@ -163,11 +183,10 @@
         }
         .status-badge {
             display: inline-block;
-            padding: 8px 15px;
+            padding: 5px 10px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            margin-top: 20px;
         }
         .status-menunggu {
             background-color: #ffeaea;
@@ -176,10 +195,6 @@
         .status-proses {
             background-color: #fff4e0;
             color: #ffaa00;
-        }
-        .status-selesai {
-            background-color: #e7f9e7;
-            color: #28a745;
         }
         .back-btn {
             display: inline-block;
@@ -216,74 +231,92 @@
                         {{ session('error') }}
                     </div>
                     <div class="tracking-form">
-                        <div class="tracking-title">SILAHKAN MASUKAN KEY</div>
+                        <div class="tracking-title">MASUKKAN NOMOR TELEPON ANDA</div>
                         <form action="{{ route('tracking.check') }}" method="POST">
                             @csrf
                             <div class="input-group">
-                                <input type="text" name="key" class="input-control" placeholder="Masukkan kode perbaikan Anda" required>
+                                <input type="text" name="key" class="input-control" placeholder="Masukkan nomor telepon Anda" required>
                             </div>
-                            <button type="submit" class="submit-btn">SUBMIT</button>
+                            <button type="submit" class="submit-btn">CARI PERBAIKAN</button>
                         </form>
                     </div>
                 </div>
             </div>
-            @elseif(isset($perbaikan))
+        @elseif(isset($perbaikanList))
             <div class="result-container">
                 <div class="result-header">
                     <h2>SELAMAT DATANG iGENGS!</h2>
                 </div>
                 <div class="result-body">
-                    <div class="info-row">
-                        <div class="info-label">Nama Customer</div>
-                        <div class="info-value">{{ $perbaikan->pelanggan->nama_pelanggan }}</div>
+                    <div class="customer-info">
+                        <h3>Informasi Pelanggan</h3>
+                        <div class="info-row">
+                            <div class="info-label">Nama</div>
+                            <div class="info-value">{{ $pelanggan->nama_pelanggan }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">No. Telepon</div>
+                            <div class="info-value">{{ $pelanggan->nomor_telp }}</div>
+                        </div>
+                        @if($pelanggan->email)
+                        <div class="info-row">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">{{ $pelanggan->email }}</div>
+                        </div>
+                        @endif
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">No. HP</div>
-                        <div class="info-value">{{ $perbaikan->pelanggan->nomor_telp }}</div>
+
+                    <h3>Perbaikan Aktif ({{ $perbaikanList->count() }})</h3>
+
+                    @foreach($perbaikanList as $perbaikan)
+                    <div class="repair-card">
+                        <div class="repair-title">
+                            <span>{{ $perbaikan->nama_barang }}</span>
+                            <span class="status-badge status-{{ strtolower($perbaikan->status) }}">
+                                {{ $perbaikan->status }}
+                            </span>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Kode</div>
+                            <div class="info-value">{{ $perbaikan->kode_perbaikan }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Masalah</div>
+                            <div class="info-value">{{ $perbaikan->masalah }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Tanggal Masuk</div>
+                            <div class="info-value">{{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y') }}</div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-label">Teknisi</div>
+                            <div class="info-value">{{ $perbaikan->user->name ?? 'Belum ditugaskan' }}</div>
+                        </div>
+
+                        @if($perbaikan->harga > 0)
+                        <div class="info-row">
+                            <div class="info-label">Estimasi Biaya</div>
+                            <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}</div>
+                        </div>
+                        @endif
+
+                        @if($perbaikan->garansi)
+                        <div class="info-row">
+                            <div class="info-label">Garansi</div>
+                            <div class="info-value">{{ $perbaikan->garansi }}</div>
+                        </div>
+                        @endif
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">Email</div>
-                        <div class="info-value">{{ $perbaikan->pelanggan->email ?? '-' }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">ID Teknisi</div>
-                        <div class="info-value">{{ $perbaikan->user_id ?? '-' }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Nama Teknisi</div>
-                        <div class="info-value">{{ $perbaikan->user->name ?? 'Tidak ada' }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Device</div>
-                        <div class="info-value">{{ $perbaikan->nama_barang }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Deskripsi Masalah</div>
-                        <div class="info-value">{{ $perbaikan->masalah }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Tanggal Perbaikan</div>
-                        <div class="info-value">{{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y') }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Lama Garansi</div>
-                        <div class="info-value">{{ $perbaikan->garansi ?? '1 Tahun' }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Total Harga</div>
-                        <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}</div>
-                    </div>
+                    @endforeach
 
                     <div style="text-align: center;">
-                        <span class="status-badge status-{{ strtolower($perbaikan->status) }}">
-                            Perbaikan device kamu lagi {{ $perbaikan->status }}
-                        </span>
-
-                        <div>
-                            <a href="{{ route('tracking.index') }}" class="back-btn">
-                                <i class="fas fa-arrow-left"></i> Kembali
-                            </a>
-                        </div>
+                        <a href="{{ route('tracking.index') }}" class="back-btn">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </a>
                     </div>
                 </div>
             </div>
@@ -295,13 +328,13 @@
                 </div>
                 <div class="tracking-body">
                     <div class="tracking-form">
-                        <div class="tracking-title">SILAHKAN MASUKAN KEY</div>
+                        <div class="tracking-title">MASUKKAN NOMOR TELEPON ANDA</div>
                         <form action="{{ route('tracking.check') }}" method="POST">
                             @csrf
                             <div class="input-group">
-                                <input type="text" name="key" class="input-control" placeholder="Masukkan kode perbaikan Anda" required>
+                                <input type="text" name="key" class="input-control" placeholder="Masukkan nomor telepon Anda" required>
                             </div>
-                            <button type="submit" class="submit-btn">SUBMIT</button>
+                            <button type="submit" class="submit-btn">CARI PERBAIKAN</button>
                         </form>
                     </div>
                 </div>

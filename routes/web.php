@@ -36,11 +36,11 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     // Admin routes
-        Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-        Route::put('/admin/perbaikan/{id}/status', [AdminController::class, 'updateStatus'])->name('admin.perbaikan.update-status');
+        Route::put('/perbaikan/{id}/status', [AdminController::class, 'updateStatus'])->name('perbaikan.update-status');
         // Tambahkan di bagian routes admin
-        Route::get('/admin/pelanggan/{id}/edit-pelanggan', [AdminController::class, 'editPelanggan'])->name('perbaikan.edit-pelanggan');
+        Route::get('/pelanggan/{id}/edit-pelanggan', [AdminController::class, 'editPelanggan'])->name('perbaikan.edit-pelanggan');
         // Transaksi admin routes
         Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi');
         Route::get('/transaksi/{id}', [AdminController::class, 'showTransaksi'])->name('transaksi.show');
@@ -90,11 +90,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/perbaikan/{id}', [PerbaikanController::class, 'show'])->name('perbaikan.show');
         Route::get('/perbaikan/{id}/edit', [PerbaikanController::class, 'edit'])->name('perbaikan.edit');
         Route::put('/perbaikan/{id}', [PerbaikanController::class, 'update'])->name('perbaikan.update');
-        Route::put('/teknisi/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
-        // Update status with AJAX
-        Route::put('/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
 
         // Confirm status change
         Route::get('/perbaikan/{id}/confirm-status/{status}', [PerbaikanController::class, 'confirmStatus'])->name('perbaikan.confirm-status');
     });
+
+    // FIX: Unified single route for status updates
+    Route::put('/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
 });

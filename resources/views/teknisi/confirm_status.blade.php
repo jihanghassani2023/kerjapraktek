@@ -67,33 +67,33 @@
     </div>
 
     <script>
-        function confirmStatus(status) {
-            // Get CSRF token
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
-            // Send AJAX request
-            fetch('/teknisi/perbaikan/{{ $perbaikan->id }}/status', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({ status: status })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Redirect back to progress page
-                    window.location.href = '{{ route("teknisi.progress") }}';
-                } else {
-                    alert('Gagal mengubah status. Silakan coba lagi.');
-                }
-            })
-            .catch(error => {
-                console.error('Error updating status:', error);
-                alert('Terjadi kesalahan. Silakan coba lagi.');
-            });
+       function confirmStatus(status) {
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Send AJAX request
+    fetch('/perbaikan/{{ $perbaikan->id }}/status', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect back to progress page
+            window.location.href = '{{ route("teknisi.progress") }}';
+        } else {
+            alert('Gagal mengubah status. Silakan coba lagi.');
         }
+    })
+    .catch(error => {
+        console.error('Error updating status:', error);
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+    });
+}
     </script>
 </body>
 </html>

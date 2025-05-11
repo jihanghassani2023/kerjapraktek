@@ -34,10 +34,8 @@ class KaryawanController extends Controller
         $validator = Validator::make($request->all(), [
             'id_karyawan' => 'required|unique:karyawan,id_karyawan',
             'nama_karyawan' => 'required|string|max:255',
-            'ttl' => 'required|string|max:255',
             'alamat' => 'required|string',
             'jabatan' => 'required|string|in:Kepala Teknisi,Teknisi,Admin',
-            'status' => 'required|string|in:Kontrak,Tetap',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6'
         ]);
@@ -51,10 +49,8 @@ class KaryawanController extends Controller
         $karyawan = Karyawan::create([
             'id_karyawan' => $request->id_karyawan,
             'nama_karyawan' => $request->nama_karyawan,
-            'ttl' => $request->ttl,
             'alamat' => $request->alamat,
             'jabatan' => $request->jabatan,
-            'status' => $request->status,
         ]);
 
         $userRole = 'user';
@@ -109,10 +105,8 @@ class KaryawanController extends Controller
 
         $validator = Validator::make($request->all(), [
             'nama_karyawan' => 'required|string|max:255',
-            'ttl' => 'required|string|max:255',
             'alamat' => 'required|string',
             'jabatan' => 'required|string|in:Kepala Teknisi,Teknisi,Admin',
-            'status' => 'required|string|in:Kontrak,Tetap',
         ]);
 
         if ($validator->fails()) {
@@ -123,10 +117,8 @@ class KaryawanController extends Controller
 
         $karyawan->update([
             'nama_karyawan' => $request->nama_karyawan,
-            'ttl' => $request->ttl,
             'alamat' => $request->alamat,
             'jabatan' => $request->jabatan,
-            'status' => $request->status,
         ]);
 
         $user = User::where('name', $karyawan->nama_karyawan)->first();

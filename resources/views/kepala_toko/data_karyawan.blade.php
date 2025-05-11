@@ -185,7 +185,7 @@
             width: 100%;
             border-collapse: collapse;
         }
-        table th, 
+        table th,
         table td {
             text-align: left;
             padding: 12px 15px;
@@ -316,10 +316,8 @@
                             <th>NO</th>
                             <th>ID KARYAWAN</th>
                             <th>NAMA KARYAWAN</th>
-                            <th>TTL</th>
                             <th>ALAMAT</th>
                             <th>JABATAN</th>
-                            <th>STATUS</th>
                             <th>AKSI</th>
                         </tr>
                     </thead>
@@ -329,10 +327,8 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $k->id_karyawan }}</td>
                                 <td>{{ $k->nama_karyawan }}</td>
-                                <td>{{ $k->ttl }}</td>
                                 <td>{{ $k->alamat }}</td>
                                 <td>{{ $k->jabatan }}</td>
-                                <td>{{ $k->status }}</td>
                                 <td class="action-buttons" onclick="event.stopPropagation();">
                                     <a href="{{ route('karyawan.edit', $k->id) }}" class="action-btn" title="Edit">
                                         <i class="fas fa-edit"></i>
@@ -348,7 +344,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" style="text-align: center;">Tidak ada data karyawan</td>
+                                <td colspan="6" style="text-align: center;">Tidak ada data karyawan</td>
                             </tr>
                         @endforelse
                     </tbody>

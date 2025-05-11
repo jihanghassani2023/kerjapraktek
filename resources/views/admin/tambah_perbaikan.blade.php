@@ -187,6 +187,7 @@
         }
         textarea.form-control {
             min-height: 100px;
+            resize: vertical;
         }
         .invalid-feedback {
             color: #dc3545;
@@ -208,39 +209,6 @@
             background-color: #d4edda;
             border-color: #28a745;
             color: #155724;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fff;
-            margin: 10% auto;
-            padding: 20px;
-            border-radius: 5px;
-            width: 400px;
-            max-width: 90%;
-            text-align: center;
-        }
-        .modal-header {
-            margin-bottom: 20px;
-        }
-        .modal-title {
-            font-size: 20px;
-            color: #333;
-        }
-        .generated-key {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 20pxfont-weight: bold;
-            margin: 20px 0;
         }
         @media (max-width: 768px) {
             .sidebar {
@@ -396,35 +364,24 @@
                 </div>
 
                 <div style="text-align: right;">
-                    <button type="button" id="generateKeyBtn" class="btn btn-primary">Generate Kode & Simpan</button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="keyModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">GENERATE KODE PERBAIKAN</h2>
-            </div>
-            <div class="modal-body">
-                <p>Kode perbaikan telah digenerate:</p>
-                <div id="generatedKey" class="generated-key"></div>
-            </div>
-            <button id="saveKeyBtn" class="btn btn-primary" style="width: 100%;">SIMPAN DATA</button>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const generateKeyBtn = document.getElementById('generateKeyBtn');
-            const keyModal = document.getElementById('keyModal');
-            const generatedKeyEl = document.getElementById('generatedKey');
-            const saveKeyBtn = document.getElementById('saveKeyBtn');
-            const kodeInput = document.getElementById('kode_perbaikan');
             const form = document.getElementById('perbaikanForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const kodeInput = document.getElementById('kode_perbaikan');
 
-            // Fungsi untuk validasi form
+            // CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Function to validate form
             function validateForm() {
                 const requiredFields = ['pelanggan_id', 'user_id', 'nama_barang', 'masalah'];
                 let isValid = true;
@@ -442,17 +399,16 @@
                 return isValid;
             }
 
-            // CSRF token
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            // Submit form handler
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
 
-            // Event listener untuk tombol Generate Key
-            generateKeyBtn.addEventListener('click', function() {
                 if (!validateForm()) {
                     alert('Silakan lengkapi semua field yang diperlukan.');
                     return;
                 }
 
-                // Generate key via AJAX
+                // Generate a key before submitting
                 fetch('{{ route("admin.perbaikan.generate-key") }}', {
                     headers: {
                         'X-CSRF-TOKEN': csrfToken
@@ -461,28 +417,17 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.kode) {
-                        generatedKeyEl.textContent = data.kode;
+                        // Set the generated code and submit the form
                         kodeInput.value = data.kode;
-                        keyModal.style.display = 'block';
+                        form.submit();
+                    } else {
+                        alert('Gagal generate kode perbaikan. Silakan coba lagi.');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Gagal generate kode perbaikan. Silakan coba lagi.');
+                    alert('Terjadi kesalahan. Silakan coba lagi.');
                 });
-            });
-
-            // Event listener untuk tombol Simpan di modal
-            saveKeyBtn.addEventListener('click', function() {
-                keyModal.style.display = 'none';
-                form.submit();
-            });
-
-            // Tutup modal jika diklik di luar modal
-            window.addEventListener('click', function(event) {
-                if (event.target == keyModal) {
-                    keyModal.style.display = 'none';
-                }
             });
         });
     </script>

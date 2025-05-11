@@ -13,10 +13,8 @@ return new class extends Migration
             $table->id();
             $table->string('id_karyawan', 20)->unique();
             $table->string('nama_karyawan');
-            $table->string('ttl'); // Tanggal dan tempat lahir
             $table->text('alamat');
             $table->string('jabatan'); // Kepala Teknisi, Teknisi, Admin
-            $table->string('status')->default('Kontrak'); // Kontrak, Tetap
             $table->timestamps();
         });
     }

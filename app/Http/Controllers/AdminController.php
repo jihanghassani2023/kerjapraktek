@@ -251,8 +251,8 @@ class AdminController extends Controller
         $perbaikan->status = 'Menunggu';
         $perbaikan->save();
 
-        return redirect()->route('admin.transaksi')
-            ->with('success', 'Data perbaikan berhasil ditambahkan');
+       return redirect()->route('admin.transaksi')
+        ->with('success', 'Perbaikan berhasil disimpan');
     }
 
     public function generateKey()

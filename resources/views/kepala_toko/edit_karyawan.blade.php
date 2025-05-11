@@ -299,14 +299,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="ttl">Tempat, Tanggal Lahir</label>
-                    <input type="text" class="form-control @error('ttl') is-invalid @enderror" id="ttl" name="ttl" value="{{ old('ttl', $karyawan->ttl) }}" required>
-                    @error('ttl')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="form-group">
                     <label for="alamat">Alamat</label>
                     <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat" required>{{ old('alamat', $karyawan->alamat) }}</textarea>
                     @error('alamat')
@@ -323,18 +315,6 @@
                         <option value="Admin" {{ old('jabatan', $karyawan->jabatan) == 'Admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                     @error('jabatan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select class="form-control @error('status') is-invalid @enderror" id="status" name="status" required>
-                        <option value="">Pilih Status</option>
-                        <option value="Kontrak" {{ old('status', $karyawan->status) == 'Kontrak' ? 'selected' : '' }}>Kontrak</option>
-                        <option value="Tetap" {{ old('status', $karyawan->status) == 'Tetap' ? 'selected' : '' }}>Tetap</option>
-                    </select>
-                    @error('status')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

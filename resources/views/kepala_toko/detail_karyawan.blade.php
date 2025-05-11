@@ -261,7 +261,7 @@
             width: 100%;
             border-collapse: collapse;
         }
-        table th, 
+        table th,
         table td {
             text-align: left;
             padding: 12px 15px;
@@ -341,12 +341,12 @@
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
-        
+
         <a href="{{ route('karyawan.index') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali</span>
         </a>
-        
+
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="logout-btn">
@@ -401,20 +401,12 @@
                         <div class="data-value">{{ $karyawan->nama_karyawan }}</div>
                     </div>
                     <div class="data-row">
-                        <div class="data-label">Tempat, Tanggal Lahir</div>
-                        <div class="data-value">{{ $karyawan->ttl }}</div>
-                    </div>
-                    <div class="data-row">
                         <div class="data-label">Alamat</div>
                         <div class="data-value">{{ $karyawan->alamat }}</div>
                     </div>
                     <div class="data-row">
                         <div class="data-label">Jabatan</div>
                         <div class="data-value">{{ $karyawan->jabatan }}</div>
-                    </div>
-                    <div class="data-row">
-                        <div class="data-label">Status</div>
-                        <div class="data-value">{{ $karyawan->status }}</div>
                     </div>
                 </div>
             </div>

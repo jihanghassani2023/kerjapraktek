@@ -475,39 +475,39 @@
 
     <script>
         function updateStatus(status) {
-            if (confirm('Apakah Anda yakin ingin mengubah status menjadi ' + status + '?')) {
-                // Get CSRF token
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    if (confirm('Apakah Anda yakin ingin mengubah status menjadi ' + status + '?')) {
+        // Get CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                // Send AJAX request
-                fetch('/teknisi/perbaikan/{{ $perbaikan->id }}/status', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({ status: status })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        // Reload page to show updated status
-                        window.location.reload();
-                    } else {
-                        alert('Gagal mengubah status. Silakan coba lagi.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating status:', error);
-                    alert('Terjadi kesalahan. Silakan coba lagi.');
-                });
+        // Send AJAX request
+        fetch('/perbaikan/{{ $perbaikan->id }}/status', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({ status: status })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Reload page to show updated status
+                window.location.reload();
+            } else {
+                alert('Gagal mengubah status. Silakan coba lagi.');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating status:', error);
+            alert('Terjadi kesalahan. Silakan coba lagi.');
+        });
+    }
+}
 
         // Print function styling
         document.addEventListener('DOMContentLoaded', function() {

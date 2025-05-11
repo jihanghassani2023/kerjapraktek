@@ -109,14 +109,17 @@ class PerbaikanController extends Controller
     /**
      * Update the status of a repair.
      */
-    public function updateStatus(Request $request, $id)
+    /**
+ * Update the status of a repair.
+ */
+public function updateStatus(Request $request, $id)
 {
     $perbaikan = Perbaikan::findOrFail($id);
 
     // Make sure the repair belongs to the logged-in user
     if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
         if ($request->ajax()) {
-            return response()->json(['error' => 'Anda tidak memiliki akses'], 403);
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses'], 403);
         }
         return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
     }
@@ -128,17 +131,23 @@ class PerbaikanController extends Controller
 
     if ($validator->fails()) {
         if ($request->ajax()) {
-            return response()->json(['error' => 'Status tidak valid'], 400);
+            return response()->json(['success' => false, 'message' => 'Status tidak valid'], 400);
         }
         return redirect()->back()->withErrors($validator)->withInput();
     }
 
     // Update status
+    $oldStatus = $perbaikan->status;
     $perbaikan->status = $request->status;
     $perbaikan->save();
 
     if ($request->ajax()) {
-        return response()->json(['success' => true, 'status' => $perbaikan->status]);
+        return response()->json([
+            'success' => true,
+            'status' => $perbaikan->status,
+            'message' => "Status berhasil diperbarui dari {$oldStatus} menjadi {$perbaikan->status}",
+            'id' => $perbaikan->id
+        ]);
     }
 
     return redirect()->route('teknisi.progress')->with('success', 'Status berhasil diperbarui');

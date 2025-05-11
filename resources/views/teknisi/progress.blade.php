@@ -235,15 +235,50 @@
             background-color: #d0f0d0;
         }
         .alert {
-            padding: 10px 15px;
-            border-radius: 4px;
+            padding: 15px;
+            border-radius: 5px;
             margin-bottom: 20px;
-            font-size: 14px;
+            animation: fadeIn 0.3s ease-in-out;
         }
         .alert-success {
-            background-color: #e7f9e7;
-            color: #28a745;
-            border: 1px solid #d0f0d0;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+        .fadeout {
+            animation: fadeOut 0.5s ease-in-out forwards;
+        }
+        .table-container {
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            .sidebar-logo span,
+            .menu-item span,
+            .logout span {
+                display: none;
+            }
+            .main-content {
+                margin-left: 70px;
+            }
+            .status-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -287,50 +322,60 @@
             </div>
         </div>
 
+        <div id="notification-container"></div>
+
         @if(session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
 
-        <table>
-            <thead>
-                <tr>
-                    <th>NO</th>
-                    <th>KODE PERBAIKAN</th>
-                    <th>NAMA BARANG</th>
-                    <th>TANGGAL PERBAIKAN</th>
-                    <th>MASALAH</th>
-                    <th>STATUS</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($perbaikan as $index => $p)
-                <tr onclick="window.location.href='{{ route('perbaikan.show', $p->id) }}';">
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $p->kode_perbaikan }}</td>
-                    <td>{{ $p->nama_barang }}</td>
-                    <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('l, j F Y') }}</td>
-                    <td>{{ $p->masalah }}</td>
-                    <td>
-                        @if($p->status == 'Menunggu')
-                            <span class="status status-menunggu">{{ $p->status }}</span>
-                            <button class="btn-action btn-process" data-id="{{ $p->id }}" data-status="Proses">Proses</button>
-                        @elseif($p->status == 'Proses')
-                            <span class="status status-proses">{{ $p->status }}</span>
-                            <button class="btn-action btn-complete" data-id="{{ $p->id }}" data-status="Selesai">Selesai</button>
-                        @else
-                            <span class="status status-selesai">{{ $p->status }}</span>
-                        @endif
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" style="text-align: center;">Tidak ada data perbaikan</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>NO</th>
+                        <th>KODE PERBAIKAN</th>
+                        <th>NAMA BARANG</th>
+                        <th>TANGGAL PERBAIKAN</th>
+                        <th>MASALAH</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($perbaikan as $index => $p)
+                    <tr onclick="window.location.href='{{ route('perbaikan.show', $p->id) }}';">
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $p->kode_perbaikan }}</td>
+                        <td>{{ $p->nama_barang }}</td>
+                        <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('l, j F Y') }}</td>
+                        <td>{{ $p->masalah }}</td>
+                        <td>
+                            @if($p->status == 'Menunggu')
+                                <span class="status status-menunggu">{{ $p->status }}</span>
+                                <button class="btn-action btn-process" data-id="{{ $p->id }}" data-status="Proses">Proses</button>
+                            @elseif($p->status == 'Proses')
+                                <span class="status status-proses">{{ $p->status }}</span>
+                                <button class="btn-action btn-complete" data-id="{{ $p->id }}" data-status="Selesai">Selesai</button>
+                            @else
+                                <span class="status status-selesai">{{ $p->status }}</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" style="text-align: center;">Tidak ada data perbaikan</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div id="confirmModal" class="modal">
@@ -343,86 +388,114 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const statusButtons = document.querySelectorAll('.btn-action');
-            const confirmModal = document.getElementById('confirmModal');
-            const confirmYes = document.getElementById('confirmYes');
-            const confirmNo = document.getElementById('confirmNo');
-            let currentButton = null;
-            let currentId = null;
-            let currentStatus = null;
-            
-            // Add click event to all status buttons
-            statusButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    currentButton = this;
-                    currentId = this.dataset.id;
-                    currentStatus = this.dataset.status;
-                    
-                    // Update dialog text based on status
-                    const statusText = currentStatus === 'Proses' ? 'KERJAKAN' : 'SELESAIKAN';
-                    document.querySelector('.modal-title').textContent = `APAKAH DEVICE INI AKAN ANDA ${statusText}?`;
-                    
-                    // Show modal
-                    confirmModal.style.display = 'block';
-                });
+    <!-- Simpan kode ini dalam <script> tag di bagian bawah file progress.blade.php -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusButtons = document.querySelectorAll('.btn-action');
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmYes = document.getElementById('confirmYes');
+        const confirmNo = document.getElementById('confirmNo');
+
+        let currentButton = null;
+        let currentId = null;
+        let currentStatus = null;
+
+        // Fungsi untuk menampilkan notifikasi
+        function showNotification(type, message) {
+            // Cek apakah sudah ada notifikasi
+            let existingAlert = document.querySelector('.alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            // Buat elemen notifikasi baru
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.textContent = message;
+
+            // Tambahkan ke DOM sebelum tabel
+            const mainContent = document.querySelector('.main-content');
+            const tableContainer = document.querySelector('.table-container');
+            mainContent.insertBefore(notification, tableContainer);
+
+            // Hilangkan notifikasi setelah 3 detik
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Add click event to all status buttons
+        statusButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation(); // Penting! Mencegah event klik mengaktifkan baris tabel
+
+                currentButton = this;
+                currentId = this.dataset.id;
+                currentStatus = this.dataset.status;
+
+                // Update dialog text based on status
+                const statusText = currentStatus === 'Proses' ? 'KERJAKAN' : 'SELESAIKAN';
+                document.querySelector('.modal-title').textContent = `APAKAH DEVICE INI AKAN ANDA ${statusText}?`;
+
+                // Show modal
+                confirmModal.style.display = 'block';
             });
-            
-            // Confirm button (Yes)
-            confirmYes.addEventListener('click', function() {
-                if (currentId && currentStatus) {
-                    updateStatus(currentId, currentStatus);
-                }
+        });
+
+        // Confirm button (Yes)
+        confirmYes.addEventListener('click', function() {
+            if (currentId && currentStatus) {
+                updateStatus(currentId, currentStatus);
+            }
+            confirmModal.style.display = 'none';
+        });
+
+        // Cancel button (No)
+        confirmNo.addEventListener('click', function() {
+            confirmModal.style.display = 'none';
+        });
+
+        // Close modal if clicked outside
+        window.addEventListener('click', function(event) {
+            if (event.target === confirmModal) {
                 confirmModal.style.display = 'none';
-            });
-            
-            // Cancel button (No)
-            confirmNo.addEventListener('click', function() {
-                confirmModal.style.display = 'none';
-            });
-            
-            // Close modal if clicked outside
-            window.addEventListener('click', function(event) {
-                if (event.target === confirmModal) {
-                    confirmModal.style.display = 'none';
-                }
-            });
-            
-            // Function to update status
-            function updateStatus(id, status) {
-                // Get CSRF token
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                
-                // Send AJAX request
-                fetch(`/teknisi/perbaikan/${id}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({ status: status })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        // Reload page to show updated status
-                        window.location.reload();
-                    } else {
-                        alert('Gagal mengubah status. Silakan coba lagi.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating status:', error);
-                    alert('Terjadi kesalahan. Silakan coba lagi.');
-                });
             }
         });
-    </script>
+
+        // Function to update status
+        function updateStatus(id, status) {
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Send AJAX request
+    fetch(`/perbaikan/${id}/status`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Reload page to show updated status
+            window.location.reload();
+        } else {
+            alert('Gagal mengubah status. Silakan coba lagi.');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating status:', error);
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+    });
+}
+    });
+</script>
 </body>
 </html>
