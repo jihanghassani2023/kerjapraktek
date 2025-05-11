@@ -13,104 +13,90 @@
             font-family: 'Arial', sans-serif;
         }
         body {
-            background-color: #f0f0f0;
+            background-color: #fff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
+        .diagonal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #8c3a3a 50%, #fff 50%);
+            z-index: -1;
+        }
         .header {
-            background-color: #8c3a3a;
-            padding: 20px;
+            padding: 30px 20px 0;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            width: 100%;
         }
         .logo {
             display: flex;
             align-items: center;
+            justify-content: center;
+            flex: 1;
         }
         .logo img {
-            height: 40px;
-            margin-right: 10px;
+            height: 380px;
+            margin-bottom: 0;
         }
-        .logo span {
-            color: white;
-            font-size: 24px;
+        .logo-text {
+            margin-left: 10px;
+            color: #000;
+            font-size: 28px;
             font-weight: bold;
-        }
-        .login-btn {
-            background-color: transparent;
-            color: white;
-            border: 2px solid white;
-            padding: 10px 15px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .login-btn:hover {
-            background-color: white;
-            color: #8c3a3a;
         }
         .main-content {
             flex: 1;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
+            align-items: flex-start;
+            padding: 0 20px 20px;
+            margin-top: -80px;
         }
         .tracking-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 360px;
             background-color: white;
-            border-radius: 10px;
+            border-radius: 20px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-        }
-        .tracking-header {
-            background-color: #8c3a3a;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        .tracking-header img {
-            height: 60px;
-            margin-bottom: 10px;
-        }
-        .tracking-header h2 {
-            font-size: 20px;
-        }
-        .tracking-body {
-            padding: 30px;
-        }
-        .tracking-form {
+            padding: 30px 20px;
             text-align: center;
         }
         .tracking-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
+            margin-bottom: 30px;
+            color: #000;
+            text-transform: uppercase;
         }
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         .input-control {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #f0f0f0;
         }
         .submit-btn {
-            width: 100%;
-            padding: 15px;
+            width: 120px;
+            padding: 12px;
             background-color: #8c3a3a;
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 25px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
+            text-transform: uppercase;
         }
         .submit-btn:hover {
             background-color: #6d2d2d;
@@ -125,9 +111,9 @@
         }
         .result-container {
             width: 100%;
-            max-width: 600px;
+            max-width: 360px;
             background-color: white;
-            border-radius: 10px;
+            border-radius: 20px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
@@ -211,10 +197,11 @@
     </style>
 </head>
 <body>
+    <div class="diagonal-bg"></div>
+
     <div class="header">
         <div class="logo">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><rect width=\'40\' height=\'40\' fill=\'%23ffffff\'/><text x=\'50%\' y=\'50%\' font-size=\'20\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
-            <span>MG TECH</span>
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'380\' height=\'380\' viewBox=\'0 0 60 60\'><rect width=\'60\' height=\'60\' fill=\'%23ffffff\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
         </div>
         <a href="{{ route('login') }}" class="login-btn">LOGIN</a>
     </div>
@@ -222,24 +209,18 @@
     <div class="main-content">
         @if(session('error'))
             <div class="tracking-container">
-                <div class="tracking-header">
-                    <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\' viewBox=\'0 0 60 60\'><rect width=\'60\' height=\'60\' fill=\'%23ffffff\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
-                    <h2>Tracking Perbaikan</h2>
+                <div class="alert">
+                    {{ session('error') }}
                 </div>
-                <div class="tracking-body">
-                    <div class="alert">
-                        {{ session('error') }}
-                    </div>
-                    <div class="tracking-form">
-                        <div class="tracking-title">MASUKKAN NOMOR TELEPON ANDA</div>
-                        <form action="{{ route('tracking.check') }}" method="POST">
-                            @csrf
-                            <div class="input-group">
-                                <input type="text" name="key" class="input-control" placeholder="Masukkan nomor telepon Anda" required>
-                            </div>
-                            <button type="submit" class="submit-btn">CARI PERBAIKAN</button>
-                        </form>
-                    </div>
+                <div class="tracking-form">
+                    <div class="tracking-title">SILAHKAN<br>MASUKAN NOMOR TELEPON</div>
+                    <form action="{{ route('tracking.check') }}" method="POST">
+                        @csrf
+                        <div class="input-group">
+                            <input type="text" name="key" class="input-control" placeholder="Nomor Telepon Anda" required>
+                        </div>
+                        <button type="submit" class="submit-btn">SUBMIT</button>
+                    </form>
                 </div>
             </div>
         @elseif(isset($perbaikanList))
@@ -322,21 +303,15 @@
             </div>
         @else
             <div class="tracking-container">
-                <div class="tracking-header">
-                    <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\' viewBox=\'0 0 60 60\'><rect width=\'60\' height=\'60\' fill=\'%23ffffff\'/><text x=\'50%\' y=\'50%\' font-size=\'30\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
-                    <h2>Tracking Perbaikan</h2>
-                </div>
-                <div class="tracking-body">
-                    <div class="tracking-form">
-                        <div class="tracking-title">MASUKKAN NOMOR TELEPON ANDA</div>
-                        <form action="{{ route('tracking.check') }}" method="POST">
-                            @csrf
-                            <div class="input-group">
-                                <input type="text" name="key" class="input-control" placeholder="Masukkan nomor telepon Anda" required>
-                            </div>
-                            <button type="submit" class="submit-btn">CARI PERBAIKAN</button>
-                        </form>
-                    </div>
+                <div class="tracking-form">
+                    <div class="tracking-title">SILAHKAN<br>MASUKAN NOMOR TELEPON</div>
+                    <form action="{{ route('tracking.check') }}" method="POST">
+                        @csrf
+                        <div class="input-group">
+                            <input type="text" name="key" class="input-control" placeholder="Nomor Telepon Anda" required>
+                        </div>
+                        <button type="submit" class="submit-btn">SUBMIT</button>
+                    </form>
                 </div>
             </div>
         @endif
