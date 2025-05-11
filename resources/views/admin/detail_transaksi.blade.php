@@ -277,12 +277,12 @@
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
-        
+
         <a href="{{ route('admin.transaksi') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali</span>
         </a>
-        
+
         <form method="POST" action="{{ route('logout') }}" style="margin-top: 0;">
             @csrf
             <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
@@ -334,6 +334,12 @@
                     <div class="info-row">
                         <div class="info-label">Masalah</div>
                         <div class="info-value">{{ $transaksi->masalah }}</div>
+                    </div>
+
+
+                    <div class="info-row">
+                        <div class="info-label">Tindakan Perbaikan</div>
+                        <div class="info-value">{{ $transaksi->tindakan_perbaikan }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Harga</div>
@@ -403,7 +409,7 @@
                 document.querySelector('.header').style.display = 'none';
                 document.querySelector('.content-header').style.display = 'none';
             });
-            
+
             window.addEventListener('afterprint', function() {
                 document.querySelector('.sidebar').style.display = 'flex';
                 document.querySelector('.main-content').style.marginLeft = '220px';

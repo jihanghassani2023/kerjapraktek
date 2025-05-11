@@ -107,9 +107,16 @@ class AdminController extends Controller
 
         $request->validate([
             'status' => 'required|in:Menunggu,Proses,Selesai',
+            'tindakan_perbaikan' => 'nullable|string',
         ]);
 
         $perbaikan->status = $request->status;
+
+        // Update tindakan_perbaikan if provided
+        if ($request->has('tindakan_perbaikan')) {
+            $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
+        }
+
         $perbaikan->save();
 
         if ($request->ajax()) {
@@ -119,6 +126,7 @@ class AdminController extends Controller
         return redirect()->route('admin.transaksi.show', $id)
             ->with('success', 'Status berhasil diperbarui');
     }
+
     // Tambahan method untuk pengelolaan pelanggan
     public function pelanggan()
     {
@@ -220,13 +228,14 @@ class AdminController extends Controller
         return view('admin.tambah_perbaikan', compact('user', 'pelanggan', 'teknisi'));
     }
 
-    public function storePerbaikan(Request $request)
+       public function storePerbaikan(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'pelanggan_id' => 'required|exists:pelanggan,id',
             'user_id' => 'required|exists:users,id',
             'nama_barang' => 'required|string|max:255',
             'masalah' => 'required|string',
+            'tindakan_perbaikan' => 'nullable|string',
             'kode_perbaikan' => 'required|string|unique:perbaikan,kode_perbaikan',
             'harga' => 'nullable|numeric',
             'garansi' => 'nullable|string|max:255',
@@ -244,6 +253,7 @@ class AdminController extends Controller
         $perbaikan->user_id = $request->user_id; // Teknisi yang dipilih
         $perbaikan->nama_barang = $request->nama_barang;
         $perbaikan->masalah = $request->masalah;
+        $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
         $perbaikan->kode_perbaikan = $request->kode_perbaikan;
         $perbaikan->harga = $request->harga;
         $perbaikan->garansi = $request->garansi;

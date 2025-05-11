@@ -16,6 +16,7 @@ class Perbaikan extends Model
         'nama_barang',
         'tanggal_perbaikan',
         'masalah',
+        'tindakan_perbaikan',
         'harga',
         'garansi',
         'status',

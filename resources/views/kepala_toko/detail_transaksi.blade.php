@@ -338,6 +338,7 @@
                         <div class="info-label">Masalah</div>
                         <div class="info-value">{{ $transaksi->masalah }}</div>
                     </div>
+
                     <div class="info-row">
                         <div class="info-label">Harga</div>
                         <div class="info-value">Rp. {{ number_format($transaksi->harga, 0, ',', '.') }}</div>

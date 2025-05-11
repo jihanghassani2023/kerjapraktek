@@ -268,6 +268,15 @@
                             <div class="info-value">{{ $perbaikan->masalah }}</div>
                         </div>
 
+                         <div class="info-row">
+                            <div class="info-label">Tindakan Perbaikan</div>
+                            <div class="info-value">{{ $perbaikan->tindakan_perbaikan }}</div>
+                        </div>
+
+
+
+
+
                         <div class="info-row">
                             <div class="info-label">Tanggal Masuk</div>
                             <div class="info-value">{{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y') }}</div>

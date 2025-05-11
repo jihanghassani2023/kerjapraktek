@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nama_barang');
             $table->date('tanggal_perbaikan');
             $table->string('masalah');
+            $table->text('tindakan_perbaikan')->nullable();
             $table->decimal('harga', 15, 2)->nullable();
             $table->string('garansi')->nullable();
             $table->enum('status', ['Menunggu', 'Proses', 'Selesai'])->default('Menunggu');

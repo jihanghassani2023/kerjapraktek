@@ -348,6 +348,14 @@
                 </div>
 
                 <div class="form-group">
+    <label for="tindakan_perbaikan">Tindakan Perbaikan (opsional)</label>
+    <textarea id="tindakan_perbaikan" name="tindakan_perbaikan" class="form-control @error('tindakan_perbaikan') is-invalid @enderror">{{ old('tindakan_perbaikan') }}</textarea>
+    @error('tindakan_perbaikan')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
+                <div class="form-group">
                     <label for="harga">Harga (opsional)</label>
                     <input type="number" id="harga" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ old('harga') }}">
                     @error('harga')
