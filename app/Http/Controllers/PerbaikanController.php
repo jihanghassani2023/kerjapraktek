@@ -112,52 +112,52 @@ class PerbaikanController extends Controller
      * Update the status of a repair.
      */
     public function updateStatus(Request $request, $id)
-    {
-        $perbaikan = Perbaikan::findOrFail($id);
+{
+    $perbaikan = Perbaikan::findOrFail($id);
 
-        // Make sure the repair belongs to the logged-in user or user is admin
-        if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses'], 403);
-            }
-            return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
-        }
-
-        // Validate status
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|in:Menunggu,Proses,Selesai',
-            'tindakan_perbaikan' => 'nullable|string', // Added validation for the new field when updating status
-        ]);
-
-        if ($validator->fails()) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Status tidak valid'], 400);
-            }
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        // Update status
-        $oldStatus = $perbaikan->status;
-        $perbaikan->status = $request->status;
-
-        // Update tindakan_perbaikan if provided
-        if ($request->has('tindakan_perbaikan')) {
-            $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
-        }
-
-        $perbaikan->save();
-
+    // Make sure the repair belongs to the logged-in user or user is admin
+    if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
         if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'status' => $perbaikan->status,
-                'message' => "Status berhasil diperbarui dari {$oldStatus} menjadi {$perbaikan->status}",
-                'id' => $perbaikan->id
-            ]);
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses'], 403);
         }
-
-        return redirect()->route('teknisi.progress')->with('success', 'Status berhasil diperbarui');
+        return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
     }
+
+    // Validate status
+    $validator = Validator::make($request->all(), [
+        'status' => 'required|in:Menunggu,Proses,Selesai',
+        'tindakan_perbaikan' => 'nullable|string',
+    ]);
+
+    if ($validator->fails()) {
+        if ($request->ajax()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+        }
+        return redirect()->back()->withErrors($validator)->withInput();
+    }
+
+    // Update status
+    $oldStatus = $perbaikan->status;
+    $perbaikan->status = $request->status;
+
+    // Update tindakan_perbaikan if provided
+    if ($request->has('tindakan_perbaikan')) {
+        $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
+    }
+
+    $perbaikan->save();
+
+    if ($request->ajax()) {
+        return response()->json([
+            'success' => true,
+            'status' => $perbaikan->status,
+            'message' => "Status berhasil diperbarui dari {$oldStatus} menjadi {$perbaikan->status}",
+            'id' => $perbaikan->id
+        ]);
+    }
+
+    return redirect()->route('teknisi.progress')->with('success', 'Status berhasil diperbarui');
+}
 
     /**
      * Show the progress view.

@@ -38,9 +38,12 @@ Route::middleware(['auth'])->group(function () {
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+        // Add this new route for admin to update repair status
         Route::put('/perbaikan/{id}/status', [AdminController::class, 'updateStatus'])->name('perbaikan.update-status');
-        // Tambahkan di bagian routes admin
+
         Route::get('/pelanggan/{id}/edit-pelanggan', [AdminController::class, 'editPelanggan'])->name('perbaikan.edit-pelanggan');
+
         // Transaksi admin routes
         Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi');
         Route::get('/transaksi/{id}', [AdminController::class, 'showTransaksi'])->name('transaksi.show');
@@ -95,6 +98,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/perbaikan/{id}/confirm-status/{status}', [PerbaikanController::class, 'confirmStatus'])->name('perbaikan.confirm-status');
     });
 
-    // FIX: Unified single route for status updates
+    // FIX: Unified single route for status updates - this lets both admin and teknisi controllers handle status updates
     Route::put('/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
 });

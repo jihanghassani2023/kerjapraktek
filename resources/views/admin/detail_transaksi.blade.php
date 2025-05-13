@@ -1,9 +1,9 @@
-<!-- resources/views/admin/detail_transaksi.blade.php -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Detail Transaksi - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -240,6 +240,67 @@
         .btn-print:hover {
             background-color: #5a6268;
         }
+        /* Status actions styles */
+        .status-actions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .status-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .status-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-status {
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-menunggu {
+            background-color: #ffeaea;
+            color: #ff6b6b;
+        }
+        .btn-menunggu:hover {
+            background-color: #ffd0d0;
+        }
+        .btn-proses {
+            background-color: #fff4e0;
+            color: #ffaa00;
+        }
+        .btn-proses:hover {
+            background-color: #ffe6c0;
+        }
+        .btn-selesai {
+            background-color: #e7f9e7;
+            color: #28a745;
+        }
+        .btn-selesai:hover {
+            background-color: #d0f0d0;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -260,6 +321,9 @@
             .info-label {
                 width: 100%;
                 margin-bottom: 5px;
+            }
+            .status-buttons {
+                flex-direction: column;
             }
         }
     </style>
@@ -306,6 +370,20 @@
             </div>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <div id="statusAlert" class="alert alert-success" style="display: none;"></div>
+
         <div class="content-wrapper">
             <div class="content-header">
                 <h2 class="content-title">Transaksi #{{ $transaksi->kode_perbaikan }}</h2>
@@ -335,8 +413,6 @@
                         <div class="info-label">Masalah</div>
                         <div class="info-value">{{ $transaksi->masalah }}</div>
                     </div>
-
-
                     <div class="info-row">
                         <div class="info-label">Tindakan Perbaikan</div>
                         <div class="info-value">{{ $transaksi->tindakan_perbaikan }}</div>
@@ -352,9 +428,25 @@
                     <div class="info-row">
                         <div class="info-label">Status</div>
                         <div class="info-value">
-                            <span class="status-badge status-{{ strtolower($transaksi->status) }}">
+                            <span id="statusBadge" class="status-badge status-{{ strtolower($transaksi->status) }}">
                                 {{ $transaksi->status }}
                             </span>
+                        </div>
+                    </div>
+
+                    <!-- Status update section - Very important -->
+                    <div class="status-actions">
+                        <h4 class="status-title">Ubah Status Perbaikan</h4>
+                        <div class="status-buttons">
+                            <button type="button" class="btn-status btn-menunggu" onclick="updateStatus('Menunggu')">
+                                Menunggu
+                            </button>
+                            <button type="button" class="btn-status btn-proses" onclick="updateStatus('Proses')">
+                                Proses
+                            </button>
+                            <button type="button" class="btn-status btn-selesai" onclick="updateStatus('Selesai')">
+                                Selesai
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -367,15 +459,15 @@
                 <div class="card-body">
                     <div class="info-row">
                         <div class="info-label">Nama Pelanggan</div>
-                        <div class="info-value">{{ $transaksi->nama_pelanggan }}</div>
+                        <div class="info-value">{{ $transaksi->pelanggan->nama_pelanggan }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Nomor Telepon</div>
-                        <div class="info-value">{{ $transaksi->nomor_telp }}</div>
+                        <div class="info-value">{{ $transaksi->pelanggan->nomor_telp }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Email</div>
-                        <div class="info-value">{{ $transaksi->email ?: '-' }}</div>
+                        <div class="info-value">{{ $transaksi->pelanggan->email ?: '-' }}</div>
                     </div>
                 </div>
             </div>
@@ -408,6 +500,7 @@
                 document.querySelector('.main-content').style.marginLeft = '0';
                 document.querySelector('.header').style.display = 'none';
                 document.querySelector('.content-header').style.display = 'none';
+                document.querySelector('.status-actions').style.display = 'none';
             });
 
             window.addEventListener('afterprint', function() {
@@ -415,8 +508,59 @@
                 document.querySelector('.main-content').style.marginLeft = '220px';
                 document.querySelector('.header').style.display = 'flex';
                 document.querySelector('.content-header').style.display = 'flex';
+                document.querySelector('.status-actions').style.display = 'block';
             });
         });
+
+        function updateStatus(status) {
+            // Get CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Confirm before updating
+            if (!confirm('Apakah Anda yakin ingin mengubah status menjadi ' + status + '?')) {
+                return;
+            }
+
+            // Send AJAX request
+            fetch('/admin/perbaikan/{{ $transaksi->id }}/status', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const statusAlert = document.getElementById('statusAlert');
+                    statusAlert.textContent = 'Status berhasil diperbarui menjadi ' + status;
+                    statusAlert.style.display = 'block';
+
+                    // Update status badge
+                    const statusBadge = document.getElementById('statusBadge');
+                    statusBadge.className = 'status-badge status-' + status.toLowerCase();
+                    statusBadge.textContent = status;
+
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        statusAlert.style.display = 'none';
+                    }, 3000);
+                } else {
+                    alert('Gagal mengubah status: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error updating status:', error);
+                alert('Terjadi kesalahan. Silakan coba lagi.');
+            });
+        }
     </script>
 </body>
 </html>

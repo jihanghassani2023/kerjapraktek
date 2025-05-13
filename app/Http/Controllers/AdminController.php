@@ -105,11 +105,19 @@ class AdminController extends Controller
     {
         $perbaikan = Perbaikan::findOrFail($id);
 
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'status' => 'required|in:Menunggu,Proses,Selesai',
             'tindakan_perbaikan' => 'nullable|string',
         ]);
 
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+            }
+            return redirect()->back()->withErrors($validator);
+        }
+
+        $oldStatus = $perbaikan->status;
         $perbaikan->status = $request->status;
 
         // Update tindakan_perbaikan if provided
@@ -120,7 +128,11 @@ class AdminController extends Controller
         $perbaikan->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true, 'status' => $perbaikan->status]);
+            return response()->json([
+                'success' => true,
+                'status' => $perbaikan->status,
+                'message' => "Status berhasil diperbarui dari {$oldStatus} menjadi {$perbaikan->status}"
+            ]);
         }
 
         return redirect()->route('admin.transaksi.show', $id)
@@ -228,7 +240,7 @@ class AdminController extends Controller
         return view('admin.tambah_perbaikan', compact('user', 'pelanggan', 'teknisi'));
     }
 
-       public function storePerbaikan(Request $request)
+    public function storePerbaikan(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'pelanggan_id' => 'required|exists:pelanggan,id',
