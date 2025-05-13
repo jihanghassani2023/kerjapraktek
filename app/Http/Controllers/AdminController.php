@@ -154,12 +154,18 @@ class AdminController extends Controller
         return view('admin.tambah_pelanggan', compact('user'));
     }
 
-    public function storePelanggan(Request $request)
+     public function storePelanggan(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'nama_pelanggan' => 'required|string|max:255',
-            'nomor_telp' => 'required|string|max:15',
+            'nomor_telp' => 'required|string|max:13|regex:/^[0-9]+$/', // Only digits, max 13
             'email' => 'nullable|email|max:255',
+        ], [
+            'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
+            'nomor_telp.required' => 'Nomor telepon wajib diisi.',
+            'nomor_telp.max' => 'Nomor telepon maksimal 13 digit.',
+            'nomor_telp.regex' => 'Nomor telepon hanya boleh berisi angka.',
+            'email.email' => 'Format email tidak valid.',
         ]);
 
         if ($validator->fails()) {
@@ -192,8 +198,14 @@ class AdminController extends Controller
 
         $validator = Validator::make($request->all(), [
             'nama_pelanggan' => 'required|string|max:255',
-            'nomor_telp' => 'required|string|max:15',
+            'nomor_telp' => 'required|string|max:13|regex:/^[0-9]+$/', // Only digits, max 13
             'email' => 'nullable|email|max:255',
+        ], [
+            'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
+            'nomor_telp.required' => 'Nomor telepon wajib diisi.',
+            'nomor_telp.max' => 'Nomor telepon maksimal 13 digit.',
+            'nomor_telp.regex' => 'Nomor telepon hanya boleh berisi angka.',
+            'email.email' => 'Format email tidak valid.',
         ]);
 
         if ($validator->fails()) {
@@ -211,6 +223,7 @@ class AdminController extends Controller
         return redirect()->route('admin.pelanggan')
             ->with('success', 'Data pelanggan berhasil diperbarui');
     }
+
 
     public function destroyPelanggan($id)
     {
@@ -249,8 +262,16 @@ class AdminController extends Controller
             'masalah' => 'required|string',
             'tindakan_perbaikan' => 'nullable|string',
             'kode_perbaikan' => 'required|string|unique:perbaikan,kode_perbaikan',
-            'harga' => 'nullable|numeric',
+            'harga' => 'nullable|numeric', // Ensure price is numeric
             'garansi' => 'nullable|string|max:255',
+        ], [
+            'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
+            'user_id.required' => 'Teknisi wajib dipilih.',
+            'nama_barang.required' => 'Nama barang wajib diisi.',
+            'masalah.required' => 'Masalah wajib diisi.',
+            'kode_perbaikan.required' => 'Kode perbaikan wajib diisi.',
+            'kode_perbaikan.unique' => 'Kode perbaikan sudah digunakan.',
+            'harga.numeric' => 'Harga harus berupa angka.',
         ]);
 
         if ($validator->fails()) {
@@ -259,10 +280,10 @@ class AdminController extends Controller
                 ->withInput();
         }
 
-        // Buat data perbaikan baru
+        // Create new repair data
         $perbaikan = new Perbaikan();
         $perbaikan->pelanggan_id = $request->pelanggan_id;
-        $perbaikan->user_id = $request->user_id; // Teknisi yang dipilih
+        $perbaikan->user_id = $request->user_id; // Selected technician
         $perbaikan->nama_barang = $request->nama_barang;
         $perbaikan->masalah = $request->masalah;
         $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
@@ -276,7 +297,6 @@ class AdminController extends Controller
        return redirect()->route('admin.transaksi')
         ->with('success', 'Perbaikan berhasil disimpan');
     }
-
     public function generateKey()
     {
         // Generate a random number between 100000 and 999999

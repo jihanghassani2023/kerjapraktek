@@ -317,3 +317,110 @@
     </div>
 </body>
 </html>
+<script>
+    // JavaScript untuk validasi frontend
+
+    // Menunggu hingga DOM sepenuhnya dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        // Temukan form dan input yang relevan
+        const form = document.querySelector('form');
+        const nomorTelpInput = document.getElementById('nomor_telp');
+        const hargaInput = document.getElementById('harga'); // Mungkin tidak ada di semua form
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+
+                // Validasi nomor telepon - hanya angka dan maksimal 13 digit
+                if (nomorTelpInput) {
+                    const phoneValue = nomorTelpInput.value.trim();
+                    const phoneRegex = /^[0-9]{1,13}$/;
+
+                    if (!phoneRegex.test(phoneValue)) {
+                        isValid = false;
+                        // Buat atau perbarui pesan kesalahan
+                        let errorDiv = nomorTelpInput.nextElementSibling;
+                        if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+                            errorDiv = document.createElement('div');
+                            errorDiv.className = 'invalid-feedback';
+                            nomorTelpInput.parentNode.insertBefore(errorDiv, nomorTelpInput.nextSibling);
+                        }
+
+                        errorDiv.textContent = phoneValue.length > 13 ?
+                            'Nomor telepon maksimal 13 digit.' :
+                            'Nomor telepon hanya boleh berisi angka.';
+
+                        errorDiv.style.display = 'block';
+                        nomorTelpInput.classList.add('is-invalid');
+                    } else {
+                        // Hapus kesalahan jika valid
+                        nomorTelpInput.classList.remove('is-invalid');
+                        const errorDiv = nomorTelpInput.nextElementSibling;
+                        if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                            errorDiv.style.display = 'none';
+                        }
+                    }
+                }
+
+                // Validasi input harga jika ada - hanya angka
+                if (hargaInput) {
+                    const hargaValue = hargaInput.value.trim();
+
+                    if (hargaValue !== '' && !/^\d+(\.\d{1,2})?$/.test(hargaValue)) {
+                        isValid = false;
+                        // Buat atau perbarui pesan kesalahan
+                        let errorDiv = hargaInput.nextElementSibling;
+                        if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+                            errorDiv = document.createElement('div');
+                            errorDiv.className = 'invalid-feedback';
+                            hargaInput.parentNode.insertBefore(errorDiv, hargaInput.nextSibling);
+                        }
+
+                        errorDiv.textContent = 'Harga harus berupa angka.';
+                        errorDiv.style.display = 'block';
+                        hargaInput.classList.add('is-invalid');
+                    } else {
+                        // Hapus kesalahan jika valid
+                        hargaInput.classList.remove('is-invalid');
+                        const errorDiv = hargaInput.nextElementSibling;
+                        if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                            errorDiv.style.display = 'none';
+                        }
+                    }
+                }
+
+                // Mencegah pengiriman form jika validasi gagal
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Validasi real-time untuk input nomor telepon
+        if (nomorTelpInput) {
+            nomorTelpInput.addEventListener('input', function() {
+                // Hapus karakter non-numerik saat diketik
+                this.value = this.value.replace(/[^0-9]/g, '');
+
+                // Batasi hingga 13 digit
+                if (this.value.length > 13) {
+                    this.value = this.value.slice(0, 13);
+                }
+            });
+        }
+
+        // Validasi real-time untuk input harga
+        if (hargaInput) {
+            hargaInput.addEventListener('input', function() {
+                // Hanya izinkan angka dan titik desimal
+                this.value = this.value.replace(/[^0-9.]/g, '');
+
+                // Pastikan hanya ada satu titik desimal
+                const parts = this.value.split('.');
+                if (parts.length > 2) {
+                    this.value = parts[0] + '.' + parts.slice(1).join('');
+                }
+            });
+        }
+    });
+</script>

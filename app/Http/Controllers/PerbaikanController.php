@@ -91,6 +91,12 @@ class PerbaikanController extends Controller
             'masalah' => 'required|string',
             'tindakan_perbaikan' => 'nullable|string', // Added validation for the new field
             'status' => 'required|in:Menunggu,Proses,Selesai',
+            'harga' => 'nullable|numeric', // Ensure price is numeric
+        ], [
+            'masalah.required' => 'Masalah wajib diisi.',
+            'status.required' => 'Status wajib diisi.',
+            'status.in' => 'Status tidak valid.',
+            'harga.numeric' => 'Harga harus berupa angka.',
         ]);
 
         if ($validator->fails()) {
@@ -103,61 +109,76 @@ class PerbaikanController extends Controller
         $perbaikan->masalah = $request->masalah;
         $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan; // Save the new field
         $perbaikan->status = $request->status;
+        if ($request->has('harga')) {
+            $perbaikan->harga = $request->harga;
+        }
         $perbaikan->save();
 
         return redirect()->route('teknisi.progress')->with('success', 'Data perbaikan berhasil diperbarui');
     }
 
+
     /**
      * Update the status of a repair.
      */
-    public function updateStatus(Request $request, $id)
-{
-    $perbaikan = Perbaikan::findOrFail($id);
 
-    // Make sure the repair belongs to the logged-in user or user is admin
-    if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
-        if ($request->ajax()) {
-            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses'], 403);
+   public function updateStatus(Request $request, $id)
+    {
+        $perbaikan = Perbaikan::findOrFail($id);
+
+        // Make sure the repair belongs to the logged-in user or user is admin
+        if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses'], 403);
+            }
+            return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
         }
-        return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
-    }
 
-    // Validate status
-    $validator = Validator::make($request->all(), [
-        'status' => 'required|in:Menunggu,Proses,Selesai',
-        'tindakan_perbaikan' => 'nullable|string',
-    ]);
-
-    if ($validator->fails()) {
-        if ($request->ajax()) {
-            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
-        }
-        return redirect()->back()->withErrors($validator)->withInput();
-    }
-
-    // Update status
-    $oldStatus = $perbaikan->status;
-    $perbaikan->status = $request->status;
-
-    // Update tindakan_perbaikan if provided
-    if ($request->has('tindakan_perbaikan')) {
-        $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
-    }
-
-    $perbaikan->save();
-
-    if ($request->ajax()) {
-        return response()->json([
-            'success' => true,
-            'status' => $perbaikan->status,
-            'message' => "Status berhasil diperbarui dari {$oldStatus} menjadi {$perbaikan->status}",
-            'id' => $perbaikan->id
+        // Validate status
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:Menunggu,Proses,Selesai',
+            'tindakan_perbaikan' => 'nullable|string',
+            'harga' => 'nullable|numeric', // Ensure price is numeric
+        ], [
+            'status.required' => 'Status wajib diisi.',
+            'status.in' => 'Status tidak valid.',
+            'harga.numeric' => 'Harga harus berupa angka.',
         ]);
-    }
 
-    return redirect()->route('teknisi.progress')->with('success', 'Status berhasil diperbarui');
-}
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // Update status
+        $oldStatus = $perbaikan->status;
+        $perbaikan->status = $request->status;
+
+        // Update tindakan_perbaikan if provided
+        if ($request->has('tindakan_perbaikan')) {
+            $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
+        }
+
+        // Update harga if provided
+        if ($request->has('harga')) {
+            $perbaikan->harga = $request->harga;
+        }
+
+        $perbaikan->save();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'status' => $perbaikan->status,
+                'message' => "Status berhasil diperbarui dari {$oldStatus} menjadi {$perbaikan->status}",
+                'id' => $perbaikan->id
+            ]);
+        }
+
+        return redirect()->route('teknisi.progress')->with('success', 'Status berhasil diperbarui');
+    }
 
     /**
      * Show the progress view.

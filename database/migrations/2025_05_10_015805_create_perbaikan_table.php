@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('tanggal_perbaikan');
             $table->string('masalah');
             $table->text('tindakan_perbaikan')->nullable();
-            $table->decimal('harga', 15, 2)->nullable();
+            $table->decimal('harga', 15, 2)->nullable(); // Automatically ensures numeric values
             $table->string('garansi')->nullable();
             $table->enum('status', ['Menunggu', 'Proses', 'Selesai'])->default('Menunggu');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');

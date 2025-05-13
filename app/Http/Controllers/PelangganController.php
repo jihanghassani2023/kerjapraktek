@@ -42,8 +42,14 @@ class PelangganController extends Controller
         // Validate form input
         $validator = Validator::make($request->all(), [
             'nama_pelanggan' => 'required|string|max:255',
-            'nomor_telp' => 'required|string|max:15',
+            'nomor_telp' => 'required|string|max:13|regex:/^[0-9]+$/', // Only digits, max 13
             'email' => 'nullable|email|max:255',
+        ], [
+            'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
+            'nomor_telp.required' => 'Nomor telepon wajib diisi.',
+            'nomor_telp.max' => 'Nomor telepon maksimal 13 digit.',
+            'nomor_telp.regex' => 'Nomor telepon hanya boleh berisi angka.',
+            'email.email' => 'Format email tidak valid.',
         ]);
 
         if ($validator->fails()) {
@@ -122,8 +128,14 @@ class PelangganController extends Controller
         // Validate form input
         $validator = Validator::make($request->all(), [
             'nama_pelanggan' => 'required|string|max:255',
-            'nomor_telp' => 'required|string|max:15',
+            'nomor_telp' => 'required|string|max:13|regex:/^[0-9]+$/', // Only digits, max 13
             'email' => 'nullable|email|max:255',
+        ], [
+            'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
+            'nomor_telp.required' => 'Nomor telepon wajib diisi.',
+            'nomor_telp.max' => 'Nomor telepon maksimal 13 digit.',
+            'nomor_telp.regex' => 'Nomor telepon hanya boleh berisi angka.',
+            'email.email' => 'Format email tidak valid.',
         ]);
 
         if ($validator->fails()) {
@@ -140,5 +152,4 @@ class PelangganController extends Controller
 
         return redirect()->route('pelanggan.index')
             ->with('success', 'Data pelanggan berhasil diperbarui');
-    }
-}
+    }}
