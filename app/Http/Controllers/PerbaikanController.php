@@ -88,16 +88,20 @@ class PerbaikanController extends Controller
 
         // Validate form input
         $validator = Validator::make($request->all(), [
-            'masalah' => 'required|string',
-            'tindakan_perbaikan' => 'nullable|string', // Added validation for the new field
-            'status' => 'required|in:Menunggu,Proses,Selesai',
-            'harga' => 'nullable|numeric', // Ensure price is numeric
-        ], [
-            'masalah.required' => 'Masalah wajib diisi.',
-            'status.required' => 'Status wajib diisi.',
-            'status.in' => 'Status tidak valid.',
-            'harga.numeric' => 'Harga harus berupa angka.',
-        ]);
+    'masalah' => 'required|string',
+    'tindakan_perbaikan' => 'required|string', // Changed from nullable to required
+    'status' => 'required|in:Menunggu,Proses,Selesai',
+    'harga' => 'required|numeric', // Changed from nullable to required
+    'garansi' => 'required|string', // Changed from nullable to required
+], [
+    'masalah.required' => 'Masalah wajib diisi.',
+    'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.', // Added message
+    'status.required' => 'Status wajib diisi.',
+    'status.in' => 'Status tidak valid.',
+    'harga.required' => 'Harga wajib diisi.', // Added message
+    'harga.numeric' => 'Harga harus berupa angka.',
+    'garansi.required' => 'Garansi wajib diisi.', // Added message
+]);
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -135,15 +139,17 @@ class PerbaikanController extends Controller
         }
 
         // Validate status
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|in:Menunggu,Proses,Selesai',
-            'tindakan_perbaikan' => 'nullable|string',
-            'harga' => 'nullable|numeric', // Ensure price is numeric
-        ], [
-            'status.required' => 'Status wajib diisi.',
-            'status.in' => 'Status tidak valid.',
-            'harga.numeric' => 'Harga harus berupa angka.',
-        ]);
+       $validator = Validator::make($request->all(), [
+    'status' => 'required|in:Menunggu,Proses,Selesai',
+    'tindakan_perbaikan' => 'required|string', // Changed from nullable to required
+    'harga' => 'required|numeric', // Changed from nullable to required
+], [
+    'status.required' => 'Status wajib diisi.',
+    'status.in' => 'Status tidak valid.',
+    'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.', // Added message
+    'harga.required' => 'Harga wajib diisi.', // Added message
+    'harga.numeric' => 'Harga harus berupa angka.',
+]);
 
         if ($validator->fails()) {
             if ($request->ajax()) {

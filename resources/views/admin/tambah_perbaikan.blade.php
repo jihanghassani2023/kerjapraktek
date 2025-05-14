@@ -348,28 +348,28 @@
                 </div>
 
                 <div class="form-group">
-    <label for="tindakan_perbaikan">Tindakan Perbaikan (opsional)</label>
-    <textarea id="tindakan_perbaikan" name="tindakan_perbaikan" class="form-control @error('tindakan_perbaikan') is-invalid @enderror">{{ old('tindakan_perbaikan') }}</textarea>
+    <label for="tindakan_perbaikan">Tindakan Perbaikan</label>
+    <textarea id="tindakan_perbaikan" name="tindakan_perbaikan" class="form-control @error('tindakan_perbaikan') is-invalid @enderror" required>{{ old('tindakan_perbaikan') }}</textarea>
     @error('tindakan_perbaikan')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-                <div class="form-group">
-                    <label for="harga">Harga (opsional)</label>
-                    <input type="number" id="harga" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ old('harga') }}">
-                    @error('harga')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+<div class="form-group">
+    <label for="harga">Harga</label>
+    <input type="number" id="harga" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ old('harga') }}" required>
+    @error('harga')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
 
-                <div class="form-group">
-                    <label for="garansi">Garansi (opsional)</label>
-                    <input type="text" id="garansi" name="garansi" class="form-control @error('garansi') is-invalid @enderror" value="{{ old('garansi') ?? '1 Tahun' }}">
-                    @error('garansi')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+<div class="form-group">
+    <label for="garansi">Garansi</label>
+    <input type="text" id="garansi" name="garansi" class="form-control @error('garansi') is-invalid @enderror" value="{{ old('garansi') ?? '1 Tahun' }}" required>
+    @error('garansi')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
 
                 <div style="text-align: right;">
                     <button type="submit" id="submitBtn" class="btn btn-primary">

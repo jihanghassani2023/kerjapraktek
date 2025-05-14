@@ -102,7 +102,7 @@
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;align-items: center;
+            align-items: center;
             padding-bottom: 20px;
             border-bottom: 1px solid #e3e3e3;
         }
@@ -262,6 +262,11 @@
             color: #28a745;
             border: 1px solid #d0f0d0;
         }
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -298,7 +303,7 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">EDIT PERBAIKAN <span>TEKNISI</span></h1>
+            <h1 class="page-title">Edit Perbaikan <span>TEKNISI</span></h1>
             <div class="user-info">
                 <div class="user-name">
                     <div>{{ $user->name }}</div>
@@ -360,16 +365,46 @@
 
                 <div class="form-group">
                     <label for="masalah">Keterangan Masalah</label>
-                    <textarea id="masalah" name="masalah" class="form-control" required>{{ old('masalah', $perbaikan->masalah) }}</textarea>
+                    <textarea id="masalah" name="masalah" class="form-control @error('masalah') is-invalid @enderror" required>{{ old('masalah', $perbaikan->masalah) }}</textarea>
+                    @error('masalah')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="tindakan_perbaikan">Tindakan Perbaikan</label>
+                    <textarea id="tindakan_perbaikan" name="tindakan_perbaikan" class="form-control @error('tindakan_perbaikan') is-invalid @enderror" required>{{ old('tindakan_perbaikan', $perbaikan->tindakan_perbaikan) }}</textarea>
+                    @error('tindakan_perbaikan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="form-group">
                     <label for="status">Status Perbaikan</label>
-                    <select id="status" name="status" class="form-control status-select" required>
+                    <select id="status" name="status" class="form-control status-select @error('status') is-invalid @enderror" required>
                         <option value="Menunggu" {{ old('status', $perbaikan->status) == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
                         <option value="Proses" {{ old('status', $perbaikan->status) == 'Proses' ? 'selected' : '' }}>Proses</option>
                         <option value="Selesai" {{ old('status', $perbaikan->status) == 'Selesai' ? 'selected' : '' }}>Selesai</option>
                     </select>
+                    @error('status')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="harga">Harga</label>
+                    <input type="number" id="harga" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ old('harga', $perbaikan->harga) }}" required>
+                    @error('harga')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="garansi">Garansi</label>
+                    <input type="text" id="garansi" name="garansi" class="form-control @error('garansi') is-invalid @enderror" value="{{ old('garansi', $perbaikan->garansi) }}" required>
+                    @error('garansi')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="form-footer">
@@ -383,5 +418,19 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // JavaScript for validation and interaction
+        document.addEventListener('DOMContentLoaded', function() {
+            // Harga field validation - numbers only
+            const hargaInput = document.getElementById('harga');
+            if (hargaInput) {
+                hargaInput.addEventListener('input', function() {
+                    // Remove non-numeric characters
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

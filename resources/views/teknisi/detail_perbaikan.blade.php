@@ -419,6 +419,10 @@
                         <div class="info-value">{{ $perbaikan->masalah }}</div>
                     </div>
                     <div class="info-row">
+                        <div class="info-label">Tindakan Perbaikan</div>
+                        <div class="info-value">{{ $perbaikan->tindakan_perbaikan }}</div>
+                    </div>
+                    <div class="info-row">
                         <div class="info-label">Harga</div>
                         <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}</div>
                     </div>

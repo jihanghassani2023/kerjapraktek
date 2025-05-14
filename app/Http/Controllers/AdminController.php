@@ -256,23 +256,26 @@ class AdminController extends Controller
     public function storePerbaikan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'pelanggan_id' => 'required|exists:pelanggan,id',
-            'user_id' => 'required|exists:users,id',
-            'nama_barang' => 'required|string|max:255',
-            'masalah' => 'required|string',
-            'tindakan_perbaikan' => 'nullable|string',
-            'kode_perbaikan' => 'required|string|unique:perbaikan,kode_perbaikan',
-            'harga' => 'nullable|numeric', // Ensure price is numeric
-            'garansi' => 'nullable|string|max:255',
-        ], [
-            'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
-            'user_id.required' => 'Teknisi wajib dipilih.',
-            'nama_barang.required' => 'Nama barang wajib diisi.',
-            'masalah.required' => 'Masalah wajib diisi.',
-            'kode_perbaikan.required' => 'Kode perbaikan wajib diisi.',
-            'kode_perbaikan.unique' => 'Kode perbaikan sudah digunakan.',
-            'harga.numeric' => 'Harga harus berupa angka.',
-        ]);
+    'pelanggan_id' => 'required|exists:pelanggan,id',
+    'user_id' => 'required|exists:users,id',
+    'nama_barang' => 'required|string|max:255',
+    'masalah' => 'required|string',
+    'tindakan_perbaikan' => 'required|string', // Changed from nullable to required
+    'kode_perbaikan' => 'required|string|unique:perbaikan,kode_perbaikan',
+    'harga' => 'required|numeric', // Changed from nullable to required
+    'garansi' => 'required|string|max:255', // Changed from nullable to required
+], [
+    'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
+    'user_id.required' => 'Teknisi wajib dipilih.',
+    'nama_barang.required' => 'Nama barang wajib diisi.',
+    'masalah.required' => 'Masalah wajib diisi.',
+    'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.', // Added message
+    'kode_perbaikan.required' => 'Kode perbaikan wajib diisi.',
+    'kode_perbaikan.unique' => 'Kode perbaikan sudah digunakan.',
+    'harga.required' => 'Harga wajib diisi.', // Added message
+    'harga.numeric' => 'Harga harus berupa angka.',
+    'garansi.required' => 'Garansi wajib diisi.', // Added message
+]);
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -282,18 +285,17 @@ class AdminController extends Controller
 
         // Create new repair data
         $perbaikan = new Perbaikan();
-        $perbaikan->pelanggan_id = $request->pelanggan_id;
-        $perbaikan->user_id = $request->user_id; // Selected technician
-        $perbaikan->nama_barang = $request->nama_barang;
-        $perbaikan->masalah = $request->masalah;
-        $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
-        $perbaikan->kode_perbaikan = $request->kode_perbaikan;
-        $perbaikan->harga = $request->harga;
-        $perbaikan->garansi = $request->garansi;
-        $perbaikan->tanggal_perbaikan = date('Y-m-d');
-        $perbaikan->status = 'Menunggu';
-        $perbaikan->save();
-
+$perbaikan->pelanggan_id = $request->pelanggan_id;
+$perbaikan->user_id = $request->user_id;
+$perbaikan->nama_barang = $request->nama_barang;
+$perbaikan->masalah = $request->masalah;
+$perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
+$perbaikan->kode_perbaikan = $request->kode_perbaikan;
+$perbaikan->harga = $request->harga;
+$perbaikan->garansi = $request->garansi;
+$perbaikan->tanggal_perbaikan = date('Y-m-d');
+$perbaikan->status = 'Menunggu';
+$perbaikan->save();
        return redirect()->route('admin.transaksi')
         ->with('success', 'Perbaikan berhasil disimpan');
     }
