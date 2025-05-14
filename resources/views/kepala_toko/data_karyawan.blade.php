@@ -339,7 +339,7 @@ table td:last-child {
         <tr onclick="window.location='{{ route('karyawan.show', $k->id) }}';" style="cursor: pointer;">
             <td>{{ $index + 1 }}</td>
             <td>{{ $k->id_karyawan }}</td>
-            <td>{{ $k->nama_karyawan }}</td>
+            <td>{{ $k->name }}</td>
             <td>{{ $k->alamat }}</td>
             <td>{{ $k->jabatan }}</td>
             <td class="action-buttons" onclick="event.stopPropagation();" style="text-align: center;"> <!-- Added text-align: center -->

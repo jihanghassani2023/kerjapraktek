@@ -398,7 +398,7 @@
                     </div>
                     <div class="data-row">
                         <div class="data-label">Nama Karyawan</div>
-                        <div class="data-value">{{ $karyawan->nama_karyawan }}</div>
+                        <div class="data-value">{{ $karyawan->name }}</div>
                     </div>
                     <div class="data-row">
                         <div class="data-label">Alamat</div>

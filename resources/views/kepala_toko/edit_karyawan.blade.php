@@ -290,10 +290,10 @@
                     <input type="text" class="form-control" id="id_karyawan" name="id_karyawan" value="{{ $karyawan->id_karyawan }}" readonly>
                 </div>
 
-                <div class="form-group">
-                    <label for="nama_karyawan">Nama Karyawan</label>
-                    <input type="text" class="form-control @error('nama_karyawan') is-invalid @enderror" id="nama_karyawan" name="nama_karyawan" value="{{ old('nama_karyawan', $karyawan->nama_karyawan) }}" required>
-                    @error('nama_karyawan')
+               <div class="form-group">
+                    <label for="name">Nama Karyawan</label>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $karyawan->name) }}" required>
+                    @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

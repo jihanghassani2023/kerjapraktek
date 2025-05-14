@@ -153,9 +153,10 @@ class TransaksiController extends Controller
     {
         $user = Auth::user();
 
-        $karyawan = Karyawan::orderBy('created_at', 'desc')
-            ->take(3)
-            ->get();
+         $karyawan = User::whereIn('role', ['admin', 'teknisi', 'kepala teknisi'])
+        ->orderBy('created_at', 'desc')
+        ->take(3)
+        ->get();
 
         $currentMonth = date('m');
         $currentYear = date('Y');
@@ -174,7 +175,7 @@ class TransaksiController extends Controller
         }
 
         // Change to only count Teknisi and Kepala Teknisi
-        $teknisiCount = Karyawan::whereIn('jabatan', ['Teknisi', 'Kepala Teknisi'])->count();
+       $teknisiCount = User::where('role', 'teknisi', 'kepala teknisi')->count();
 
         $latestTransaksi = Perbaikan::with('user')
             ->where('status', 'Selesai')
