@@ -174,14 +174,45 @@
             font-size: 12px;
             font-weight: bold;
         }
-        .status-menunggu {
-            background-color: #ffeaea;
-            color: #ff6b6b;
-        }
-        .status-proses {
-            background-color: #fff4e0;
-            color: #ffaa00;
-        }
+       /* Tampilan untuk status perbaikan */
+.status-menunggu {
+    background-color: #ffeaea;
+    color: #ff6b6b;
+}
+.status-proses {
+    background-color: #fff4e0;
+    color: #ffaa00;
+}
+.status-selesai {
+    background-color: #e7f9e7;
+    color: #28a745;
+}
+/* Menambahkan sedikit transparansi pada kartu perbaikan yang sudah selesai */
+.repair-card[data-status="Selesai"] {
+    background-color: #f9f9f9;
+    border-left: 4px solid #28a745;
+}
+/* Kartu perbaikan yang sedang proses */
+.repair-card[data-status="Proses"] {
+    border-left: 4px solid #ffaa00;
+}
+/* Kartu perbaikan yang menunggu */
+.repair-card[data-status="Menunggu"] {
+    border-left: 4px solid #ff6b6b;
+}
+/* Tambahkan stempel "SELESAI" pada kartu yang sudah selesai */
+.repair-card[data-status="Selesai"]::after {
+    content: "SELESAI";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #28a745;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    opacity: 0.7;
+}
         .back-btn {
             display: inline-block;
             padding: 10px 15px;
@@ -250,7 +281,7 @@
                     <h3>Perbaikan Aktif ({{ $perbaikanList->count() }})</h3>
 
                     @foreach($perbaikanList as $perbaikan)
-                    <div class="repair-card">
+                    <div class="repair-card" data-status="{{ $perbaikan->status }}">
                         <div class="repair-title">
                             <span>{{ $perbaikan->nama_barang }}</span>
                             <span class="status-badge status-{{ strtolower($perbaikan->status) }}">

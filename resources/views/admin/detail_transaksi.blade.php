@@ -449,6 +449,13 @@
                             </button>
                         </div>
                     </div>
+                    <!-- Add this inside the card-body div, perhaps before the status-actions section -->
+<div class="actions" style="margin-top: 20px;">
+    <a href="{{ route('admin.perbaikan.edit', $transaksi->id) }}" class="btn btn-primary">
+        <i class="fas fa-edit"></i> Edit Perbaikan
+    </a>
+</div>
+
                 </div>
             </div>
 

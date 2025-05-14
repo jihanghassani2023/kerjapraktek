@@ -19,32 +19,35 @@ class TrackingController extends Controller
     /**
      * Memeriksa nomor telepon pelanggan dan menampilkan hasilnya
      */
-    public function check(Request $request)
-    {
-        $request->validate([
-            'key' => 'required|string',
-        ]);
+   /**
+ * Memeriksa nomor telepon pelanggan dan menampilkan hasilnya
+ */
+public function check(Request $request)
+{
+    $request->validate([
+        'key' => 'required|string',
+    ]);
 
-        // Cari data pelanggan berdasarkan nomor telepon
-        $pelanggan = Pelanggan::where('nomor_telp', $request->key)->first();
+    // Cari data pelanggan berdasarkan nomor telepon
+    $pelanggan = Pelanggan::where('nomor_telp', $request->key)->first();
 
-        if (!$pelanggan) {
-            return redirect()->route('tracking.index')
-                ->with('error', 'Nomor telepon tidak ditemukan. Mohon periksa kembali nomor telepon Anda.');
-        }
-
-        // Ambil semua perbaikan yang sedang berjalan untuk pelanggan ini
-        $perbaikanList = Perbaikan::where('pelanggan_id', $pelanggan->id)
-                            ->whereIn('status', ['Menunggu', 'Proses'])
-                            ->with(['user', 'pelanggan'])
-                            ->orderBy('created_at', 'desc')
-                            ->get();
-
-        if ($perbaikanList->isEmpty()) {
-            return redirect()->route('tracking.index')
-                ->with('error', 'Tidak ada perbaikan aktif yang ditemukan untuk nomor telepon ini.');
-        }
-
-        return view('tracking.index', compact('perbaikanList', 'pelanggan'));
+    if (!$pelanggan) {
+        return redirect()->route('tracking.index')
+            ->with('error', 'Nomor telepon tidak ditemukan. Mohon periksa kembali nomor telepon Anda.');
     }
+
+    // Ambil semua perbaikan untuk pelanggan ini, tanpa filter status
+    // Urutkan berdasarkan tanggal perbaikan (terbaru di atas)
+    $perbaikanList = Perbaikan::where('pelanggan_id', $pelanggan->id)
+                        ->with(['user', 'pelanggan'])
+                        ->orderBy('tanggal_perbaikan', 'desc') // Urutkan berdasarkan tanggal perbaikan
+                        ->get();
+
+    if ($perbaikanList->isEmpty()) {
+        return redirect()->route('tracking.index')
+            ->with('error', 'Tidak ada perbaikan yang ditemukan untuk nomor telepon ini.');
+    }
+
+    return view('tracking.index', compact('perbaikanList', 'pelanggan'));
+}
 }

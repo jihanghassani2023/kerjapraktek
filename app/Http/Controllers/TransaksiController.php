@@ -78,7 +78,8 @@ class TransaksiController extends Controller
     {
         $user = Auth::user();
         // Always get fresh data with findOrFail
-        $transaksi = Perbaikan::with('user')->findOrFail($id);
+       $transaksi = Perbaikan::with(['user', 'pelanggan'])->findOrFail($id);
+
 
         return view('kepala_toko.detail_transaksi', compact('user', 'transaksi'));
     }

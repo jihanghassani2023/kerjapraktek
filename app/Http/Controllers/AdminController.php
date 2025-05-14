@@ -191,7 +191,43 @@ class AdminController extends Controller
 
         return view('admin.edit_pelanggan', compact('user', 'pelanggan'));
     }
+    public function editPerbaikan($id)
+{
+    $user = Auth::user();
+    $perbaikan = Perbaikan::with('pelanggan')->findOrFail($id);
 
+    return view('admin.edit_perbaikan', compact('user', 'perbaikan'));
+}
+
+public function updatePerbaikan(Request $request, $id)
+{
+    $perbaikan = Perbaikan::findOrFail($id);
+
+    $validator = Validator::make($request->all(), [
+        'masalah' => 'required|string',
+        'tindakan_perbaikan' => 'required|string',
+        'status' => 'required|in:Menunggu,Proses,Selesai',
+        'harga' => 'required|numeric',
+        'garansi' => 'required|string',
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    $perbaikan->update([
+        'masalah' => $request->masalah,
+        'tindakan_perbaikan' => $request->tindakan_perbaikan,
+        'status' => $request->status,
+        'harga' => $request->harga,
+        'garansi' => $request->garansi,
+    ]);
+
+    return redirect()->route('admin.transaksi.show', $id)
+        ->with('success', 'Data perbaikan berhasil diperbarui');
+}
     public function updatePelanggan(Request $request, $id)
     {
         $pelanggan = Pelanggan::findOrFail($id);

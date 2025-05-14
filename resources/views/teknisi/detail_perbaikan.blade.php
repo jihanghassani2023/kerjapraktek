@@ -447,6 +447,12 @@
                             @endif
                         </div>
                     </div>
+                    <!-- Add this inside the card-body div, just before or after the status-actions div -->
+<div class="actions">
+    <a href="{{ route('perbaikan.edit', $perbaikan->id) }}" class="btn btn-primary">
+        <i class="fas fa-edit"></i> Edit Perbaikan
+    </a>
+</div>
                 </div>
             </div>
 

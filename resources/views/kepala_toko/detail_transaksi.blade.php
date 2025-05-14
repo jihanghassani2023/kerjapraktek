@@ -358,25 +358,31 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Informasi Pelanggan</h3>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-label">Nama Pelanggan</div>
-                        <div class="info-value">{{ $transaksi->nama_pelanggan }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Nomor Telepon</div>
-                        <div class="info-value">{{ $transaksi->nomor_telp }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Email</div>
-                        <div class="info-value">{{ $transaksi->email ?: '-' }}</div>
-                    </div>
-                </div>
+           <div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Informasi Pelanggan</h3>
+    </div>
+    <div class="card-body">
+        @if($transaksi->pelanggan)
+            <div class="info-row">
+                <div class="info-label">Nama Pelanggan</div>
+                <div class="info-value">{{ $transaksi->pelanggan->nama_pelanggan }}</div>
             </div>
+            <div class="info-row">
+                <div class="info-label">Nomor Telepon</div>
+                <div class="info-value">{{ $transaksi->pelanggan->nomor_telp }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ $transaksi->pelanggan->email ?: '-' }}</div>
+            </div>
+        @else
+            <div class="info-row">
+                <div class="info-value">Data pelanggan tidak tersedia</div>
+            </div>
+        @endif
+    </div>
+</div>
 
             <div class="card">
                 <div class="card-header">
