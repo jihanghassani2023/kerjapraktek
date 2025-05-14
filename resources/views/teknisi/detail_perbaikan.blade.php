@@ -395,12 +395,12 @@
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Detail Perbaikan</h3>
-                    <div>
-                        <span class="status-badge status-{{ strtolower($perbaikan->status) }}">{{ $perbaikan->status }}</span>
-                    </div>
-                </div>
+               <div class="card-header">
+    <h3 class="card-title">Detail Perbaikan</h3>
+    <span class="detail-status" style="color: {{ $perbaikan->status == 'Selesai' ? '#28a745' : ($perbaikan->status == 'Proses' ? '#ffaa00' : '#ff6b6b') }};">
+        {{ $perbaikan->status }}
+    </span>
+</div>
                 <div class="card-body">
                     <div class="info-row">
                         <div class="info-label">Kode Perbaikan</div>
@@ -435,19 +435,16 @@
 <div class="status-actions">
     <div class="status-title">Ubah Status Perbaikan</div>
     <div class="status-buttons">
-        @if($perbaikan->status == 'Proses')
-            <!-- Only show Menunggu button if current status is Proses -->
-            <button type="button" class="btn-status btn-menunggu" onclick="updateStatus('Menunggu')">Menunggu</button>
+        @if($perbaikan->status != 'Menunggu')
+        <button type="button" class="btn-status btn-menunggu" data-status="Menunggu">Menunggu</button>
         @endif
 
-        @if($perbaikan->status == 'Menunggu')
-            <!-- Only show Proses button if current status is Menunggu -->
-            <button type="button" class="btn-status btn-proses" onclick="updateStatus('Proses')">Proses</button>
+        @if($perbaikan->status != 'Proses')
+        <button type="button" class="btn-status btn-proses" data-status="Proses">Proses</button>
         @endif
 
         @if($perbaikan->status != 'Selesai')
-            <!-- Always show Selesai button if not already completed -->
-            <button type="button" class="btn-status btn-selesai" onclick="updateStatus('Selesai')">Selesai</button>
+        <button type="button" class="btn-status btn-selesai" data-status="Selesai">Selesai</button>
         @endif
     </div>
 </div>
@@ -486,63 +483,261 @@
             </div>
         </div>
     </div>
+<script>
+    // Execute when DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get current status
+        const currentStatus = '{{ $perbaikan->status }}';
 
-    <script>
-        function updateStatus(status) {
-    if (confirm('Apakah Anda yakin ingin mengubah status menjadi ' + status + '?')) {
-        // Get CSRF token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        // Hide status change section if status is already "Selesai"
+        if (currentStatus === 'Selesai') {
+            const statusActions = document.querySelector('.status-actions');
+            if (statusActions) {
+                statusActions.style.display = 'none';
+            }
+        }
 
-        // Send AJAX request
-        fetch('/perbaikan/{{ $perbaikan->id }}/status', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify({ status: status })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Reload page to show updated status
-                window.location.reload();
-            } else {
-                alert('Gagal mengubah status. Silakan coba lagi.');
-            }
-        })
-        .catch(error => {
-            console.error('Error updating status:', error);
-            alert('Terjadi kesalahan. Silakan coba lagi.');
+        // Set up the confirmation modal
+        const modal = document.getElementById('confirmationModal');
+        const confirmText = document.getElementById('confirmationText');
+        const confirmYes = document.getElementById('confirmYes');
+        const confirmNo = document.getElementById('confirmNo');
+
+        // Variables to store the status we want to change to
+        let pendingStatus = '';
+
+        // Attach click handlers to all status buttons
+        document.querySelectorAll('.btn-status').forEach(button => {
+            button.addEventListener('click', function() {
+                // Get the status from data attribute
+                pendingStatus = this.getAttribute('data-status');
+
+                // Set confirmation message based on the status
+                if (pendingStatus === 'Proses') {
+                    confirmText.textContent = 'APAKAH DEVICE INI AKAN ANDA KERJAKAN?';
+                } else if (pendingStatus === 'Selesai') {
+                    confirmText.textContent = 'APAKAH DEVICE INI SUDAH SELESAI?';
+                } else {
+                    confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS?';
+                }
+
+                // Show the confirmation modal
+                modal.style.display = 'block';
+            });
         });
+
+        // Handle confirmation: YES
+        confirmYes.addEventListener('click', function() {
+            if (pendingStatus) {
+                // Get CSRF token
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                // Hide the modal
+                modal.style.display = 'none';
+
+                // Capture the old status before updating UI
+                const statusBadge = document.querySelector('.status-badge');
+                const oldStatus = statusBadge ? statusBadge.textContent.trim() : '';
+
+                // OPTIMISTIC UI UPDATE - Update UI immediately before waiting for server
+                if (statusBadge) {
+                    statusBadge.className = 'status-badge status-' + pendingStatus.toLowerCase();
+                    statusBadge.textContent = pendingStatus;
+                }
+
+                // If status is now "Selesai", hide the status change section immediately
+                if (pendingStatus === 'Selesai') {
+                    const statusActions = document.querySelector('.status-actions');
+                    if (statusActions) {
+                        statusActions.style.display = 'none';
+                    }
+                } else {
+                    // Otherwise, update which buttons should be visible immediately
+                    updateStatusButtons(pendingStatus);
+                }
+
+                // Also update any other UI elements that show the status
+                const detailStatus = document.querySelector('.detail-status');
+                if (detailStatus) {
+                    detailStatus.textContent = pendingStatus;
+                    if (pendingStatus === 'Selesai') {
+                        detailStatus.style.color = '#28a745';
+                    } else if (pendingStatus === 'Proses') {
+                        detailStatus.style.color = '#ffaa00';
+                    } else {
+                        detailStatus.style.color = '#ff6b6b';
+                    }
+                }
+
+                // Now send the status update request
+                fetch('/perbaikan/{{ $perbaikan->id }}/status', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token
+                    },
+                    body: JSON.stringify({
+                        status: pendingStatus,
+                        tindakan_perbaikan: "Akan diupdate",
+                        harga: 0
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        // If failed, revert UI changes
+                        console.error('Failed to update status:', data.message);
+
+                        // Revert status badge
+                        if (statusBadge) {
+                            statusBadge.className = 'status-badge status-' + oldStatus.toLowerCase();
+                            statusBadge.textContent = oldStatus;
+                        }
+
+                        // Revert detail status
+                        if (detailStatus) {
+                            detailStatus.textContent = oldStatus;
+                            if (oldStatus === 'Selesai') {
+                                detailStatus.style.color = '#28a745';
+                            } else if (oldStatus === 'Proses') {
+                                detailStatus.style.color = '#ffaa00';
+                            } else {
+                                detailStatus.style.color = '#ff6b6b';
+                            }
+                        }
+
+                        // Revert button visibility
+                        if (oldStatus === 'Selesai') {
+                            const statusActions = document.querySelector('.status-actions');
+                            if (statusActions) {
+                                statusActions.style.display = 'none';
+                            }
+                        } else {
+                            updateStatusButtons(oldStatus);
+                            const statusActions = document.querySelector('.status-actions');
+                            if (statusActions) {
+                                statusActions.style.display = 'block';
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating status:', error);
+                    // Could add code here to revert UI changes on network error
+                });
+            }
+        });
+
+        // Handle confirmation: NO
+        confirmNo.addEventListener('click', function() {
+            // Just hide the modal
+            modal.style.display = 'none';
+        });
+
+        // Close the modal if user clicks outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+
+    // Function to update button display based on status
+    function updateStatusButtons(status) {
+        // Remove all buttons first
+        const buttonsContainer = document.querySelector('.status-buttons');
+        if (!buttonsContainer) return;
+
+        buttonsContainer.innerHTML = '';
+
+        // Add appropriate buttons based on status
+        if (status !== 'Selesai') {
+            if (status === 'Menunggu') {
+                // For Menunggu status, show Proses and Selesai buttons
+                const prosesButton = document.createElement('button');
+                prosesButton.type = 'button';
+                prosesButton.className = 'btn-status btn-proses';
+                prosesButton.setAttribute('data-status', 'Proses');
+                prosesButton.textContent = 'Proses';
+                prosesButton.addEventListener('click', showConfirmationModal);
+                buttonsContainer.appendChild(prosesButton);
+
+                const selesaiButton = document.createElement('button');
+                selesaiButton.type = 'button';
+                selesaiButton.className = 'btn-status btn-selesai';
+                selesaiButton.setAttribute('data-status', 'Selesai');
+                selesaiButton.textContent = 'Selesai';
+                selesaiButton.addEventListener('click', showConfirmationModal);
+                buttonsContainer.appendChild(selesaiButton);
+            } else if (status === 'Proses') {
+                // For Proses status, show Menunggu and Selesai buttons
+                const menungguButton = document.createElement('button');
+                menungguButton.type = 'button';
+                menungguButton.className = 'btn-status btn-menunggu';
+                menungguButton.setAttribute('data-status', 'Menunggu');
+                menungguButton.textContent = 'Menunggu';
+                menungguButton.addEventListener('click', showConfirmationModal);
+                buttonsContainer.appendChild(menungguButton);
+
+                const selesaiButton = document.createElement('button');
+                selesaiButton.type = 'button';
+                selesaiButton.className = 'btn-status btn-selesai';
+                selesaiButton.setAttribute('data-status', 'Selesai');
+                selesaiButton.textContent = 'Selesai';
+                selesaiButton.addEventListener('click', showConfirmationModal);
+                buttonsContainer.appendChild(selesaiButton);
+            }
+        }
     }
-}
 
-        // Print function styling
-        document.addEventListener('DOMContentLoaded', function() {
-            window.addEventListener('beforeprint', function() {
-                document.querySelector('.sidebar').style.display = 'none';
-                document.querySelector('.main-content').style.marginLeft = '0';
-                document.querySelector('.header').style.display = 'none';
-                document.querySelector('.content-header .btn-print').style.display = 'none';
-                document.querySelector('.status-actions').style.display = 'none';
-                document.querySelector('.actions').style.display = 'none';
-            });
+    // Helper function to show confirmation modal
+    function showConfirmationModal() {
+        const pendingStatus = this.getAttribute('data-status');
+        const confirmText = document.getElementById('confirmationText');
 
-            window.addEventListener('afterprint', function() {
-                document.querySelector('.sidebar').style.display = 'flex';
-                document.querySelector('.main-content').style.marginLeft = '150px';
-                document.querySelector('.header').style.display = 'flex';
-                document.querySelector('.content-header .btn-print').style.display = 'inline-flex';
-                document.querySelector('.status-actions').style.display = 'block';
-                document.querySelector('.actions').style.display = 'flex';
-            });
-        });
-    </script>
+        if (pendingStatus === 'Proses') {
+            confirmText.textContent = 'APAKAH DEVICE INI AKAN ANDA KERJAKAN?';
+        } else if (pendingStatus === 'Selesai') {
+            confirmText.textContent = 'APAKAH DEVICE INI SUDAH SELESAI?';
+        } else {
+            confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS?';
+        }
+
+        document.getElementById('confirmationModal').style.display = 'block';
+    }
+
+    // Print functionality
+    window.addEventListener('beforeprint', function() {
+        document.querySelector('.sidebar').style.display = 'none';
+        document.querySelector('.main-content').style.marginLeft = '0';
+        document.querySelector('.header').style.display = 'none';
+        document.querySelector('.content-header .btn-print').style.display = 'none';
+        document.querySelector('.status-actions').style.display = 'none';
+        document.querySelector('.actions').style.display = 'none';
+    });
+
+    window.addEventListener('afterprint', function() {
+        document.querySelector('.sidebar').style.display = 'flex';
+        document.querySelector('.main-content').style.marginLeft = '150px';
+        document.querySelector('.header').style.display = 'flex';
+        document.querySelector('.content-header .btn-print').style.display = 'inline-flex';
+
+        const currentStatus = document.querySelector('.status-badge').textContent.trim();
+        if (currentStatus !== 'Selesai') {
+            document.querySelector('.status-actions').style.display = 'block';
+        }
+
+        document.querySelector('.actions').style.display = 'flex';
+    });
+</script>
+<div id="confirmationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 5px; text-align: center; width: 350px;">
+        <h3 id="confirmationText" style="margin-bottom: 20px; font-weight: bold; color: #333333;">APAKAH DEVICE INI AKAN ANDA KERJAKAN?</h3>
+        <div>
+            <button id="confirmYes" style="padding: 8px 30px; background-color: #28a745; color: white; border: none; border-radius: 5px; margin-right: 10px; cursor: pointer; font-weight: bold;">YA</button>
+            <button id="confirmNo" style="padding: 8px 30px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">TIDAK</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
