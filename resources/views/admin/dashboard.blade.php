@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard Admin - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -267,6 +268,103 @@
         .btn-secondary:hover {
             background-color: #2d6d2d;
         }
+        /* Search box styles */
+        .search-container {
+            margin: 20px 0;
+            display: flex;
+            max-width: 600px;
+            position: relative; /* For suggestions dropdown */
+        }
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-right: none;
+            border-radius: 5px 0 0 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #8c3a3a;
+        }
+        .search-button {
+            background-color: #8c3a3a;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .search-button:hover {
+            background-color: #6d2d2d;
+        }
+        /* Suggestions dropdown styles */
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .search-suggestion-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .search-suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .search-suggestion-item:hover {
+            background-color: #f5f5f5;
+        }
+        .suggestion-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        .suggestion-details {
+            display: flex;
+            font-size: 0.85em;
+            color: #666;
+            gap: 10px;
+        }
+        .suggestion-detail {
+            display: flex;
+            align-items: center;
+        }
+        .suggestion-detail i {
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+        .suggestion-status {
+            font-size: 0.85em;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .suggestion-status-menunggu {
+            background-color: #ffeaea;
+            color: #ff6b6b;
+        }
+        .suggestion-status-proses {
+            background-color: #fff4e0;
+            color: #ffaa00;
+        }
+        .suggestion-status-selesai {
+            background-color: #e7f9e7;
+            color: #28a745;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -285,6 +383,9 @@
             }
             .action-buttons {
                 flex-direction: column;
+            }
+            .search-container {
+                max-width: 100%;
             }
         }
     </style>
@@ -334,18 +435,18 @@
             </div>
         </div>
 
-
-
-        <div class="action-buttons">
-            <a href="{{ route('admin.pelanggan.create') }}" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i> Tambah Pelanggan
-            </a>
-            <a href="{{ route('admin.perbaikan.create') }}" class="btn btn-secondary">
-                <i class="fas fa-tools"></i> Tambah Perbaikan
-            </a>
-
+        <!-- Search box with autocomplete suggestions -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Cari berdasarkan kode, nama pelanggan, atau barang...">
+            <button type="button" class="search-button">
+                <i class="fas fa-search"></i>
+            </button>
+            <div id="searchSuggestions" class="search-suggestions"></div>
         </div>
-          <div style="margin-top: 30px;"></div>
+
+
+
+        <div style="margin-top: 30px;"></div>
 
         <div class="stats-container">
             <div class="stat-card">
@@ -424,5 +525,130 @@
             </table>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchSuggestions = document.getElementById('searchSuggestions');
+            const searchButton = document.querySelector('.search-button');
+
+            let debounceTimer;
+
+            // Event listener for search input
+            searchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+
+                const query = this.value.trim();
+
+                // Clear suggestions if query is empty
+                if (!query) {
+                    searchSuggestions.innerHTML = '';
+                    searchSuggestions.style.display = 'none';
+                    return;
+                }
+
+                // Debounce the API call to avoid making too many requests
+                debounceTimer = setTimeout(() => {
+                    fetchSuggestions(query);
+                }, 300);
+            });
+
+            // Event listener for search button
+            searchButton.addEventListener('click', function() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    window.location.href = "{{ route('admin.search') }}?search=" + encodeURIComponent(query);
+                }
+            });
+
+            // Event listener for Enter key
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    const query = this.value.trim();
+                    if (query) {
+                        window.location.href = "{{ route('admin.search') }}?search=" + encodeURIComponent(query);
+                    }
+                }
+            });
+
+            // Close suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
+                    searchSuggestions.style.display = 'none';
+                }
+            });
+
+            // Function to fetch suggestions from the API
+            function fetchSuggestions(query) {
+                fetch("{{ route('search.suggestions') }}?query=" + encodeURIComponent(query), {
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    displaySuggestions(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                });
+            }
+
+            // Function to display suggestions
+            function displaySuggestions(suggestions) {
+                searchSuggestions.innerHTML = '';
+
+                if (suggestions.length === 0) {
+                    searchSuggestions.style.display = 'none';
+                    return;
+                }
+
+                suggestions.forEach(item => {
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.className = 'search-suggestion-item';
+
+                    // Create suggestion content
+                    let statusClass = '';
+                    switch(item.status.toLowerCase()) {
+                        case 'menunggu':
+                            statusClass = 'suggestion-status-menunggu';
+                            break;
+                        case 'proses':
+                            statusClass = 'suggestion-status-proses';
+                            break;
+                        case 'selesai':
+                            statusClass = 'suggestion-status-selesai';
+                            break;
+                    }
+
+                    suggestionItem.innerHTML = `
+                        <div class="suggestion-title">${item.kode_perbaikan} - ${item.nama_barang}</div>
+                        <div class="suggestion-details">
+                            <div class="suggestion-detail">
+                                <i class="fas fa-user"></i> ${item.nama_pelanggan}
+                            </div>
+                            <div class="suggestion-detail">
+                                <i class="fas fa-calendar"></i> ${item.tanggal}
+                            </div>
+                            <div class="suggestion-status ${statusClass}">
+                                ${item.status}
+                            </div>
+                        </div>
+                    `;
+
+                    // Add click event to redirect to detail page
+                    suggestionItem.addEventListener('click', function() {
+                        window.location.href = item.url;
+                    });
+
+                    searchSuggestions.appendChild(suggestionItem);
+                });
+
+                searchSuggestions.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>

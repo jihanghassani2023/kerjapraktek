@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = Auth::user();
 
@@ -19,6 +19,11 @@ class AdminController extends Controller
         $totalTeknisi = User::where('role', 'teknisi')->count();
         $totalTransaksiHariIni = Perbaikan::whereDate('tanggal_perbaikan', date('Y-m-d'))->sum('harga');
         $totalTransaksiBulanIni = Perbaikan::whereMonth('tanggal_perbaikan', date('m'))->whereYear('tanggal_perbaikan', date('Y'))->sum('harga');
+
+        // If search is submitted via the search form, redirect to search results page
+        if ($request->has('search') && $request->search) {
+            return redirect()->route('admin.search', ['search' => $request->search]);
+        }
 
         // Mendapatkan transaksi terbaru
         $latestTransaksi = Perbaikan::with(['user', 'pelanggan'])
@@ -33,6 +38,37 @@ class AdminController extends Controller
             'totalTransaksiBulanIni',
             'latestTransaksi'
         ));
+    }
+
+    /**
+     * Search perbaikan based on keyword.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request)
+    {
+        $user = Auth::user();
+        $search = $request->input('search');
+
+        if (empty($search)) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $query = Perbaikan::with(['user', 'pelanggan']);
+
+        $query->where(function($q) use ($search) {
+            $q->where('kode_perbaikan', 'like', "%{$search}%")
+              ->orWhere('nama_barang', 'like', "%{$search}%")
+              ->orWhereHas('pelanggan', function($subq) use ($search) {
+                  $subq->where('nama_pelanggan', 'like', "%{$search}%")
+                      ->orWhere('nomor_telp', 'like', "%{$search}%");
+              });
+        });
+
+        $perbaikan = $query->orderBy('created_at', 'desc')->get();
+
+        return view('admin.search_results', compact('user', 'perbaikan', 'search'));
     }
 
     public function transaksi(Request $request)
@@ -102,56 +138,56 @@ class AdminController extends Controller
     }
 
     public function updateStatus(Request $request, $id)
-{
-    $perbaikan = Perbaikan::findOrFail($id);
-    $currentStatus = $perbaikan->status;
-    $newStatus = $request->status;
+    {
+        $perbaikan = Perbaikan::findOrFail($id);
+        $currentStatus = $perbaikan->status;
+        $newStatus = $request->status;
 
-    // Validate the status transition
-    $validator = Validator::make($request->all(), [
-        'status' => 'required|in:Menunggu,Proses,Selesai',
-        'tindakan_perbaikan' => 'nullable|string',
-    ]);
+        // Validate the status transition
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:Menunggu,Proses,Selesai',
+            'tindakan_perbaikan' => 'nullable|string',
+        ]);
 
-    if ($validator->fails()) {
-        if ($request->ajax()) {
-            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+            }
+            return redirect()->back()->withErrors($validator);
         }
-        return redirect()->back()->withErrors($validator);
-    }
 
-    // Prevent invalid status transitions
-    if ($currentStatus == 'Selesai' ||
-        ($currentStatus == 'Proses' && $newStatus == 'Menunggu')) {
+        // Prevent invalid status transitions
+        if ($currentStatus == 'Selesai' ||
+            ($currentStatus == 'Proses' && $newStatus == 'Menunggu')) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Tidak dapat mengubah status dari {$currentStatus} menjadi {$newStatus}"
+                ], 422);
+            }
+            return redirect()->back()->with('error', "Tidak dapat mengubah status dari {$currentStatus} menjadi {$newStatus}");
+        }
+
+        $perbaikan->status = $newStatus;
+
+        // Update tindakan_perbaikan if provided
+        if ($request->has('tindakan_perbaikan')) {
+            $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
+        }
+
+        $perbaikan->save();
+
         if ($request->ajax()) {
             return response()->json([
-                'success' => false,
-                'message' => "Tidak dapat mengubah status dari {$currentStatus} menjadi {$newStatus}"
-            ], 422);
+                'success' => true,
+                'status' => $perbaikan->status,
+                'message' => "Status berhasil diperbarui dari {$currentStatus} menjadi {$perbaikan->status}"
+            ]);
         }
-        return redirect()->back()->with('error', "Tidak dapat mengubah status dari {$currentStatus} menjadi {$newStatus}");
+
+        return redirect()->route('admin.transaksi.show', $id)
+            ->with('success', 'Status berhasil diperbarui');
     }
-
-    $perbaikan->status = $newStatus;
-
-    // Update tindakan_perbaikan if provided
-    if ($request->has('tindakan_perbaikan')) {
-        $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
-    }
-
-    $perbaikan->save();
-
-    if ($request->ajax()) {
-        return response()->json([
-            'success' => true,
-            'status' => $perbaikan->status,
-            'message' => "Status berhasil diperbarui dari {$currentStatus} menjadi {$perbaikan->status}"
-        ]);
-    }
-
-    return redirect()->route('admin.transaksi.show', $id)
-        ->with('success', 'Status berhasil diperbarui');
-}
 
     // Tambahan method untuk pengelolaan pelanggan
     public function pelanggan()
@@ -206,42 +242,42 @@ class AdminController extends Controller
         return view('admin.edit_pelanggan', compact('user', 'pelanggan'));
     }
     public function editPerbaikan($id)
-{
-    $user = Auth::user();
-    $perbaikan = Perbaikan::with('pelanggan')->findOrFail($id);
+    {
+        $user = Auth::user();
+        $perbaikan = Perbaikan::with('pelanggan')->findOrFail($id);
 
-    return view('admin.edit_perbaikan', compact('user', 'perbaikan'));
-}
-
-public function updatePerbaikan(Request $request, $id)
-{
-    $perbaikan = Perbaikan::findOrFail($id);
-
-    $validator = Validator::make($request->all(), [
-        'masalah' => 'required|string',
-        'tindakan_perbaikan' => 'required|string',
-        'status' => 'required|in:Menunggu,Proses,Selesai',
-        'harga' => 'required|numeric',
-        'garansi' => 'required|string',
-    ]);
-
-    if ($validator->fails()) {
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
+        return view('admin.edit_perbaikan', compact('user', 'perbaikan'));
     }
 
-    $perbaikan->update([
-        'masalah' => $request->masalah,
-        'tindakan_perbaikan' => $request->tindakan_perbaikan,
-        'status' => $request->status,
-        'harga' => $request->harga,
-        'garansi' => $request->garansi,
-    ]);
+    public function updatePerbaikan(Request $request, $id)
+    {
+        $perbaikan = Perbaikan::findOrFail($id);
 
-    return redirect()->route('admin.transaksi.show', $id)
-        ->with('success', 'Data perbaikan berhasil diperbarui');
-}
+        $validator = Validator::make($request->all(), [
+            'masalah' => 'required|string',
+            'tindakan_perbaikan' => 'required|string',
+            'status' => 'required|in:Menunggu,Proses,Selesai',
+            'harga' => 'required|numeric',
+            'garansi' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $perbaikan->update([
+            'masalah' => $request->masalah,
+            'tindakan_perbaikan' => $request->tindakan_perbaikan,
+            'status' => $request->status,
+            'harga' => $request->harga,
+            'garansi' => $request->garansi,
+        ]);
+
+        return redirect()->route('admin.transaksi.show', $id)
+            ->with('success', 'Data perbaikan berhasil diperbarui');
+    }
     public function updatePelanggan(Request $request, $id)
     {
         $pelanggan = Pelanggan::findOrFail($id);
@@ -275,10 +311,10 @@ public function updatePerbaikan(Request $request, $id)
     }
 
     public function getCustomers()
-{
-    $customers = Pelanggan::select('id', 'nama_pelanggan', 'nomor_telp', 'email')->get();
-    return response()->json($customers);
-}
+    {
+        $customers = Pelanggan::select('id', 'nama_pelanggan', 'nomor_telp', 'email')->get();
+        return response()->json($customers);
+    }
     public function destroyPelanggan($id)
     {
         $pelanggan = Pelanggan::findOrFail($id);

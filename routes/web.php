@@ -7,6 +7,7 @@ use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Auth;
 
 // Route halaman tracking untuk pelanggan
@@ -39,6 +40,9 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
+        // Search functionality route
+        Route::get('/search', [AdminController::class, 'search'])->name('search');
+
         // Add this new route for admin to update repair status
         Route::put('/perbaikan/{id}/status', [AdminController::class, 'updateStatus'])->name('perbaikan.update-status');
 
@@ -62,8 +66,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/perbaikan', [AdminController::class, 'storePerbaikan'])->name('perbaikan.store');
         Route::get('/generate-key', [AdminController::class, 'generateKey'])->name('perbaikan.generate-key');
         Route::get('/perbaikan/{id}/edit', [AdminController::class, 'editPerbaikan'])->name('perbaikan.edit');
-Route::put('/perbaikan/{id}', [AdminController::class, 'updatePerbaikan'])->name('perbaikan.update');
+        Route::put('/perbaikan/{id}', [AdminController::class, 'updatePerbaikan'])->name('perbaikan.update');
     });
+
+    // Search suggestions API route (outside of admin group)
+    Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
     // Kepala toko routes
     Route::get('/kepala-toko/dashboard', [TransaksiController::class, 'dashboard'])->name('kepala-toko.dashboard');
@@ -100,7 +107,7 @@ Route::put('/perbaikan/{id}', [AdminController::class, 'updatePerbaikan'])->name
         Route::get('/perbaikan/{id}/confirm-status/{status}', [PerbaikanController::class, 'confirmStatus'])->name('perbaikan.confirm-status');
     });
     // Add this to your routes/web.php
-Route::get('/admin/api/customers', [AdminController::class, 'getCustomers'])->name('admin.api.customers');
+    Route::get('/admin/api/customers', [AdminController::class, 'getCustomers'])->name('admin.api.customers');
 
     // FIX: Unified single route for status updates - this lets both admin and teknisi controllers handle status updates
     Route::put('/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
