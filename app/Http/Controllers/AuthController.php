@@ -39,6 +39,8 @@ class AuthController extends Controller
                 case 'kepala_toko':
                     return redirect()->route('kepala-toko.dashboard');
                 case 'teknisi':
+                case 'kepala teknisi':
+
                     return redirect()->route('teknisi.dashboard');
                 default:
                     Auth::logout();

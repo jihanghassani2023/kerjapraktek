@@ -267,12 +267,7 @@
             </div>
         </div>
 
-        <div class="welcome-box">
-            <h2 class="welcome-title">Selamat Datang, {{ $user->name }}!</h2>
-            <p class="welcome-text">
-                Anda melihat daftar perbaikan yang ditugaskan kepada Anda. Silakan lihat status perbaikan dan update progres pekerjaan Anda.
-            </p>
-        </div>
+
 
         <div class="stats-container">
             <div class="stat-card">

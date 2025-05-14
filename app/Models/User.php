@@ -16,13 +16,13 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-       'name',
-    'email',
-    'password',
-    'role',
-    'id_karyawan',
-    'alamat',
-    'jabatan',
+        'name',
+        'email',
+        'password',
+        'role',
+        'id_karyawan',
+        'alamat',
+        'jabatan',
     ];
 
     /**
@@ -72,7 +72,7 @@ class User extends Authenticatable
      */
     public function isTeknisi()
     {
-        return $this->role === 'teknisi';
+        return $this->role === 'teknisi' || $this->role === 'kepala teknisi';
     }
 
     /**

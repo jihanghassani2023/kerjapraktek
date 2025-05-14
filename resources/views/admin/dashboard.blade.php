@@ -272,7 +272,7 @@
         .search-container {
             margin: 20px 0;
             display: flex;
-            max-width: 600px;
+            max-width: 1600px;
             position: relative; /* For suggestions dropdown */
         }
         .search-input {
@@ -394,7 +394,7 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
-            <span>MG TECH</span>
+
         </div>
         <a href="{{ route('admin.dashboard') }}" class="menu-item active">
             <i class="fas fa-home"></i>

@@ -268,7 +268,6 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
-            <span>MG TECH</span>
         </div>
         <a href="{{ route('admin.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -395,20 +394,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="harga">Harga</label>
-                    <input type="number" id="harga" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ old('harga') }}" required>
-                    @error('harga')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="garansi">Garansi</label>
-                    <input type="text" id="garansi" name="garansi" class="form-control @error('garansi') is-invalid @enderror" value="{{ old('garansi') ?? '1 Tahun' }}" required>
-                    @error('garansi')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+    <label for="harga">Harga (Rp)</label>
+    <input type="number" id="harga" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ old('harga') }}" required>
+    @error('harga')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+               <div class="form-group">
+    <label for="garansi">Garansi</label>
+    <input type="text" id="garansi" name="garansi" class="form-control @error('garansi') is-invalid @enderror" value="{{ old('garansi') }}" required>
+    @error('garansi')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
 
                 <div style="text-align: right;">
                     <button type="submit" id="submitBtn" class="btn btn-primary">

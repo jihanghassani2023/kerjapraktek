@@ -16,7 +16,7 @@ class AdminController extends Controller
         $user = Auth::user();
 
         // Menghitung statistik untuk dashboard
-        $totalTeknisi = User::where('role', 'teknisi', 'kepala teknisi')->count();
+        $totalTeknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->count();
         $totalTransaksiHariIni = Perbaikan::whereDate('tanggal_perbaikan', date('Y-m-d'))->sum('harga');
         $totalTransaksiBulanIni = Perbaikan::whereMonth('tanggal_perbaikan', date('m'))->whereYear('tanggal_perbaikan', date('Y'))->sum('harga');
 
@@ -338,7 +338,7 @@ class AdminController extends Controller
     {
         $user = Auth::user();
         $pelanggan = Pelanggan::all();
-        $teknisi = User::where('role', 'teknisi')->get();
+       $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
 
         return view('admin.tambah_perbaikan', compact('user', 'pelanggan', 'teknisi'));
     }

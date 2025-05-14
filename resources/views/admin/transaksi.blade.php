@@ -381,12 +381,7 @@
             </div>
         </div>
 
-        <div class="title-section">
-            <h1 class="page-title">Data Transaksi Perbaikan</h1>
-            <a href="#" class="btn btn-export" onclick="alert('Fitur export akan segera tersedia')">
-                <i class="fas fa-file-export"></i> Export Data
-            </a>
-        </div>
+        <div style="margin-top: 2%"></div>
 
         @if(session('info'))
             <div class="alert alert-info">
@@ -459,7 +454,7 @@
                                     <td>{{ $t->kode_perbaikan }}</td>
                                     <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y') }}</td>
                                     <td>{{ $t->nama_barang }}</td>
-                                    <td>{{ $t->nama_pelanggan }}</td>
+                                    <td>{{ $t->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $t->user->name ?? 'N/A' }}</td>
                                     <td>Rp. {{ number_format($t->harga, 0, ',', '.') }}</td>
                                     <td><span class="status-selesai">{{ $t->status }}</span></td>
