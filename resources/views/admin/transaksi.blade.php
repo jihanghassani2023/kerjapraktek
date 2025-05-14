@@ -219,7 +219,7 @@
             width: 100%;
             border-collapse: collapse;
         }
-        table th, 
+        table th,
         table td {
             text-align: left;
             padding: 12px 15px;
@@ -325,7 +325,7 @@
             .main-content {
                 margin-left: 70px;
             }
-            .summary-cards, 
+            .summary-cards,
             .filter-container {
                 flex-direction: column;
             }
@@ -347,6 +347,14 @@
         <a href="{{ route('admin.transaksi') }}" class="menu-item active">
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
+        </a>
+         <a href="{{ route('admin.pelanggan') }}" class="menu-item">
+            <i class="fas fa-users"></i>
+            <span>Pelanggan</span>
+        </a>
+        <a href="{{ route('admin.perbaikan.create') }}" class="menu-item">
+            <i class="fas fa-tools"></i>
+            <span>Tambah Perbaikan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
@@ -498,13 +506,13 @@
             // Tab functionality
             const tabItems = document.querySelectorAll('.tab-item');
             const tabContents = document.querySelectorAll('.tab-content');
-            
+
             tabItems.forEach(item => {
                 item.addEventListener('click', function() {
                     // Remove active class from all tabs
                     tabItems.forEach(tab => tab.classList.remove('active'));
                     tabContents.forEach(content => content.classList.remove('active'));
-                    
+
                     // Add active class to clicked tab
                     this.classList.add('active');
                     const tabId = this.getAttribute('data-tab');

@@ -334,10 +334,7 @@
             </div>
         </div>
 
-        <div class="welcome-message">
-            <h2>Selamat Datang, {{ $user->name }}!</h2>
-            <p>Sebagai admin, Anda dapat mengelola data pelanggan, membuat perbaikan baru, dan melihat progress perbaikan yang dilakukan oleh teknisi.</p>
-        </div>
+
 
         <div class="action-buttons">
             <a href="{{ route('admin.pelanggan.create') }}" class="btn btn-primary">
@@ -346,7 +343,9 @@
             <a href="{{ route('admin.perbaikan.create') }}" class="btn btn-secondary">
                 <i class="fas fa-tools"></i> Tambah Perbaikan
             </a>
+
         </div>
+          <div style="margin-top: 30px;"></div>
 
         <div class="stats-container">
             <div class="stat-card">

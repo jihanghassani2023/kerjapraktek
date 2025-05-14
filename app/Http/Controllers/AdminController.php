@@ -274,7 +274,11 @@ public function updatePerbaikan(Request $request, $id)
             ->with('success', 'Data pelanggan berhasil diperbarui');
     }
 
-
+    public function getCustomers()
+{
+    $customers = Pelanggan::select('id', 'nama_pelanggan', 'nomor_telp', 'email')->get();
+    return response()->json($customers);
+}
     public function destroyPelanggan($id)
     {
         $pelanggan = Pelanggan::findOrFail($id);

@@ -210,6 +210,12 @@
             border-color: #28a745;
             color: #155724;
         }
+        .mt-2 {
+            margin-top: 8px;
+        }
+        .text-primary {
+            color: #8c3a3a;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -223,6 +229,38 @@
             .main-content {
                 margin-left: 70px;
             }
+        }
+
+        /* Autocomplete styling */
+        .autocomplete-container {
+            position: relative;
+        }
+        .autocomplete-results {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ced4da;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .autocomplete-results.show {
+            display: block;
+        }
+        .autocomplete-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .autocomplete-item:hover {
+            background-color: #f8f9fa;
+        }
+        .autocomplete-item.selected {
+            background-color: #e9ecef;
         }
     </style>
 </head>
@@ -300,18 +338,19 @@
             <form id="perbaikanForm" action="{{ route('admin.perbaikan.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="kode_perbaikan" id="kode_perbaikan" value="{{ old('kode_perbaikan') }}">
+                <input type="hidden" name="pelanggan_id" id="pelanggan_id" value="{{ old('pelanggan_id') }}">
+                <input type="hidden" name="nomor_telp" id="nomor_telp" value="{{ old('nomor_telp') }}">
+                <input type="hidden" name="email" id="email" value="{{ old('email') }}">
 
                 <div class="form-group">
-                    <label for="pelanggan_id">Pilih Pelanggan</label>
-                    <select class="form-control @error('pelanggan_id') is-invalid @enderror" id="pelanggan_id" name="pelanggan_id" required>
-                        <option value="">-- Pilih Pelanggan --</option>
-                        @foreach($pelanggan as $p)
-                            <option value="{{ $p->id }}" {{ old('pelanggan_id') == $p->id ? 'selected' : '' }}>
-                                {{ $p->nama_pelanggan }} - {{ $p->nomor_telp }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('pelanggan_id')
+                    <label for="nama_pelanggan">Nama Pelanggan</label>
+                    <div class="autocomplete-container">
+                        <input type="text" id="nama_pelanggan" name="nama_pelanggan" class="form-control"
+                               placeholder="Ketik nama pelanggan..." value="{{ old('nama_pelanggan') }}" required>
+                        <div id="autocompleteResults" class="autocomplete-results"></div>
+                    </div>
+
+                    @error('nama_pelanggan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -348,28 +387,28 @@
                 </div>
 
                 <div class="form-group">
-    <label for="tindakan_perbaikan">Tindakan Perbaikan</label>
-    <textarea id="tindakan_perbaikan" name="tindakan_perbaikan" class="form-control @error('tindakan_perbaikan') is-invalid @enderror" required>{{ old('tindakan_perbaikan') }}</textarea>
-    @error('tindakan_perbaikan')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-</div>
+                    <label for="tindakan_perbaikan">Tindakan Perbaikan</label>
+                    <textarea id="tindakan_perbaikan" name="tindakan_perbaikan" class="form-control @error('tindakan_perbaikan') is-invalid @enderror" required>{{ old('tindakan_perbaikan') }}</textarea>
+                    @error('tindakan_perbaikan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
-<div class="form-group">
-    <label for="harga">Harga</label>
-    <input type="number" id="harga" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ old('harga') }}" required>
-    @error('harga')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-</div>
+                <div class="form-group">
+                    <label for="harga">Harga</label>
+                    <input type="number" id="harga" name="harga" class="form-control @error('harga') is-invalid @enderror" value="{{ old('harga') }}" required>
+                    @error('harga')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
-<div class="form-group">
-    <label for="garansi">Garansi</label>
-    <input type="text" id="garansi" name="garansi" class="form-control @error('garansi') is-invalid @enderror" value="{{ old('garansi') ?? '1 Tahun' }}" required>
-    @error('garansi')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-</div>
+                <div class="form-group">
+                    <label for="garansi">Garansi</label>
+                    <input type="text" id="garansi" name="garansi" class="form-control @error('garansi') is-invalid @enderror" value="{{ old('garansi') ?? '1 Tahun' }}" required>
+                    @error('garansi')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
                 <div style="text-align: right;">
                     <button type="submit" id="submitBtn" class="btn btn-primary">
@@ -385,32 +424,120 @@
             const form = document.getElementById('perbaikanForm');
             const submitBtn = document.getElementById('submitBtn');
             const kodeInput = document.getElementById('kode_perbaikan');
+            const namaPelangganInput = document.getElementById('nama_pelanggan');
+            const pelangganIdInput = document.getElementById('pelanggan_id');
+            const nomorTelpInput = document.getElementById('nomor_telp');
+            const emailInput = document.getElementById('email');
+            const autocompleteResults = document.getElementById('autocompleteResults');
 
             // CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            // Function to validate form
-            function validateForm() {
-                const requiredFields = ['pelanggan_id', 'user_id', 'nama_barang', 'masalah'];
-                let isValid = true;
+            // Store all customers from database
+            let allCustomers = [];
 
-                requiredFields.forEach(field => {
-                    const input = document.getElementById(field);
-                    if (!input.value.trim()) {
-                        input.style.borderColor = 'red';
-                        isValid = false;
-                    } else {
-                        input.style.borderColor = '';
+            // Fetch customers from the database when page loads
+            fetchCustomers();
+
+            // Function to fetch customers from the database
+            function fetchCustomers() {
+                fetch('{{ route("admin.api.customers") }}', {
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
                     }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    allCustomers = data;
+                })
+                .catch(error => {
+                    console.error('Error fetching customers:', error);
+                });
+            }
+
+            // Filter function for customer search
+            function filterCustomers(query) {
+                if (!query) return [];
+
+                query = query.toLowerCase();
+                return allCustomers.filter(customer =>
+                    customer.nama_pelanggan.toLowerCase().includes(query)
+                );
+            }
+
+            // Function to display autocomplete results
+            function displayAutocompleteResults(results) {
+                autocompleteResults.innerHTML = '';
+
+                if (results.length === 0) {
+                    // Show a message directing to register customer first
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.textContent = 'Pelanggan tidak ditemukan. Silakan daftarkan pelanggan terlebih dahulu.';
+                    item.style.color = '#dc3545';
+
+                    autocompleteResults.appendChild(item);
+                    autocompleteResults.classList.add('show');
+
+                    // Clear hidden fields to ensure data isn't submitted
+                    pelangganIdInput.value = '';
+                    nomorTelpInput.value = '';
+                    emailInput.value = '';
+
+                    return;
+                }
+
+                results.forEach(customer => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = `<strong>${customer.nama_pelanggan}</strong>`;
+
+                    item.addEventListener('click', function() {
+                        selectCustomer(customer);
+                    });
+
+                    autocompleteResults.appendChild(item);
                 });
 
-                return isValid;
+                autocompleteResults.classList.add('show');
             }
+
+            // Function to select a customer
+            function selectCustomer(customer) {
+                namaPelangganInput.value = customer.nama_pelanggan;
+                pelangganIdInput.value = customer.id;
+                nomorTelpInput.value = customer.nomor_telp;
+                emailInput.value = customer.email || '';
+
+                // Hide autocomplete results
+                autocompleteResults.classList.remove('show');
+            }
+
+            // Customer name input event
+            namaPelangganInput.addEventListener('input', function() {
+                const query = this.value.trim();
+
+                if (query.length >= 1) { // Show suggestions after typing at least 1 character
+                    const results = filterCustomers(query);
+                    displayAutocompleteResults(results);
+                } else {
+                    autocompleteResults.classList.remove('show');
+                }
+            });
+
+            // Close autocomplete results when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!autocompleteResults.contains(event.target) && event.target !== namaPelangganInput) {
+                    autocompleteResults.classList.remove('show');
+                }
+            });
 
             // Submit form handler
             form.addEventListener('submit', function(event) {
                 event.preventDefault();
 
+                // Validate required fields
                 if (!validateForm()) {
                     alert('Silakan lengkapi semua field yang diperlukan.');
                     return;
@@ -437,6 +564,42 @@
                     alert('Terjadi kesalahan. Silakan coba lagi.');
                 });
             });
+
+            // Function to validate form
+            function validateForm() {
+                let isValid = true;
+
+                // Check if customer is selected (must have a pelanggan_id)
+                if (!pelangganIdInput.value) {
+                    namaPelangganInput.style.borderColor = 'red';
+                    alert('Pelanggan tidak ditemukan. Silakan pilih pelanggan dari daftar atau daftarkan pelanggan baru terlebih dahulu.');
+                    isValid = false;
+                } else {
+                    namaPelangganInput.style.borderColor = '';
+                }
+
+                // Check required fields (excluding hidden fields)
+                const requiredFields = ['nama_pelanggan', 'user_id', 'nama_barang', 'masalah', 'tindakan_perbaikan', 'harga', 'garansi'];
+                requiredFields.forEach(field => {
+                    const input = document.getElementById(field);
+                    if (!input.value.trim()) {
+                        input.style.borderColor = 'red';
+                        isValid = false;
+                    } else {
+                        input.style.borderColor = '';
+                    }
+                });
+
+                return isValid;
+            }
+
+            // Numeric validation for harga
+            const hargaInput = document.getElementById('harga');
+            if (hargaInput) {
+                hargaInput.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
         });
     </script>
 </body>

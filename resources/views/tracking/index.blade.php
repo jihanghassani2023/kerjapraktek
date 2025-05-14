@@ -201,18 +201,7 @@
     border-left: 4px solid #ff6b6b;
 }
 /* Tambahkan stempel "SELESAI" pada kartu yang sudah selesai */
-.repair-card[data-status="Selesai"]::after {
-    content: "SELESAI";
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #28a745;
-    color: white;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    opacity: 0.7;
-}
+
         .back-btn {
             display: inline-block;
             padding: 10px 15px;

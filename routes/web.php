@@ -99,6 +99,8 @@ Route::put('/perbaikan/{id}', [AdminController::class, 'updatePerbaikan'])->name
         // Confirm status change
         Route::get('/perbaikan/{id}/confirm-status/{status}', [PerbaikanController::class, 'confirmStatus'])->name('perbaikan.confirm-status');
     });
+    // Add this to your routes/web.php
+Route::get('/admin/api/customers', [AdminController::class, 'getCustomers'])->name('admin.api.customers');
 
     // FIX: Unified single route for status updates - this lets both admin and teknisi controllers handle status updates
     Route::put('/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
