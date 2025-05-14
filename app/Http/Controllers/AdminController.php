@@ -102,42 +102,56 @@ class AdminController extends Controller
     }
 
     public function updateStatus(Request $request, $id)
-    {
-        $perbaikan = Perbaikan::findOrFail($id);
+{
+    $perbaikan = Perbaikan::findOrFail($id);
+    $currentStatus = $perbaikan->status;
+    $newStatus = $request->status;
 
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|in:Menunggu,Proses,Selesai',
-            'tindakan_perbaikan' => 'nullable|string',
-        ]);
+    // Validate the status transition
+    $validator = Validator::make($request->all(), [
+        'status' => 'required|in:Menunggu,Proses,Selesai',
+        'tindakan_perbaikan' => 'nullable|string',
+    ]);
 
-        if ($validator->fails()) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
-            }
-            return redirect()->back()->withErrors($validator);
+    if ($validator->fails()) {
+        if ($request->ajax()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
         }
+        return redirect()->back()->withErrors($validator);
+    }
 
-        $oldStatus = $perbaikan->status;
-        $perbaikan->status = $request->status;
-
-        // Update tindakan_perbaikan if provided
-        if ($request->has('tindakan_perbaikan')) {
-            $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
-        }
-
-        $perbaikan->save();
-
+    // Prevent invalid status transitions
+    if ($currentStatus == 'Selesai' ||
+        ($currentStatus == 'Proses' && $newStatus == 'Menunggu')) {
         if ($request->ajax()) {
             return response()->json([
-                'success' => true,
-                'status' => $perbaikan->status,
-                'message' => "Status berhasil diperbarui dari {$oldStatus} menjadi {$perbaikan->status}"
-            ]);
+                'success' => false,
+                'message' => "Tidak dapat mengubah status dari {$currentStatus} menjadi {$newStatus}"
+            ], 422);
         }
-
-        return redirect()->route('admin.transaksi.show', $id)
-            ->with('success', 'Status berhasil diperbarui');
+        return redirect()->back()->with('error', "Tidak dapat mengubah status dari {$currentStatus} menjadi {$newStatus}");
     }
+
+    $perbaikan->status = $newStatus;
+
+    // Update tindakan_perbaikan if provided
+    if ($request->has('tindakan_perbaikan')) {
+        $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
+    }
+
+    $perbaikan->save();
+
+    if ($request->ajax()) {
+        return response()->json([
+            'success' => true,
+            'status' => $perbaikan->status,
+            'message' => "Status berhasil diperbarui dari {$currentStatus} menjadi {$perbaikan->status}"
+        ]);
+    }
+
+    return redirect()->route('admin.transaksi.show', $id)
+        ->with('success', 'Status berhasil diperbarui');
+}
 
     // Tambahan method untuk pengelolaan pelanggan
     public function pelanggan()

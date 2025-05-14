@@ -435,20 +435,36 @@
                     </div>
 
                     <!-- Status update section - Very important -->
-                    <div class="status-actions">
-                        <h4 class="status-title">Ubah Status Perbaikan</h4>
-                        <div class="status-buttons">
-                            <button type="button" class="btn-status btn-menunggu" onclick="updateStatus('Menunggu')">
-                                Menunggu
-                            </button>
-                            <button type="button" class="btn-status btn-proses" onclick="updateStatus('Proses')">
-                                Proses
-                            </button>
-                            <button type="button" class="btn-status btn-selesai" onclick="updateStatus('Selesai')">
-                                Selesai
-                            </button>
-                        </div>
-                    </div>
+                    <!-- Change the status buttons section in detail_transaksi.blade.php -->
+<div class="status-actions">
+    <h4 class="status-title">Ubah Status Perbaikan</h4>
+    <div class="status-buttons">
+        @if($transaksi->status != 'Menunggu')
+            <!-- Only show Menunggu button if current status is not already Menunggu and not Selesai -->
+            @if($transaksi->status != 'Selesai')
+                <button type="button" class="btn-status btn-menunggu" onclick="updateStatus('Menunggu')">
+                    Menunggu
+                </button>
+            @endif
+        @endif
+
+        @if($transaksi->status != 'Proses')
+            <!-- Only show Proses button if current status is not already Proses and not Selesai -->
+            @if($transaksi->status != 'Selesai')
+                <button type="button" class="btn-status btn-proses" onclick="updateStatus('Proses')">
+                    Proses
+                </button>
+            @endif
+        @endif
+
+        @if($transaksi->status != 'Selesai')
+            <!-- Always show Selesai button if not already completed -->
+            <button type="button" class="btn-status btn-selesai" onclick="updateStatus('Selesai')">
+                Selesai
+            </button>
+        @endif
+    </div>
+</div>
                     <!-- Add this inside the card-body div, perhaps before the status-actions section -->
 <div class="actions" style="margin-top: 20px;">
     <a href="{{ route('admin.perbaikan.edit', $transaksi->id) }}" class="btn btn-primary">

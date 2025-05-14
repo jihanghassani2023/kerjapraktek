@@ -431,22 +431,26 @@
                         <div class="info-value">{{ $perbaikan->garansi ?: 'Tidak ada' }}</div>
                     </div>
 
-                    <div class="status-actions">
-                        <div class="status-title">Ubah Status Perbaikan</div>
-                        <div class="status-buttons">
-                            @if($perbaikan->status != 'Menunggu')
-                            <button type="button" class="btn-status btn-menunggu" onclick="updateStatus('Menunggu')">Menunggu</button>
-                            @endif
+                  <!-- Change the status buttons section in detail_perbaikan.blade.php -->
+<div class="status-actions">
+    <div class="status-title">Ubah Status Perbaikan</div>
+    <div class="status-buttons">
+        @if($perbaikan->status == 'Proses')
+            <!-- Only show Menunggu button if current status is Proses -->
+            <button type="button" class="btn-status btn-menunggu" onclick="updateStatus('Menunggu')">Menunggu</button>
+        @endif
 
-                            @if($perbaikan->status != 'Proses')
-                            <button type="button" class="btn-status btn-proses" onclick="updateStatus('Proses')">Proses</button>
-                            @endif
+        @if($perbaikan->status == 'Menunggu')
+            <!-- Only show Proses button if current status is Menunggu -->
+            <button type="button" class="btn-status btn-proses" onclick="updateStatus('Proses')">Proses</button>
+        @endif
 
-                            @if($perbaikan->status != 'Selesai')
-                            <button type="button" class="btn-status btn-selesai" onclick="updateStatus('Selesai')">Selesai</button>
-                            @endif
-                        </div>
-                    </div>
+        @if($perbaikan->status != 'Selesai')
+            <!-- Always show Selesai button if not already completed -->
+            <button type="button" class="btn-status btn-selesai" onclick="updateStatus('Selesai')">Selesai</button>
+        @endif
+    </div>
+</div>
                     <!-- Add this inside the card-body div, just before or after the status-actions div -->
 <div class="actions">
     <a href="{{ route('perbaikan.edit', $perbaikan->id) }}" class="btn btn-primary">

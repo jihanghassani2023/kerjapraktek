@@ -356,17 +356,18 @@
                         <td>{{ $p->nama_barang }}</td>
                         <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('l, j F Y') }}</td>
                         <td>{{ $p->masalah }}</td>
-                        <td>
-                            @if($p->status == 'Menunggu')
-                                <span class="status status-menunggu">{{ $p->status }}</span>
-                                <button class="btn-action btn-process" data-id="{{ $p->id }}" data-status="Proses">Proses</button>
-                            @elseif($p->status == 'Proses')
-                                <span class="status status-proses">{{ $p->status }}</span>
-                                <button class="btn-action btn-complete" data-id="{{ $p->id }}" data-status="Selesai">Selesai</button>
-                            @else
-                                <span class="status status-selesai">{{ $p->status }}</span>
-                            @endif
-                        </td>
+                       <!-- Update the status buttons in the table rows -->
+<td>
+    @if($p->status == 'Menunggu')
+        <span class="status status-menunggu">{{ $p->status }}</span>
+        <button class="btn-action btn-process" data-id="{{ $p->id }}" data-status="Proses">Proses</button>
+    @elseif($p->status == 'Proses')
+        <span class="status status-proses">{{ $p->status }}</span>
+        <button class="btn-action btn-complete" data-id="{{ $p->id }}" data-status="Selesai">Selesai</button>
+    @else
+        <span class="status status-selesai">{{ $p->status }}</span>
+    @endif
+</td>
                     </tr>
                     @empty
                     <tr>
@@ -463,9 +464,17 @@
         });
 
         // Function to update status
-        function updateStatus(id, status) {
+function updateStatus(id, status) {
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // For Proses and Selesai status, we need to include these required fields
+    // Default values that will be updated properly in the edit form later
+    const data = {
+        status: status,
+        tindakan_perbaikan: "Akan diupdate", // Default value
+        harga: 0 // Default value
+    };
 
     // Send AJAX request
     fetch(`/perbaikan/${id}/status`, {
@@ -474,7 +483,7 @@
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': csrfToken
         },
-        body: JSON.stringify({ status: status })
+        body: JSON.stringify(data)
     })
     .then(response => {
         if (!response.ok) {
