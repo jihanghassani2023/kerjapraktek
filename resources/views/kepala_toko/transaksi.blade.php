@@ -219,7 +219,7 @@
             width: 100%;
             border-collapse: collapse;
         }
-        table th, 
+        table th,
         table td {
             text-align: left;
             padding: 12px 15px;
@@ -325,7 +325,7 @@
             .main-content {
                 margin-left: 70px;
             }
-            .summary-cards, 
+            .summary-cards,
             .filter-container {
                 flex-direction: column;
             }
@@ -455,7 +455,7 @@
                                     <td>{{ $t->kode_perbaikan }}</td>
                                     <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y') }}</td>
                                     <td>{{ $t->nama_barang }}</td>
-                                    <td>{{ $t->nama_pelanggan }}</td>
+                                    <td>{{ $t->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $t->user->name ?? 'N/A' }}</td>
                                     <td>Rp. {{ number_format($t->harga, 0, ',', '.') }}</td>
                                     <td><span class="status-selesai">{{ $t->status }}</span></td>
@@ -502,13 +502,13 @@
             // Tab functionality
             const tabItems = document.querySelectorAll('.tab-item');
             const tabContents = document.querySelectorAll('.tab-content');
-            
+
             tabItems.forEach(item => {
                 item.addEventListener('click', function() {
                     // Remove active class from all tabs
                     tabItems.forEach(tab => tab.classList.remove('active'));
                     tabContents.forEach(content => content.classList.remove('active'));
-                    
+
                     // Add active class to clicked tab
                     this.classList.add('active');
                     const tabId = this.getAttribute('data-tab');

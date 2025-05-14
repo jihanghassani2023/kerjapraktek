@@ -201,21 +201,33 @@
             cursor: pointer;
         }
         .action-buttons {
-            display: flex;
-            gap: 5px;
-            justify-content: flex-end;
-        }
-        .action-btn {
-            padding: 6px 10px;
-            border-radius: 4px;
-            background-color: #e9ecef;
-            color: #495057;
-            text-decoration: none;
-            font-size: 0.9em;
-            transition: background-color 0.2s;
-            border: none;
-            cursor: pointer;
-        }
+    display: flex;
+    gap: 5px;
+    justify-content: center; /* Changed from flex-end to center */
+}
+
+/* Add these new styles */
+table th:last-child,
+table td:last-child {
+    text-align: center;
+}
+
+.action-btn {
+    padding: 6px 10px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    color: #495057;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
         .action-btn:hover {
             background-color: #dee2e6;
         }
@@ -296,7 +308,7 @@
         </div>
 
         <div class="title-section">
-            <h1 class="page-title">Data Karyawan</h1>
+            <h1 class="page-title"></h1>
             <a href="{{ route('karyawan.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Tambah Karyawan
             </a>
@@ -311,43 +323,44 @@
         <div class="content-section">
             <div class="table-responsive">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>NO</th>
-                            <th>ID KARYAWAN</th>
-                            <th>NAMA KARYAWAN</th>
-                            <th>ALAMAT</th>
-                            <th>JABATAN</th>
-                            <th>AKSI</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($karyawan as $index => $k)
-                            <tr onclick="window.location='{{ route('karyawan.show', $k->id) }}';" style="cursor: pointer;">
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $k->id_karyawan }}</td>
-                                <td>{{ $k->nama_karyawan }}</td>
-                                <td>{{ $k->alamat }}</td>
-                                <td>{{ $k->jabatan }}</td>
-                                <td class="action-buttons" onclick="event.stopPropagation();">
-                                    <a href="{{ route('karyawan.edit', $k->id) }}" class="action-btn" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('karyawan.destroy', $k->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="action-btn" title="Hapus" onclick="return confirm('Apakah Anda yakin ingin menghapus karyawan ini?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" style="text-align: center;">Tidak ada data karyawan</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
+             <!-- Update the table header and cell for AKSI -->
+<thead>
+    <tr>
+        <th>NO</th>
+        <th>ID KARYAWAN</th>
+        <th>NAMA KARYAWAN</th>
+        <th>ALAMAT</th>
+        <th>JABATAN</th>
+        <th style="text-align: center;">AKSI</th> <!-- Added text-align: center -->
+    </tr>
+</thead>
+<tbody>
+    @forelse($karyawan as $index => $k)
+        <tr onclick="window.location='{{ route('karyawan.show', $k->id) }}';" style="cursor: pointer;">
+            <td>{{ $index + 1 }}</td>
+            <td>{{ $k->id_karyawan }}</td>
+            <td>{{ $k->nama_karyawan }}</td>
+            <td>{{ $k->alamat }}</td>
+            <td>{{ $k->jabatan }}</td>
+            <td class="action-buttons" onclick="event.stopPropagation();" style="text-align: center;"> <!-- Added text-align: center -->
+                <a href="{{ route('karyawan.edit', $k->id) }}" class="action-btn" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <form action="{{ route('karyawan.destroy', $k->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="action-btn" title="Hapus" onclick="return confirm('Apakah Anda yakin ingin menghapus karyawan ini?')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="6" style="text-align: center;">Tidak ada data karyawan</td>
+        </tr>
+    @endforelse
+</tbody>
                 </table>
             </div>
         </div>

@@ -264,9 +264,7 @@
             </div>
         </div>
 
-        <div class="dashboard-title">
-            Dashboard <span>Kepala Toko</span>
-        </div>
+        <div style="margin-top: 30px;"></div>
 
         <div class="stats-container">
            <div class="stat-card">
