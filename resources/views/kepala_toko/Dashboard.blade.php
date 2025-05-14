@@ -269,15 +269,15 @@
         </div>
 
         <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-icon karyawan">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Total Karyawan</h3>
-                    <p>{{ $karyawanCount ?? 0 }}</p>
-                </div>
-            </div>
+           <div class="stat-card">
+    <div class="stat-icon karyawan">
+        <i class="fas fa-users"></i>
+    </div>
+    <div class="stat-info">
+        <h3>Total Teknisi</h3>
+        <p>{{ $teknisiCount ?? 0 }}</p>
+    </div>
+</div>
 
             <div class="stat-card">
                 <div class="stat-icon harian">
@@ -315,10 +315,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Data for monthly repair chart
             const monthlyData = @json($monthlyRepairCounts ?? []);
-            
+
             const labels = monthlyData.map(item => item.month);
             const counts = monthlyData.map(item => item.count);
-            
+
             const ctx = document.getElementById('monthlyRepairChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
