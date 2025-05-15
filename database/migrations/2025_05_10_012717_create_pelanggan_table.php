@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('pelanggan', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_pelanggan');
+            $table->string('nama_pelanggan',50);
             $table->string('nomor_telp', 13);  // Limit to 13 characters
-            $table->string('email')->nullable();
+            $table->string('email',100)->nullable();
             $table->timestamps();
         });
     }

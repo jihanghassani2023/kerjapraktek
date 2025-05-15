@@ -12,12 +12,12 @@ class UserController extends Controller
     {
         // Validasi input password
         $request->validate([
-            'new_password' => 'required|string|min:8|confirmed', // Validasi password minimal 8 karakter dan konfirmasi
+            'new_password' => 'required|string|min:8|max:100|confirmed', // Validasi password minimal 8 karakter dan konfirmasi
         ]);
 
         // Mencari pengguna berdasarkan ID
         $user = User::find($userId);
-        
+
         // Periksa apakah pengguna ada
         if (!$user) {
             return redirect()->back()->withErrors(['user' => 'Pengguna tidak ditemukan.']);

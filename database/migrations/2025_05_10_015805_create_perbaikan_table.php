@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('perbaikan', function (Blueprint $table) {
             $table->id();
             $table->string('kode_perbaikan', 20)->unique();
-            $table->string('nama_barang');
+            $table->string('nama_barang',100);
             $table->date('tanggal_perbaikan');
-            $table->string('masalah');
+            $table->string('masalah',200);
             $table->text('tindakan_perbaikan');
             $table->decimal('harga', 15, 2);
-            $table->string('garansi');
+            $table->string('garansi',50);
             $table->enum('status', ['Menunggu', 'Proses', 'Selesai'])->default('Menunggu');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('pelanggan_id')->nullable()->constrained('pelanggan');

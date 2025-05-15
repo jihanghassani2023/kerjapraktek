@@ -41,9 +41,9 @@ class PelangganController extends Controller
     {
         // Validate form input
         $validator = Validator::make($request->all(), [
-            'nama_pelanggan' => 'required|string|max:255',
+            'nama_pelanggan' => 'required|string|max:50',
             'nomor_telp' => 'required|string|max:13|regex:/^[0-9]+$/', // Only digits, max 13
-            'email' => 'nullable|email|max:255',
+            'email' => 'nullable|email|max:100',
         ], [
             'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
             'nomor_telp.required' => 'Nomor telepon wajib diisi.',

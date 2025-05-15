@@ -22,47 +22,48 @@ class KaryawanController extends Controller
     {
         $user = Auth::user();
         $lastKaryawan = User::where('id_karyawan', '!=', null)
-                          ->orderBy('id_karyawan', 'desc')->first();
+            ->orderBy('id_karyawan', 'desc')->first();
         $lastId = $lastKaryawan ? intval(substr($lastKaryawan->id_karyawan, -5)) : 0;
         $newId = '10' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
 
         return view('kepala_toko.tambah_karyawan', compact('user', 'newId'));
-    }public function store(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'id_karyawan' => 'required|unique:users,id_karyawan',
-        'name' => 'required|string|max:255', // Ubah ini dari nama_karyawan ke name
-        'alamat' => 'required|string',
-        'jabatan' => 'required|string|in:Kepala Teknisi,Teknisi,Admin',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:6'
-    ]);
-
-    if ($validator->fails()) {
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
     }
+    public function store(Request $request)
+    {
+       $validator = Validator::make($request->all(), [
+    'id_karyawan' => 'required|string|max:20|unique:users,id_karyawan',  // Tambahkan max:20
+    'name' => 'required|string|max:50',  // Dari max:255 menjadi max:50
+    'alamat' => 'required|string',
+    'jabatan' => 'required|string|max:20|in:Kepala Teknisi,Teknisi,Admin',  // Tambahkan max:20
+    'email' => 'required|email|max:100|unique:users,email',  // Dari max:255 menjadi max:100
+    'password' => 'required|min:6|max:100'  // Tambahkan max:100
+]);
 
-    $userRole = 'user';
-    if ($request->jabatan == 'Admin') {
-        $userRole = 'admin';
-    } elseif ($request->jabatan == 'Teknisi' || $request->jabatan == 'Kepala Teknisi') {
-        $userRole = 'teknisi';
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $userRole = 'user';
+        if ($request->jabatan == 'Admin') {
+            $userRole = 'admin';
+        } elseif ($request->jabatan == 'Teknisi' || $request->jabatan == 'Kepala Teknisi') {
+            $userRole = 'teknisi';
+        }
+
+        User::create([
+            'id_karyawan' => $request->id_karyawan,
+            'name' => $request->name, // Ubah ini dari nama_karyawan ke name
+            'alamat' => $request->alamat,
+            'jabatan' => $request->jabatan,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $userRole,
+        ]);
+
+        return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan');
     }
-
-    User::create([
-        'id_karyawan' => $request->id_karyawan,
-        'name' => $request->name, // Ubah ini dari nama_karyawan ke name
-        'alamat' => $request->alamat,
-        'jabatan' => $request->jabatan,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role' => $userRole,
-    ]);
-
-    return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan');
-}
 
     public function show($id)
     {
@@ -88,37 +89,37 @@ class KaryawanController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $karyawan = User::findOrFail($id);
+    {
+        $karyawan = User::findOrFail($id);
 
-    $validator = Validator::make($request->all(), [
-        'name' => 'required|string|max:255', // Ubah ini
-        'alamat' => 'required|string',
-        'jabatan' => 'required|string|in:Kepala Teknisi,Teknisi,Admin',
-    ]);
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255', // Ubah ini
+            'alamat' => 'required|string',
+            'jabatan' => 'required|string|in:Kepala Teknisi,Teknisi,Admin',
+        ]);
 
-    if ($validator->fails()) {
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $userRole = 'user';
+        if ($request->jabatan == 'Admin') {
+            $userRole = 'admin';
+        } elseif ($request->jabatan == 'Teknisi' || $request->jabatan == 'Kepala Teknisi') {
+            $userRole = 'teknisi';
+        }
+
+        $karyawan->update([
+            'name' => $request->name, // Ubah ini
+            'alamat' => $request->alamat,
+            'jabatan' => $request->jabatan,
+            'role' => $userRole,
+        ]);
+
+        return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil diperbarui');
     }
-
-    $userRole = 'user';
-    if ($request->jabatan == 'Admin') {
-        $userRole = 'admin';
-    } elseif ($request->jabatan == 'Teknisi' || $request->jabatan == 'Kepala Teknisi') {
-        $userRole = 'teknisi';
-    }
-
-    $karyawan->update([
-        'name' => $request->name, // Ubah ini
-        'alamat' => $request->alamat,
-        'jabatan' => $request->jabatan,
-        'role' => $userRole,
-    ]);
-
-    return redirect()->route('karyawan.index')->with('success', 'Data karyawan berhasil diperbarui');
-}
 
     public function destroy($id)
     {

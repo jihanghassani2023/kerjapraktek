@@ -207,9 +207,9 @@ class AdminController extends Controller
      public function storePelanggan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nama_pelanggan' => 'required|string|max:255',
+            'nama_pelanggan' => 'required|string|max:50',
             'nomor_telp' => 'required|string|max:13|regex:/^[0-9]+$/', // Only digits, max 13
-            'email' => 'nullable|email|max:255',
+            'email' => 'nullable|email|max:100',
         ], [
             'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
             'nomor_telp.required' => 'Nomor telepon wajib diisi.',
@@ -283,9 +283,9 @@ class AdminController extends Controller
         $pelanggan = Pelanggan::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'nama_pelanggan' => 'required|string|max:255',
+            'nama_pelanggan' => 'required|string|max:50',
             'nomor_telp' => 'required|string|max:13|regex:/^[0-9]+$/', // Only digits, max 13
-            'email' => 'nullable|email|max:255',
+            'email' => 'nullable|email|max:100',
         ], [
             'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
             'nomor_telp.required' => 'Nomor telepon wajib diisi.',
@@ -348,12 +348,12 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
     'pelanggan_id' => 'required|exists:pelanggan,id',
     'user_id' => 'required|exists:users,id',
-    'nama_barang' => 'required|string|max:255',
-    'masalah' => 'required|string',
+    'nama_barang' => 'required|string|max:100',
+   'masalah' => 'required|string|max:200',
     'tindakan_perbaikan' => 'required|string', // Changed from nullable to required
     'kode_perbaikan' => 'required|string|unique:perbaikan,kode_perbaikan',
     'harga' => 'required|numeric', // Changed from nullable to required
-    'garansi' => 'required|string|max:255', // Changed from nullable to required
+    'garansi' => 'required|string|max:50', // Changed from nullable to required
 ], [
     'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
     'user_id.required' => 'Teknisi wajib dipilih.',
