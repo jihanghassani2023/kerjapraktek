@@ -15,7 +15,7 @@ class AdminController extends Controller
     {
         $user = Auth::user();
 
-        // Menghitung statistik untuk dashboard
+
         $totalTeknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->count();
         $totalTransaksiHariIni = Perbaikan::whereDate('tanggal_perbaikan', date('Y-m-d'))->sum('harga');
         $totalTransaksiBulanIni = Perbaikan::whereMonth('tanggal_perbaikan', date('m'))->whereYear('tanggal_perbaikan', date('Y'))->sum('harga');
@@ -57,13 +57,13 @@ class AdminController extends Controller
 
         $query = Perbaikan::with(['user', 'pelanggan']);
 
-        $query->where(function($q) use ($search) {
+        $query->where(function ($q) use ($search) {
             $q->where('kode_perbaikan', 'like', "%{$search}%")
-              ->orWhere('nama_barang', 'like', "%{$search}%")
-              ->orWhereHas('pelanggan', function($subq) use ($search) {
-                  $subq->where('nama_pelanggan', 'like', "%{$search}%")
-                      ->orWhere('nomor_telp', 'like', "%{$search}%");
-              });
+                ->orWhere('nama_barang', 'like', "%{$search}%")
+                ->orWhereHas('pelanggan', function ($subq) use ($search) {
+                    $subq->where('nama_pelanggan', 'like', "%{$search}%")
+                        ->orWhere('nomor_telp', 'like', "%{$search}%");
+                });
         });
 
         $perbaikan = $query->orderBy('created_at', 'desc')->get();
@@ -82,38 +82,38 @@ class AdminController extends Controller
 
         if ($month && $year) {
             $query->whereMonth('tanggal_perbaikan', $month)
-                  ->whereYear('tanggal_perbaikan', $year);
+                ->whereYear('tanggal_perbaikan', $year);
         }
 
         $transaksi = $query->with(['user', 'pelanggan'])
-                         ->orderBy('tanggal_perbaikan', 'desc')
-                         ->get();
+            ->orderBy('tanggal_perbaikan', 'desc')
+            ->get();
 
         $totalTransaksi = $transaksi->sum('harga');
         $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
-                                        ->whereDate('tanggal_perbaikan', date('Y-m-d'))
-                                        ->sum('harga');
+            ->whereDate('tanggal_perbaikan', date('Y-m-d'))
+            ->sum('harga');
         $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
-                                         ->whereMonth('tanggal_perbaikan', date('m'))
-                                         ->whereYear('tanggal_perbaikan', date('Y'))
-                                         ->sum('harga');
+            ->whereMonth('tanggal_perbaikan', date('m'))
+            ->whereYear('tanggal_perbaikan', date('Y'))
+            ->sum('harga');
 
         $teknisi = User::where('role', 'teknisi')->get();
         $teknisiStats = [];
 
         foreach ($teknisi as $t) {
             $repairCount = Perbaikan::where('user_id', $t->id)
-                                  ->whereMonth('tanggal_perbaikan', $month)
-                                  ->whereYear('tanggal_perbaikan', $year)
-                                  ->count();
+                ->whereMonth('tanggal_perbaikan', $month)
+                ->whereYear('tanggal_perbaikan', $year)
+                ->count();
 
             $teknisiStats[] = [
                 'name' => $t->name,
                 'repair_count' => $repairCount,
                 'income' => Perbaikan::where('user_id', $t->id)
-                                  ->whereMonth('tanggal_perbaikan', $month)
-                                  ->whereYear('tanggal_perbaikan', $year)
-                                  ->sum('harga')
+                    ->whereMonth('tanggal_perbaikan', $month)
+                    ->whereYear('tanggal_perbaikan', $year)
+                    ->sum('harga')
             ];
         }
 
@@ -157,8 +157,10 @@ class AdminController extends Controller
         }
 
         // Prevent invalid status transitions
-        if ($currentStatus == 'Selesai' ||
-            ($currentStatus == 'Proses' && $newStatus == 'Menunggu')) {
+        if (
+            $currentStatus == 'Selesai' ||
+            ($currentStatus == 'Proses' && $newStatus == 'Menunggu')
+        ) {
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
@@ -204,7 +206,7 @@ class AdminController extends Controller
         return view('admin.tambah_pelanggan', compact('user'));
     }
 
-     public function storePelanggan(Request $request)
+    public function storePelanggan(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'nama_pelanggan' => 'required|string|max:50',
@@ -338,7 +340,7 @@ class AdminController extends Controller
     {
         $user = Auth::user();
         $pelanggan = Pelanggan::all();
-       $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
+        $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
 
         return view('admin.tambah_perbaikan', compact('user', 'pelanggan', 'teknisi'));
     }
@@ -346,26 +348,26 @@ class AdminController extends Controller
     public function storePerbaikan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-    'pelanggan_id' => 'required|exists:pelanggan,id',
-    'user_id' => 'required|exists:users,id',
-    'nama_barang' => 'required|string|max:100',
-   'masalah' => 'required|string|max:200',
-    'tindakan_perbaikan' => 'required|string', // Changed from nullable to required
-    'kode_perbaikan' => 'required|string|unique:perbaikan,kode_perbaikan',
-    'harga' => 'required|numeric', // Changed from nullable to required
-    'garansi' => 'required|string|max:50', // Changed from nullable to required
-], [
-    'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
-    'user_id.required' => 'Teknisi wajib dipilih.',
-    'nama_barang.required' => 'Nama barang wajib diisi.',
-    'masalah.required' => 'Masalah wajib diisi.',
-    'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.', // Added message
-    'kode_perbaikan.required' => 'Kode perbaikan wajib diisi.',
-    'kode_perbaikan.unique' => 'Kode perbaikan sudah digunakan.',
-    'harga.required' => 'Harga wajib diisi.', // Added message
-    'harga.numeric' => 'Harga harus berupa angka.',
-    'garansi.required' => 'Garansi wajib diisi.', // Added message
-]);
+            'pelanggan_id' => 'required|exists:pelanggan,id',
+            'user_id' => 'required|exists:users,id',
+            'nama_barang' => 'required|string|max:100',
+            'masalah' => 'required|string|max:200',
+            'tindakan_perbaikan' => 'required|string',
+            'kode_perbaikan' => 'required|string|unique:perbaikan,kode_perbaikan',
+            'harga' => 'required|numeric',
+            'garansi' => 'required|string|max:50',
+        ], [
+            'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
+            'user_id.required' => 'Teknisi wajib dipilih.',
+            'nama_barang.required' => 'Nama barang wajib diisi.',
+            'masalah.required' => 'Masalah wajib diisi.',
+            'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
+            'kode_perbaikan.required' => 'Kode perbaikan wajib diisi.',
+            'kode_perbaikan.unique' => 'Kode perbaikan sudah digunakan.',
+            'harga.required' => 'Harga wajib diisi.',
+            'harga.numeric' => 'Harga harus berupa angka.',
+            'garansi.required' => 'Garansi wajib diisi.',
+        ]);
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -373,31 +375,27 @@ class AdminController extends Controller
                 ->withInput();
         }
 
-        // Create new repair data
         $perbaikan = new Perbaikan();
-$perbaikan->pelanggan_id = $request->pelanggan_id;
-$perbaikan->user_id = $request->user_id;
-$perbaikan->nama_barang = $request->nama_barang;
-$perbaikan->masalah = $request->masalah;
-$perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
-$perbaikan->kode_perbaikan = $request->kode_perbaikan;
-$perbaikan->harga = $request->harga;
-$perbaikan->garansi = $request->garansi;
-$perbaikan->tanggal_perbaikan = date('Y-m-d');
-$perbaikan->status = 'Menunggu';
-$perbaikan->save();
-       return redirect()->route('admin.transaksi')
-        ->with('success', 'Perbaikan berhasil disimpan');
+        $perbaikan->pelanggan_id = $request->pelanggan_id;
+        $perbaikan->user_id = $request->user_id;
+        $perbaikan->nama_barang = $request->nama_barang;
+        $perbaikan->masalah = $request->masalah;
+        $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
+        $perbaikan->kode_perbaikan = $request->kode_perbaikan;
+        $perbaikan->harga = $request->harga;
+        $perbaikan->garansi = $request->garansi;
+        $perbaikan->tanggal_perbaikan = date('Y-m-d');
+        $perbaikan->status = 'Menunggu';
+        $perbaikan->save();
+        return redirect()->route('admin.transaksi')
+            ->with('success', 'Perbaikan berhasil disimpan');
     }
     public function generateKey()
     {
-        // Generate a random number between 100000 and 999999
         $randomNumber = mt_rand(100000, 999999);
 
-        // Format the code as MG followed by the random number
         $kode = 'MG' . $randomNumber;
 
-        // Check if the code already exists
         while (Perbaikan::where('kode_perbaikan', $kode)->exists()) {
             $randomNumber = mt_rand(100000, 999999);
             $kode = 'MG' . $randomNumber;

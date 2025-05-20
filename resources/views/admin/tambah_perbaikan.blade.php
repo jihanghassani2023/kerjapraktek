@@ -310,12 +310,7 @@
             </div>
         </div>
 
-        <div class="title-section">
-            <h1 class="page-title">Form Tambah Perbaikan</h1>
-            <a href="{{ route('admin.transaksi') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Kembali
-            </a>
-        </div>
+        <div style="margin-top: 1%"></div>
 
         @if ($errors->any())
             <div class="alert alert-danger">

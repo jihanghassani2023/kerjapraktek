@@ -17,7 +17,6 @@ class Pelanggan extends Model
         'email'
     ];
 
-    // Relasi one-to-many dengan Perbaikan
     public function perbaikan()
     {
         return $this->hasMany(Perbaikan::class);

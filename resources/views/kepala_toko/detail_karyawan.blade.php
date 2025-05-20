@@ -394,7 +394,7 @@
                 <div class="card-body">
                     <div class="data-row">
                         <div class="data-label">ID Karyawan</div>
-                        <div class="data-value">{{ $karyawan->id_karyawan }}</div>
+                        <div class="data-value">{{ $karyawan->id }}</div>
                     </div>
                     <div class="data-row">
                         <div class="data-label">Nama Karyawan</div>

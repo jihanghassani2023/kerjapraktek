@@ -234,7 +234,7 @@
             width: 100%;
             border-collapse: collapse;
         }
-        table th, 
+        table th,
         table td {
             text-align: left;
             padding: 12px 15px;
@@ -317,12 +317,12 @@
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
-        
+
         <a href="{{ route('transaksi.teknisi') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali</span>
         </a>
-        
+
         <form method="POST" action="{{ route('logout') }}" style="margin-top: 0;">
             @csrf
             <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
@@ -357,8 +357,8 @@
                 </div>
                 <div class="card-body">
                     <div class="info-row">
-                        <div class="info-label">ID Karyawan</div>
-                        <div class="info-value">{{ $karyawan->id_karyawan }}</div>
+                        <div class="info-label">ID</div>
+                        <div class="info-value">{{ $karyawan->id }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Nama Lengkap</div>
@@ -394,14 +394,14 @@
                             <canvas id="monthlyChart"></canvas>
                         </div>
                     </div>
-                    
+
                     <div class="statistics-container">
                         <div class="stat-title">Total Pendapatan Perbulan ({{ date('Y') }})</div>
                         <div class="chart-container">
                             <canvas id="incomeChart"></canvas>
                         </div>
                     </div>
-                    
+
                     <div class="statistics-container">
                         <div class="stat-title">Ringkasan Statistik</div>
                         <div class="stats-grid">
@@ -482,16 +482,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Data for monthly charts
             const monthlyStats = @json($monthlyStats);
-            
+
             // Month labels
             const months = monthlyStats.map(item => item.month);
-            
+
             // Count data
             const countData = monthlyStats.map(item => item.count);
-            
+
             // Income data
             const incomeData = monthlyStats.map(item => item.income);
-            
+
             // Create monthly count chart
             const ctxCount = document.getElementById('monthlyChart').getContext('2d');
             new Chart(ctxCount, {
@@ -519,7 +519,7 @@
                     }
                 }
             });
-            
+
             // Create monthly income chart
             const ctxIncome = document.getElementById('incomeChart').getContext('2d');
             new Chart(ctxIncome, {

@@ -284,11 +284,13 @@
         <div class="content-section">
             <form action="{{ route('karyawan.update', $karyawan->id) }}" method="POST">
                 @csrf
-                @method('PUT')
-                <div class="form-group">
-                    <label for="id_karyawan">ID Karyawan</label>
-                    <input type="text" class="form-control" id="id_karyawan" name="id_karyawan" value="{{ $karyawan->id_karyawan }}" readonly>
-                </div>
+               @method('PUT')
+<div class="form-group">
+    <label for="karyawan_id">ID Karyawan</label>
+    <input type="text" class="form-control" id="karyawan_id" value="{{ $karyawan->id }}" readonly disabled>
+    <input type="hidden" name="karyawan_id" value="{{ $karyawan->id }}">
+</div>
+
 
                <div class="form-group">
                     <label for="name">Nama Karyawan</label>

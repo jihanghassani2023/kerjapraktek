@@ -24,16 +24,13 @@ class Perbaikan extends Model
         'pelanggan_id'
     ];
 
-    // Make sure created_at and updated_at are used
     public $timestamps = true;
 
-    // Relationship to User
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relationship to Pelanggan
     public function pelanggan()
     {
         return $this->belongsTo(Pelanggan::class);

@@ -141,7 +141,7 @@
             width: 100%;
             border-collapse: collapse;
         }
-        table th, 
+        table th,
         table td {
             text-align: left;
             padding: 12px 15px;
@@ -264,7 +264,7 @@
                         @forelse($teknisi as $index => $t)
                             <tr onclick="window.location='{{ route('transaksi.teknisi.detail', $t->id) }}';">
                                 <td>{{ $index + 1 }}</td>
-                                <td>{{ $t->id_karyawan }}</td>
+                                <td>{{ $t->id}}</td>
                                 <td>{{ $t->nama_karyawan }}</td>
                                 <td>{{ $t->ttl }}</td>
                                 <td>{{ $t->alamat }}</td>

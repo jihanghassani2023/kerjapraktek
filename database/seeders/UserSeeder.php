@@ -19,7 +19,6 @@ class UserSeeder extends Seeder
            'name' => 'Robert Chandra',
             'password' => Hash::make('Kepalatoko_mgtech1'),
             'role' => 'kepala_toko',
-            'id_karyawan' => '100002',
             'alamat' => 'Jl. Kepala Toko No. 456, Palembang',
             'jabatan' => 'Kepala Toko',
         ]);

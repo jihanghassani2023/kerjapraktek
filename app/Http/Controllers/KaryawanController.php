@@ -14,30 +14,29 @@ class KaryawanController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $karyawan = User::whereIn('role', ['admin', 'teknisi'])->get();
+        $karyawan = User::whereIn('role', ['admin', 'teknisi', 'kepala teknisi'])->get();
         return view('kepala_toko.data_karyawan', compact('karyawan', 'user'));
     }
 
     public function create()
     {
         $user = Auth::user();
-        $lastKaryawan = User::where('id_karyawan', '!=', null)
-            ->orderBy('id_karyawan', 'desc')->first();
-        $lastId = $lastKaryawan ? intval(substr($lastKaryawan->id_karyawan, -5)) : 0;
-        $newId = '10' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
+        $lastId = User::max('id') ?? 1000;
+        $nextId = $lastId + 1;
 
-        return view('kepala_toko.tambah_karyawan', compact('user', 'newId'));
+        $formattedId = $nextId;
+        return view('kepala_toko.tambah_karyawan', compact('user', 'formattedId'));
     }
     public function store(Request $request)
     {
-       $validator = Validator::make($request->all(), [
-    'id_karyawan' => 'required|string|max:20|unique:users,id_karyawan',  // Tambahkan max:20
-    'name' => 'required|string|max:50',  // Dari max:255 menjadi max:50
-    'alamat' => 'required|string',
-    'jabatan' => 'required|string|max:20|in:Kepala Teknisi,Teknisi,Admin',  // Tambahkan max:20
-    'email' => 'required|email|max:100|unique:users,email',  // Dari max:255 menjadi max:100
-    'password' => 'required|min:6|max:100'  // Tambahkan max:100
-]);
+        $validator = Validator::make($request->all(), [
+
+            'name' => 'required|string|max:50',
+            'alamat' => 'required|string',
+            'jabatan' => 'required|string|max:50|in:Kepala Teknisi,Teknisi,Admin',
+            'email' => 'required|email|max:100|unique:users,email',
+            'password' => 'required|min:6|max:100'
+        ]);
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -53,8 +52,7 @@ class KaryawanController extends Controller
         }
 
         User::create([
-            'id_karyawan' => $request->id_karyawan,
-            'name' => $request->name, // Ubah ini dari nama_karyawan ke name
+            'name' => $request->name,
             'alamat' => $request->alamat,
             'jabatan' => $request->jabatan,
             'email' => $request->email,
@@ -93,7 +91,7 @@ class KaryawanController extends Controller
         $karyawan = User::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255', // Ubah ini
+            'name' => 'required|string|max:255',
             'alamat' => 'required|string',
             'jabatan' => 'required|string|in:Kepala Teknisi,Teknisi,Admin',
         ]);
@@ -112,7 +110,7 @@ class KaryawanController extends Controller
         }
 
         $karyawan->update([
-            'name' => $request->name, // Ubah ini
+            'name' => $request->name,
             'alamat' => $request->alamat,
             'jabatan' => $request->jabatan,
             'role' => $userRole,

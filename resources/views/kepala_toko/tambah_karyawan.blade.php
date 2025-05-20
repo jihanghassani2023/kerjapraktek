@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +13,13 @@
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
+
         body {
             background-color: #f5f5f5;
             display: flex;
             min-height: 100vh;
         }
+
         .sidebar {
             width: 220px;
             background-color: #8c3a3a;
@@ -28,20 +31,24 @@
             height: 100vh;
             overflow-y: auto;
         }
+
         .sidebar-logo {
             padding: 15px 20px 30px;
             text-align: center;
         }
+
         .sidebar-logo img {
             width: 80px;
             height: auto;
         }
+
         .sidebar-logo span {
             display: block;
             font-weight: bold;
             font-size: 20px;
             margin-top: 10px;
         }
+
         .menu-item {
             padding: 15px 20px;
             display: flex;
@@ -50,17 +57,21 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .menu-item.active {
             background-color: #6d2d2d;
         }
+
         .menu-item:hover {
             background-color: #6d2d2d;
         }
+
         .menu-item i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
+
         .logout {
             margin-top: auto;
             padding: 15px 20px;
@@ -70,19 +81,23 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .logout:hover {
             background-color: #6d2d2d;
         }
+
         .logout i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
+
         .main-content {
             flex: 1;
             margin-left: 220px;
             padding: 20px;
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -90,19 +105,23 @@
             padding: 15px 20px;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .user-info {
             text-align: right;
         }
+
         .user-name {
             color: #8c3a3a;
             font-weight: bold;
         }
+
         .user-role {
             color: #888;
             font-size: 0.9em;
         }
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -113,20 +132,24 @@
             justify-content: center;
             margin-left: 15px;
         }
+
         .user-avatar i {
             color: #8c3a3a;
             font-size: 20px;
         }
+
         .title-section {
             margin: 25px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+
         .page-title {
             font-size: 1.5em;
             color: #333;
         }
+
         .btn {
             padding: 10px 15px;
             border-radius: 5px;
@@ -138,39 +161,48 @@
             display: inline-flex;
             align-items: center;
         }
+
         .btn i {
             margin-right: 8px;
         }
+
         .btn-primary {
             background-color: #8c3a3a;
             color: white;
         }
+
         .btn-primary:hover {
             background-color: #6d2d2d;
         }
+
         .btn-secondary {
             background-color: #6c757d;
             color: white;
         }
+
         .btn-secondary:hover {
             background-color: #5a6268;
         }
+
         .content-section {
             background-color: white;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .form-group {
             margin-bottom: 20px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
             color: #333;
         }
+
         .form-control {
             width: 100%;
             padding: 10px 12px;
@@ -179,54 +211,65 @@
             font-size: 1em;
             transition: border-color 0.3s;
         }
+
         .form-control:focus {
             border-color: #8c3a3a;
             outline: none;
             box-shadow: 0 0 0 0.2rem rgba(140, 58, 58, 0.25);
         }
+
         .form-control:disabled {
             background-color: #e9ecef;
         }
+
         textarea.form-control {
             min-height: 100px;
             resize: vertical;
         }
+
         .invalid-feedback {
             color: #dc3545;
             font-size: 0.9em;
             margin-top: 5px;
         }
+
         .alert {
             padding: 12px 15px;
             margin-bottom: 20px;
             border-radius: 5px;
             border-left: 4px solid;
         }
+
         .alert-danger {
             background-color: #f8d7da;
             border-color: #dc3545;
             color: #721c24;
         }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
                 overflow: hidden;
             }
+
             .sidebar-logo span,
             .menu-item span,
             .logout span {
                 display: none;
             }
+
             .main-content {
                 margin-left: 70px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo"
+                onerror="this.src='https://via.placeholder.com/80'">
             <span>MG TECH</span>
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
@@ -243,7 +286,8 @@
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
-            <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
+            <button type="submit" class="logout"
+                style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </button>
@@ -258,7 +302,8 @@
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
                     <div class="user-name">{{ $user->name }}</div>
-                    <div class="user-role">{{ $user->isKepalaToko() ? 'Kepala Toko' : ($user->isAdmin() ? 'Admin' : 'Teknisi') }}</div>
+                    <div class="user-role">
+                        {{ $user->isKepalaToko() ? 'Kepala Toko' : ($user->isAdmin() ? 'Admin' : 'Teknisi') }}</div>
                 </div>
                 <div class="user-avatar">
                     <i class="fas fa-user"></i>
@@ -286,17 +331,19 @@
         <div class="content-section">
             <form action="{{ route('karyawan.store') }}" method="POST">
                 @csrf
+
                 <div class="form-group">
-                    <label for="id_karyawan">ID Karyawan</label>
-                    <input type="text" class="form-control @error('id_karyawan') is-invalid @enderror" id="id_karyawan" name="id_karyawan" value="{{ $newId }}" readonly>
-                    @error('id_karyawan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <label for="display_id">ID Karyawan</label>
+                    <input type="text" class="form-control" id="display_id" value="{{ $formattedId ?? '1001' }}"
+                        readonly disabled>
+                    <!-- Ini hanya untuk tampilan, tidak dikirim ke server -->
                 </div>
 
-                 <div class="form-group">
+
+                <div class="form-group">
                     <label for="name">Nama Karyawan</label>
-                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
+                        name="name" value="{{ old('name') }}" required>
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -312,9 +359,11 @@
 
                 <div class="form-group">
                     <label for="jabatan">Jabatan</label>
-                    <select class="form-control @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan" required>
+                    <select class="form-control @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan"
+                        required>
                         <option value="">Pilih Jabatan</option>
-                        <option value="Kepala Teknisi" {{ old('jabatan') == 'Kepala Teknisi' ? 'selected' : '' }}>Kepala Teknisi</option>
+                        <option value="Kepala Teknisi" {{ old('jabatan') == 'Kepala Teknisi' ? 'selected' : '' }}>
+                            Kepala Teknisi</option>
                         <option value="Teknisi" {{ old('jabatan') == 'Teknisi' ? 'selected' : '' }}>Teknisi</option>
                         <option value="Admin" {{ old('jabatan') == 'Admin' ? 'selected' : '' }}>Admin</option>
                     </select>
@@ -324,9 +373,12 @@
                 </div>
 
                 <!-- Email dan Password untuk login -->
+
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
+                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
+                        name="email" autocomplete="off" required>
+
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -334,7 +386,8 @@
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
+                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password"
+                        name="password" autocomplete="off" required>
                     @error('password')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -349,4 +402,5 @@
         </div>
     </div>
 </body>
+
 </html>

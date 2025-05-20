@@ -6,14 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Periksa apakah tabel perbaikan sudah ada
+
         if (Schema::hasTable('perbaikan')) {
-            // Periksa apakah index sudah ada
             $sm = Schema::getConnection()->getDoctrineSchemaManager();
             $indexes = $sm->listTableIndexes('perbaikan');
             if (!array_key_exists('perbaikan_kode_perbaikan_index', $indexes)) {
@@ -24,9 +20,6 @@ return new class extends Migration
         }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         if (Schema::hasTable('perbaikan')) {

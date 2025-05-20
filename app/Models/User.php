@@ -10,20 +10,16 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     *  diisi secara massal.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
-        'id_karyawan',
         'alamat',
         'jabatan',
     ];
+
+
 
     /**
      * disembunyikan untuk serialisasi.
