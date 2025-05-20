@@ -39,7 +39,7 @@ Route::middleware(['auth'])->group(function () {
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-
+         Route::post('/transaksi/{id}/add-process', [AdminController::class, 'addProcessStep'])->name('transaksi.add-process');
         // Search functionality route
         Route::get('/search', [AdminController::class, 'search'])->name('search');
 
@@ -94,7 +94,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Progress page
         Route::get('/progress', [PerbaikanController::class, 'progress'])->name('teknisi.progress');
-
+        Route::post('/perbaikan/{id}/add-process', [PerbaikanController::class, 'addProcessStep'])->name('perbaikan.add-process');
         // Laporan page
         Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('teknisi.laporan');
 

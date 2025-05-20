@@ -14,14 +14,20 @@ class Perbaikan extends Model
     protected $fillable = [
         'kode_perbaikan',
         'nama_barang',
+        'kategori_device',
         'tanggal_perbaikan',
         'masalah',
         'tindakan_perbaikan',
+        'proses_pengerjaan',
         'harga',
         'garansi',
         'status',
         'user_id',
         'pelanggan_id'
+    ];
+
+    protected $casts = [
+        'proses_pengerjaan' => 'array',
     ];
 
     public $timestamps = true;
@@ -34,5 +40,19 @@ class Perbaikan extends Model
     public function pelanggan()
     {
         return $this->belongsTo(Pelanggan::class);
+    }
+
+    public function addProsesStep($step)
+    {
+        $currentProcess = $this->proses_pengerjaan ?? [];
+        $currentProcess[] = [
+            'step' => $step,
+            'timestamp' => now()->format('Y-m-d H:i:s')
+        ];
+
+        $this->proses_pengerjaan = $currentProcess;
+        $this->save();
+
+        return $this;
     }
 }

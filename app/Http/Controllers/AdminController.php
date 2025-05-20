@@ -258,9 +258,11 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'masalah' => 'required|string',
             'tindakan_perbaikan' => 'required|string',
+            'kategori_device' => 'required|string|max:50',
             'status' => 'required|in:Menunggu,Proses,Selesai',
             'harga' => 'required|numeric',
             'garansi' => 'required|string',
+             'proses_step' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -269,17 +271,47 @@ class AdminController extends Controller
                 ->withInput();
         }
 
-        $perbaikan->update([
-            'masalah' => $request->masalah,
-            'tindakan_perbaikan' => $request->tindakan_perbaikan,
-            'status' => $request->status,
-            'harga' => $request->harga,
-            'garansi' => $request->garansi,
-        ]);
+        $updateData = [
+        'masalah' => $request->masalah,
+        'tindakan_perbaikan' => $request->tindakan_perbaikan,
+        'kategori_device' => $request->kategori_device,
+        'status' => $request->status,
+        'harga' => $request->harga,
+        'garansi' => $request->garansi,
+    ];
 
-        return redirect()->route('admin.transaksi.show', $id)
-            ->with('success', 'Data perbaikan berhasil diperbarui');
+    $perbaikan->update($updateData);
+
+    // Add a new process step if provided
+    if ($request->filled('proses_step')) {
+        $perbaikan->addProsesStep($request->proses_step);
     }
+
+    return redirect()->route('admin.transaksi.show', $id)
+        ->with('success', 'Data perbaikan berhasil diperbarui');
+}
+public function addProcessStep(Request $request, $id)
+{
+    $perbaikan = Perbaikan::findOrFail($id);
+
+    // Validasi input
+    $request->validate([
+        'proses_step' => 'required|string|max:255',
+    ]);
+
+    // Tambahkan langkah proses baru
+    $currentProcess = $perbaikan->proses_pengerjaan ?? [];
+    $currentProcess[] = [
+        'step' => $request->proses_step,
+        'timestamp' => now()->format('Y-m-d H:i:s')
+    ];
+
+    $perbaikan->proses_pengerjaan = $currentProcess;
+    $perbaikan->save();
+
+    return redirect()->route('admin.transaksi.show', $id)
+        ->with('success', 'Langkah proses pengerjaan berhasil ditambahkan.');
+}
     public function updatePelanggan(Request $request, $id)
     {
         $pelanggan = Pelanggan::findOrFail($id);
@@ -356,10 +388,12 @@ class AdminController extends Controller
             'kode_perbaikan' => 'required|string|unique:perbaikan,kode_perbaikan',
             'harga' => 'required|numeric',
             'garansi' => 'required|string|max:50',
+            'proses_step' => 'nullable|string',
         ], [
             'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
             'user_id.required' => 'Teknisi wajib dipilih.',
             'nama_barang.required' => 'Nama barang wajib diisi.',
+            'kategori_device.required' => 'Kategori device wajib diisi.',
             'masalah.required' => 'Masalah wajib diisi.',
             'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
             'kode_perbaikan.required' => 'Kode perbaikan wajib diisi.',
@@ -379,6 +413,7 @@ class AdminController extends Controller
         $perbaikan->pelanggan_id = $request->pelanggan_id;
         $perbaikan->user_id = $request->user_id;
         $perbaikan->nama_barang = $request->nama_barang;
+        $perbaikan->kategori_device = $request->kategori_device;
         $perbaikan->masalah = $request->masalah;
         $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
         $perbaikan->kode_perbaikan = $request->kode_perbaikan;
@@ -386,6 +421,12 @@ class AdminController extends Controller
         $perbaikan->garansi = $request->garansi;
         $perbaikan->tanggal_perbaikan = date('Y-m-d');
         $perbaikan->status = 'Menunggu';
+          if ($request->filled('proses_step')) {
+        $perbaikan->proses_pengerjaan = [[
+            'step' => $request->proses_step,
+            'timestamp' => now()->format('Y-m-d H:i:s')
+        ]];
+    }
         $perbaikan->save();
         return redirect()->route('admin.transaksi')
             ->with('success', 'Perbaikan berhasil disimpan');

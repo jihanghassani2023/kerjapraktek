@@ -174,33 +174,32 @@
             font-size: 12px;
             font-weight: bold;
         }
-       /* Tampilan untuk status perbaikan */
-.status-menunggu {
-    background-color: #ffeaea;
-    color: #ff6b6b;
-}
-.status-proses {
-    background-color: #fff4e0;
-    color: #ffaa00;
-}
-.status-selesai {
-    background-color: #e7f9e7;
-    color: #28a745;
-}
-/* Menambahkan sedikit transparansi pada kartu perbaikan yang sudah selesai */
-.repair-card[data-status="Selesai"] {
-    background-color: #f9f9f9;
-    border-left: 4px solid #28a745;
-}
-/* Kartu perbaikan yang sedang proses */
-.repair-card[data-status="Proses"] {
-    border-left: 4px solid #ffaa00;
-}
-/* Kartu perbaikan yang menunggu */
-.repair-card[data-status="Menunggu"] {
-    border-left: 4px solid #ff6b6b;
-}
-/* Tambahkan stempel "SELESAI" pada kartu yang sudah selesai */
+        /* Tampilan untuk status perbaikan */
+        .status-menunggu {
+            background-color: #ffeaea;
+            color: #ff6b6b;
+        }
+        .status-proses {
+            background-color: #fff4e0;
+            color: #ffaa00;
+        }
+        .status-selesai {
+            background-color: #e7f9e7;
+            color: #28a745;
+        }
+        /* Menambahkan sedikit transparansi pada kartu perbaikan yang sudah selesai */
+        .repair-card[data-status="Selesai"] {
+            background-color: #f9f9f9;
+            border-left: 4px solid #28a745;
+        }
+        /* Kartu perbaikan yang sedang proses */
+        .repair-card[data-status="Proses"] {
+            border-left: 4px solid #ffaa00;
+        }
+        /* Kartu perbaikan yang menunggu */
+        .repair-card[data-status="Menunggu"] {
+            border-left: 4px solid #ff6b6b;
+        }
 
         .back-btn {
             display: inline-block;
@@ -213,6 +212,93 @@
         }
         .back-btn:hover {
             background-color: #e0e0e0;
+        }
+
+        /* Styling untuk progress pengerjaan */
+        .latest-progress {
+            margin-top: 15px;
+            background-color: rgba(140, 58, 58, 0.05);
+            border-radius: 5px;
+            padding: 10px;
+            border-left: 3px solid #8c3a3a;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .progress-date {
+            font-weight: bold;
+        }
+
+        .progress-content {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .progress-link {
+            font-size: 12px;
+            color: #8c3a3a;
+            cursor: pointer;
+            text-align: right;
+        }
+
+        .progress-link:hover {
+            text-decoration: underline;
+        }
+
+        .full-progress {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .progress-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .progress-timeline {
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid #ddd;
+            margin-left: 5px;
+        }
+
+        .progress-item {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .progress-dot {
+            position: absolute;
+            left: -26px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #8c3a3a;
+        }
+
+        .progress-step {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .progress-time {
+            font-size: 12px;
+            color: #777;
         }
     </style>
 </head>
@@ -288,14 +374,10 @@
                             <div class="info-value">{{ $perbaikan->masalah }}</div>
                         </div>
 
-                         <div class="info-row">
+                        <div class="info-row">
                             <div class="info-label">Tindakan Perbaikan</div>
                             <div class="info-value">{{ $perbaikan->tindakan_perbaikan }}</div>
                         </div>
-
-
-
-
 
                         <div class="info-row">
                             <div class="info-label">Tanggal Masuk</div>
@@ -320,7 +402,43 @@
                             <div class="info-value">{{ $perbaikan->garansi }}</div>
                         </div>
                         @endif
+
+                        <!-- Tampilkan progress terakhir -->
+                       @if(!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
+    <?php
+        $prosesArray = $perbaikan->proses_pengerjaan;
+        $latestProcess = $prosesArray[count($prosesArray) - 1];
+    ?>
+    <div class="latest-progress">
+        <div class="progress-header">
+            <span>Progress Terakhir:</span>
+            <span class="progress-date">{{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</span>
+        </div>
+        <div class="progress-content">{{ $latestProcess['step'] }}</div>
+        <div class="progress-link" onclick="toggleProgress('progress-{{ $perbaikan->id }}')">
+            Lihat semua progress <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+@endif
                     </div>
+
+                    <!-- Progress lengkap (awalnya tersembunyi) -->
+                    @if(!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
+                        <div id="progress-{{ $perbaikan->id }}" class="full-progress" style="display: none;">
+                            <div class="progress-title">Riwayat Proses Pengerjaan</div>
+                            <div class="progress-timeline">
+                                @foreach($perbaikan->proses_pengerjaan as $process)
+                                    <div class="progress-item">
+                                        <div class="progress-dot"></div>
+                                        <div class="progress-content">
+                                            <div class="progress-step">{{ $process['step'] }}</div>
+                                            <div class="progress-time">{{ \Carbon\Carbon::parse($process['timestamp'])->format('d M Y H:i:s') }}</div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                     @endforeach
 
                     <div style="text-align: center;">
@@ -345,5 +463,20 @@
             </div>
         @endif
     </div>
+
+    <script>
+        function toggleProgress(id) {
+            const progressElement = document.getElementById(id);
+            const icon = event.target.tagName === 'I' ? event.target : event.target.querySelector('i');
+
+            if (progressElement.style.display === 'none') {
+                progressElement.style.display = 'block';
+                if (icon) icon.className = 'fas fa-chevron-up';
+            } else {
+                progressElement.style.display = 'none';
+                if (icon) icon.className = 'fas fa-chevron-down';
+            }
+        }
+    </script>
 </body>
 </html>

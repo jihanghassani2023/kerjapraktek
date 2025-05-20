@@ -124,7 +124,7 @@
             padding: 15px 20px;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         .user-info {
@@ -186,6 +186,9 @@
             background-color: #f8f9fa;
             padding: 15px 20px;
             border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .card-title {
@@ -208,6 +211,8 @@
 
         .info-row:last-child {
             border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
         }
 
         .info-label {
@@ -218,15 +223,15 @@
 
         .info-value {
             flex: 1;
+            color: #333;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 5px 10px;
+            border-radius: 3px;
             font-size: 14px;
             font-weight: bold;
-            margin-top: 20px;
         }
 
         .status-menunggu {
@@ -313,7 +318,6 @@
             font-weight: bold;
             border: none;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
 
         .btn-menunggu {
@@ -361,6 +365,118 @@
             border: 1px solid #f5c6cb;
         }
 
+        /* Latest Process Styles */
+        .latest-process {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #8c3a3a;
+            margin-bottom: 20px;
+        }
+
+        .process-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .process-title {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .process-date {
+            font-size: 14px;
+            color: #666;
+            background-color: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        .process-content {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .show-all-link {
+            text-align: right;
+            color: #8c3a3a;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px 0;
+        }
+
+        .show-all-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Timeline Styles */
+        .timeline-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .timeline {
+            position: relative;
+            margin-left: 10px;
+            padding-left: 30px;
+            border-left: 2px solid #e0e0e0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -41px;
+            top: 0;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid #8c3a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timeline-marker i {
+            color: #8c3a3a;
+            font-size: 12px;
+        }
+
+        .timeline-content {
+            padding-left: 10px;
+        }
+
+        .timeline-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .timeline-date {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -397,8 +513,7 @@
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo"
-                onerror="this.src='https://via.placeholder.com/80'">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
         </div>
         <a href="{{ route('admin.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -408,6 +523,14 @@
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
+        <a href="{{ route('admin.pelanggan') }}" class="menu-item">
+            <i class="fas fa-users"></i>
+            <span>Pelanggan</span>
+        </a>
+        <a href="{{ route('admin.perbaikan.create') }}" class="menu-item">
+            <i class="fas fa-tools"></i>
+            <span>Tambah Perbaikan</span>
+        </a>
 
         <a href="{{ route('admin.transaksi') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
@@ -416,8 +539,7 @@
 
         <form method="POST" action="{{ route('logout') }}" style="margin-top: 0;">
             @csrf
-            <button type="submit" class="logout"
-                style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
+            <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </button>
@@ -479,6 +601,10 @@
                         <div class="info-value">{{ $transaksi->nama_barang }}</div>
                     </div>
                     <div class="info-row">
+                        <div class="info-label">Kategori Device</div>
+                        <div class="info-value">{{ $transaksi->kategori_device ?? 'Tidak ditentukan' }}</div>
+                    </div>
+                    <div class="info-row">
                         <div class="info-label">Masalah</div>
                         <div class="info-value">{{ $transaksi->masalah }}</div>
                     </div>
@@ -503,38 +629,81 @@
                         </div>
                     </div>
 
-                    <!-- Status update section - Very important -->
-                    <!-- Change the status buttons section in detail_transaksi.blade.php -->
-                  <div class="status-actions">
-    <h4 class="status-title">Ubah Status Perbaikan</h4>
-    <div class="status-buttons">
-        @if($transaksi->status != 'Menunggu')
-            <button type="button" class="btn-status btn-menunggu" data-status="Menunggu">
-                Menunggu
-            </button>
-        @endif
+                    <!-- Status update section -->
+                    <div class="status-actions">
+                        <h4 class="status-title">Ubah Status Perbaikan</h4>
+                        <div class="status-buttons">
+                            @if($transaksi->status != 'Menunggu')
+                                <button type="button" class="btn-status btn-menunggu" data-status="Menunggu">
+                                    Menunggu
+                                </button>
+                            @endif
 
-        @if($transaksi->status != 'Proses')
-            <button type="button" class="btn-status btn-proses" data-status="Proses">
-                Proses
-            </button>
-        @endif
+                            @if($transaksi->status != 'Proses')
+                                <button type="button" class="btn-status btn-proses" data-status="Proses">
+                                    Proses
+                                </button>
+                            @endif
 
-        @if($transaksi->status != 'Selesai')
-            <button type="button" class="btn-status btn-selesai" data-status="Selesai">
-                Selesai
-            </button>
-        @endif
-    </div>
-</div>
-<div id="statusAlert" class="alert alert-success" style="display: none;"></div>
-                    <!-- Add this inside the card-body div, perhaps before the status-actions section -->
-                    <div class="actions" style="margin-top: 20px;">
+                            @if($transaksi->status != 'Selesai')
+                                <button type="button" class="btn-status btn-selesai" data-status="Selesai">
+                                    Selesai
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Add this inside the card-body div, after the status-actions section -->
+                    <div class="actions">
                         <a href="{{ route('admin.perbaikan.edit', $transaksi->id) }}" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit Perbaikan
                         </a>
                     </div>
+                </div>
+            </div>
 
+            <!-- Proses Pengerjaan Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Proses Pengerjaan</h3>
+                </div>
+                <div class="card-body">
+                    @if(!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
+                        <?php
+                            $prosesArray = $transaksi->proses_pengerjaan;
+                            $latestProcess = $prosesArray[count($prosesArray) - 1];
+                        ?>
+                        <!-- Latest Process -->
+                        <div class="latest-process">
+                            <div class="process-header">
+                                <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
+                                <div class="process-date">{{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
+                            </div>
+                            <div class="process-content">{{ $latestProcess['step'] }}</div>
+                            <div class="show-all-link" onclick="toggleTimeline()">
+                                Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- Full Timeline (hidden by default) -->
+                        <div id="timeline-container" class="timeline-container">
+                            <div class="timeline">
+                                @foreach(array_reverse($transaksi->proses_pengerjaan) as $proses)
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker">
+                                            <i class="fas fa-circle"></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <h4 class="timeline-title">{{ $proses['step'] }}</h4>
+                                            <p class="timeline-date">{{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
+                    @endif
                 </div>
             </div>
 
@@ -577,244 +746,10 @@
             </div>
         </div>
     </div>
-<script>
-    // Execute when DOM is fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get current status
-        const currentStatus = '{{ $transaksi->status }}';
 
-        // Hide status change section if status is already "Selesai"
-        if (currentStatus === 'Selesai') {
-            const statusActions = document.querySelector('.status-actions');
-            if (statusActions) {
-                statusActions.style.display = 'none';
-            }
-        }
-
-        // Set up the confirmation modal
-        const modal = document.getElementById('confirmationModal');
-        const confirmText = document.getElementById('confirmationText');
-        const confirmYes = document.getElementById('confirmYes');
-        const confirmNo = document.getElementById('confirmNo');
-
-        // Variables to store the status we want to change to
-        let pendingStatus = '';
-
-        // Attach click handlers to all status buttons
-        document.querySelectorAll('.btn-status').forEach(button => {
-            button.addEventListener('click', function() {
-                // Get the status from data attribute or button content
-                pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
-
-                // Set confirmation message
-                confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS MENJADI ' + pendingStatus + '?';
-
-                // Show the confirmation modal
-                modal.style.display = 'block';
-            });
-        });
-
-        // Handle confirmation: YES
-        confirmYes.addEventListener('click', function() {
-            if (pendingStatus) {
-                // Get CSRF token
-                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-                // Hide the modal
-                modal.style.display = 'none';
-
-                // Capture the old status before updating UI
-                const statusBadge = document.getElementById('statusBadge');
-                const oldStatus = statusBadge ? statusBadge.textContent.trim() : '';
-
-                // OPTIMISTIC UI UPDATE - Update UI immediately before waiting for server
-                if (statusBadge) {
-                    statusBadge.className = 'status-badge status-' + pendingStatus.toLowerCase();
-                    statusBadge.textContent = pendingStatus;
-                }
-
-                // If status is now "Selesai", hide the status change section immediately
-                if (pendingStatus === 'Selesai') {
-                    const statusActions = document.querySelector('.status-actions');
-                    if (statusActions) {
-                        statusActions.style.display = 'none';
-                    }
-                } else {
-                    // Otherwise, update which buttons should be visible immediately
-                    updateStatusButtons(pendingStatus);
-                }
-
-                // Show a brief success message
-                const statusAlert = document.getElementById('statusAlert');
-                if (statusAlert) {
-                    statusAlert.textContent = 'Status berhasil diperbarui menjadi ' + pendingStatus;
-                    statusAlert.style.display = 'block';
-
-                    // Hide the alert after a few seconds
-                    setTimeout(() => {
-                        statusAlert.style.display = 'none';
-                    }, 3000);
-                }
-
-                // Now send the status update request
-                fetch('/admin/transaksi/{{ $transaksi->id }}/status', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token
-                    },
-                    body: JSON.stringify({
-                        status: pendingStatus
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        // If failed, revert UI changes
-                        console.error('Failed to update status:', data.message);
-
-                        // Revert status badge
-                        if (statusBadge) {
-                            statusBadge.className = 'status-badge status-' + oldStatus.toLowerCase();
-                            statusBadge.textContent = oldStatus;
-                        }
-
-                        // Revert button visibility
-                        if (oldStatus === 'Selesai') {
-                            const statusActions = document.querySelector('.status-actions');
-                            if (statusActions) {
-                                statusActions.style.display = 'none';
-                            }
-                        } else {
-                            updateStatusButtons(oldStatus);
-                            const statusActions = document.querySelector('.status-actions');
-                            if (statusActions) {
-                                statusActions.style.display = 'block';
-                            }
-                        }
-
-                        // Show error message
-                        if (statusAlert) {
-                            statusAlert.textContent = 'Gagal mengubah status: ' + (data.message || 'Terjadi kesalahan');
-                            statusAlert.style.display = 'block';
-
-                            // Hide the alert after a few seconds
-                            setTimeout(() => {
-                                statusAlert.style.display = 'none';
-                            }, 3000);
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating status:', error);
-                    // Could add code here to revert UI changes on network error
-                });
-            }
-        });
-
-        // Handle confirmation: NO
-        confirmNo.addEventListener('click', function() {
-            // Just hide the modal
-            modal.style.display = 'none';
-        });
-
-        // Close the modal if user clicks outside of it
-        window.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
-        // Print functionality
-        window.addEventListener('beforeprint', function() {
-            document.querySelector('.sidebar').style.display = 'none';
-            document.querySelector('.main-content').style.marginLeft = '0';
-            document.querySelector('.header').style.display = 'none';
-            document.querySelector('.content-header').style.display = 'none';
-            document.querySelector('.status-actions').style.display = 'none';
-            document.querySelector('.actions').style.display = 'none';
-        });
-
-        window.addEventListener('afterprint', function() {
-            document.querySelector('.sidebar').style.display = 'flex';
-            document.querySelector('.main-content').style.marginLeft = '220px';
-            document.querySelector('.header').style.display = 'flex';
-            document.querySelector('.content-header').style.display = 'flex';
-
-            // Only show status actions if status is not "Selesai"
-            const currentStatus = document.getElementById('statusBadge').textContent.trim();
-            if (currentStatus !== 'Selesai') {
-                document.querySelector('.status-actions').style.display = 'block';
-            }
-
-            document.querySelector('.actions').style.display = 'flex';
-        });
-    });
-
-    // Function to update button display based on status
-    function updateStatusButtons(status) {
-        // Remove all buttons first
-        const buttonsContainer = document.querySelector('.status-buttons');
-        if (!buttonsContainer) return;
-
-        buttonsContainer.innerHTML = '';
-
-        // Add appropriate buttons based on status
-        if (status !== 'Selesai') {
-            if (status === 'Menunggu') {
-                // For Menunggu status, show Proses and Selesai buttons
-                const prosesButton = document.createElement('button');
-                prosesButton.type = 'button';
-                prosesButton.className = 'btn-status btn-proses';
-                prosesButton.setAttribute('data-status', 'Proses');
-                prosesButton.textContent = 'Proses';
-                prosesButton.onclick = showConfirmationModal;
-                buttonsContainer.appendChild(prosesButton);
-
-                const selesaiButton = document.createElement('button');
-                selesaiButton.type = 'button';
-                selesaiButton.className = 'btn-status btn-selesai';
-                selesaiButton.setAttribute('data-status', 'Selesai');
-                selesaiButton.textContent = 'Selesai';
-                selesaiButton.onclick = showConfirmationModal;
-                buttonsContainer.appendChild(selesaiButton);
-            } else if (status === 'Proses') {
-                // For Proses status, show Menunggu and Selesai buttons
-                const menungguButton = document.createElement('button');
-                menungguButton.type = 'button';
-                menungguButton.className = 'btn-status btn-menunggu';
-                menungguButton.setAttribute('data-status', 'Menunggu');
-                menungguButton.textContent = 'Menunggu';
-                menungguButton.onclick = showConfirmationModal;
-                buttonsContainer.appendChild(menungguButton);
-
-                const selesaiButton = document.createElement('button');
-                selesaiButton.type = 'button';
-                selesaiButton.className = 'btn-status btn-selesai';
-                selesaiButton.setAttribute('data-status', 'Selesai');
-                selesaiButton.textContent = 'Selesai';
-                selesaiButton.onclick = showConfirmationModal;
-                buttonsContainer.appendChild(selesaiButton);
-            }
-        }
-    }
-
-    // Helper function to show confirmation modal
-    function showConfirmationModal() {
-        const pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
-        const confirmText = document.getElementById('confirmationText');
-        confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS MENJADI ' + pendingStatus + '?';
-        document.getElementById('confirmationModal').style.display = 'block';
-
-        // Store the status in a global-ish scope for the confirmation handler
-        window.pendingStatus = pendingStatus;
-    }
-</script>
     <!-- Custom Confirmation Modal -->
-    <div id="confirmationModal"
-        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
-        <div
-            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 5px; text-align: center; width: 350px;">
+    <div id="confirmationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 5px; text-align: center; width: 350px;">
             <h3 id="confirmationText" style="margin-bottom: 20px; font-weight: bold; color: #333333;">APAKAH ANDA
                 YAKIN MENGUBAH STATUS?</h3>
             <div>
@@ -825,6 +760,270 @@
             </div>
         </div>
     </div>
-</body>
 
+    <script>
+        // Toggle timeline function
+        function toggleTimeline() {
+            const timelineContainer = document.getElementById('timeline-container');
+            const toggleIcon = document.getElementById('timeline-toggle-icon');
+            const showAllLink = document.querySelector('.show-all-link');
+
+            if (timelineContainer.style.display === 'none' || timelineContainer.style.display === '') {
+                timelineContainer.style.display = 'block';
+                toggleIcon.className = 'fas fa-chevron-up';
+                showAllLink.innerHTML = 'Sembunyikan progress <i class="fas fa-chevron-up" id="timeline-toggle-icon"></i>';
+            } else {
+                timelineContainer.style.display = 'none';
+                toggleIcon.className = 'fas fa-chevron-down';
+                showAllLink.innerHTML = 'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
+            }
+        }
+
+        // Execute when DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get current status
+            const currentStatus = '{{ $transaksi->status }}';
+
+            // Hide status change section if status is already "Selesai"
+            if (currentStatus === 'Selesai') {
+                const statusActions = document.querySelector('.status-actions');
+                if (statusActions) {
+                    statusActions.style.display = 'none';
+                }
+            }
+
+            // Set up the confirmation modal
+            const modal = document.getElementById('confirmationModal');
+            const confirmText = document.getElementById('confirmationText');
+            const confirmYes = document.getElementById('confirmYes');
+            const confirmNo = document.getElementById('confirmNo');
+
+            // Variables to store the status we want to change to
+            let pendingStatus = '';
+
+            // Attach click handlers to all status buttons
+            document.querySelectorAll('.btn-status').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Get the status from data attribute or button content
+                    pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
+
+                    // Set confirmation message
+                    confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS MENJADI ' + pendingStatus + '?';
+
+                    // Show the confirmation modal
+                    modal.style.display = 'block';
+                });
+            });
+
+            // Handle confirmation: YES
+            confirmYes.addEventListener('click', function() {
+                if (pendingStatus) {
+                    // Get CSRF token
+                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                    // Hide the modal
+                    modal.style.display = 'none';
+
+                    // Capture the old status before updating UI
+                    const statusBadge = document.getElementById('statusBadge');
+                    const oldStatus = statusBadge ? statusBadge.textContent.trim() : '';
+
+                    // OPTIMISTIC UI UPDATE - Update UI immediately before waiting for server
+                    if (statusBadge) {
+                        statusBadge.className = 'status-badge status-' + pendingStatus.toLowerCase();
+                        statusBadge.textContent = pendingStatus;
+                    }
+
+                    // If status is now "Selesai", hide the status change section immediately
+                    if (pendingStatus === 'Selesai') {
+                        const statusActions = document.querySelector('.status-actions');
+                        if (statusActions) {
+                            statusActions.style.display = 'none';
+                        }
+                    } else {
+                        // Otherwise, update which buttons should be visible immediately
+                        updateStatusButtons(pendingStatus);
+                    }
+
+                    // Show a brief success message
+                    const statusAlert = document.getElementById('statusAlert');
+                    if (statusAlert) {
+                        statusAlert.textContent = 'Status berhasil diperbarui menjadi ' + pendingStatus;
+                        statusAlert.style.display = 'block';
+
+                        // Hide the alert after a few seconds
+                        setTimeout(() => {
+                            statusAlert.style.display = 'none';
+                        }, 3000);
+                    }
+
+                    // Now send the status update request
+                    fetch('/admin/transaksi/{{ $transaksi->id }}/status', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token
+                        },
+                        body: JSON.stringify({
+                            status: pendingStatus
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            // If failed, revert UI changes
+                            console.error('Failed to update status:', data.message);
+
+                            // Revert status badge
+                            if (statusBadge) {
+                                statusBadge.className = 'status-badge status-' + oldStatus.toLowerCase();
+                                statusBadge.textContent = oldStatus;
+                            }
+
+                            // Revert button visibility
+                            if (oldStatus === 'Selesai') {
+                                const statusActions = document.querySelector('.status-actions');
+                                if (statusActions) {
+                                    statusActions.style.display = 'none';
+                                }
+                            } else {
+                                updateStatusButtons(oldStatus);
+                                const statusActions = document.querySelector('.status-actions');
+                                if (statusActions) {
+                                    statusActions.style.display = 'block';
+                                }
+                            }
+
+                            // Show error message
+                            if (statusAlert) {
+                                statusAlert.textContent = 'Gagal mengubah status: ' + (data.message || 'Terjadi kesalahan');
+                                statusAlert.style.display = 'block';
+
+                                // Hide// Hide the alert after a few seconds
+                                setTimeout(() => {
+                                    statusAlert.style.display = 'none';
+                                }, 3000);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating status:', error);
+                        // Could add code here to revert UI changes on network error
+                    });
+                }
+            });
+
+            // Handle confirmation: NO
+            confirmNo.addEventListener('click', function() {
+                // Just hide the modal
+                modal.style.display = 'none';
+            });
+
+            // Close the modal if user clicks outside of it
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        // Function to update button display based on status
+        function updateStatusButtons(status) {
+            // Remove all buttons first
+            const buttonsContainer = document.querySelector('.status-buttons');
+            if (!buttonsContainer) return;
+
+            buttonsContainer.innerHTML = '';
+
+            // Add appropriate buttons based on status
+            if (status !== 'Selesai') {
+                if (status === 'Menunggu') {
+                    // For Menunggu status, show Proses and Selesai buttons
+                    const prosesButton = document.createElement('button');
+                    prosesButton.type = 'button';
+                    prosesButton.className = 'btn-status btn-proses';
+                    prosesButton.setAttribute('data-status', 'Proses');
+                    prosesButton.textContent = 'Proses';
+                    prosesButton.onclick = showConfirmationModal;
+                    buttonsContainer.appendChild(prosesButton);
+
+                    const selesaiButton = document.createElement('button');
+                    selesaiButton.type = 'button';
+                    selesaiButton.className = 'btn-status btn-selesai';
+                    selesaiButton.setAttribute('data-status', 'Selesai');
+                    selesaiButton.textContent = 'Selesai';
+                    selesaiButton.onclick = showConfirmationModal;
+                    buttonsContainer.appendChild(selesaiButton);
+                } else if (status === 'Proses') {
+                    // For Proses status, show Menunggu and Selesai buttons
+                    const menungguButton = document.createElement('button');
+                    menungguButton.type = 'button';
+                    menungguButton.className = 'btn-status btn-menunggu';
+                    menungguButton.setAttribute('data-status', 'Menunggu');
+                    menungguButton.textContent = 'Menunggu';
+                    menungguButton.onclick = showConfirmationModal;
+                    buttonsContainer.appendChild(menungguButton);
+
+                    const selesaiButton = document.createElement('button');
+                    selesaiButton.type = 'button';
+                    selesaiButton.className = 'btn-status btn-selesai';
+                    selesaiButton.setAttribute('data-status', 'Selesai');
+                    selesaiButton.textContent = 'Selesai';
+                    selesaiButton.onclick = showConfirmationModal;
+                    buttonsContainer.appendChild(selesaiButton);
+                }
+            }
+        }
+
+        // Helper function to show confirmation modal
+        function showConfirmationModal() {
+            const pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
+            const confirmText = document.getElementById('confirmationText');
+            confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS MENJADI ' + pendingStatus + '?';
+            document.getElementById('confirmationModal').style.display = 'block';
+
+            // Store the status in a global-ish scope for the confirmation handler
+            window.pendingStatus = pendingStatus;
+        }
+
+        // Print functionality
+        window.addEventListener('beforeprint', function() {
+            document.querySelector('.sidebar').style.display = 'none';
+            document.querySelector('.main-content').style.marginLeft = '0';
+            document.querySelector('.header').style.display = 'none';
+            document.querySelector('.content-header .btn-print').style.display = 'none';
+            document.querySelector('.status-actions').style.display = 'none';
+            document.querySelector('.actions').style.display = 'none';
+            document.querySelector('.show-all-link').style.display = 'none';
+
+            // Ensure full timeline is visible when printing
+            const timelineContainer = document.getElementById('timeline-container');
+            if(timelineContainer) {
+                timelineContainer.style.display = 'block';
+            }
+        });
+
+        window.addEventListener('afterprint', function() {
+            document.querySelector('.sidebar').style.display = 'flex';
+            document.querySelector('.main-content').style.marginLeft = '220px';
+            document.querySelector('.header').style.display = 'flex';
+            document.querySelector('.content-header .btn-print').style.display = 'inline-flex';
+
+            // Only show status actions if status is not "Selesai"
+            const currentStatus = document.getElementById('statusBadge').textContent.trim();
+            if (currentStatus !== 'Selesai') {
+                document.querySelector('.status-actions').style.display = 'block';
+            }
+
+            document.querySelector('.actions').style.display = 'flex';
+            document.querySelector('.show-all-link').style.display = 'block';
+
+            // Restore timeline to previous state after printing
+            const timelineContainer = document.getElementById('timeline-container');
+            if(timelineContainer && !document.querySelector('.show-all-link').innerHTML.includes('Sembunyikan')) {
+                timelineContainer.style.display = 'none';
+            }
+        });
+    </script>
+</body>
 </html>
