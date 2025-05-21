@@ -91,10 +91,9 @@ class PerbaikanController extends Controller
             'masalah' => 'required|string',
             'tindakan_perbaikan' => 'required|string',
             'kategori_device' => 'required|string|max:50',
-            'status' => 'required|in:Menunggu,Proses,Selesai',
             'harga' => 'required|numeric',
             'garansi' => 'required|string',
-            'proses_step' => 'nullable|string',
+
         ], [
             'masalah.required' => 'Masalah wajib diisi.',
             'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
@@ -116,15 +115,12 @@ class PerbaikanController extends Controller
         $perbaikan->masalah = $request->masalah;
         $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
         $perbaikan->kategori_device = $request->kategori_device;
-        $perbaikan->status = $request->status;
         $perbaikan->harga = $request->harga;
         $perbaikan->garansi = $request->garansi;
         $perbaikan->save();
 
         // Add a new process step if provided
-        if ($request->filled('proses_step')) {
-            $perbaikan->addProsesStep($request->proses_step);
-        }
+
 
         return redirect()->route('teknisi.progress')->with('success', 'Data perbaikan berhasil diperbarui');
     }

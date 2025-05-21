@@ -317,40 +317,46 @@
             font-size: 0.9em;
             margin-top: 5px;
         }
-          .timeline {
-        position: relative;
-        margin-left: 20px;
-        padding-left: 20px;
-        border-left: 2px solid #e0e0e0;
-    }
-    .timeline-item {
-        position: relative;
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-    }
-    .timeline-marker {
-        position: absolute;
-        left: -31px;
-        width: 20px;
-        height: 20px;
-        color: #8c3a3a;
-        background: white;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 20px;
-    }
-    .timeline-content {
-        padding-left: 10px;
-    }
-    .timeline-title {
-        font-size: 16px;
-        margin-bottom: 5px;
-    }
-    .timeline-date {
-        font-size: 14px;
-        color: #666;
-        margin: 0;
-    }
+
+        .timeline {
+            position: relative;
+            margin-left: 20px;
+            padding-left: 20px;
+            border-left: 2px solid #e0e0e0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -31px;
+            width: 20px;
+            height: 20px;
+            color: #8c3a3a;
+            background: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+        }
+
+        .timeline-content {
+            padding-left: 10px;
+        }
+
+        .timeline-title {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .timeline-date {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
     </style>
 </head>
 
@@ -438,8 +444,7 @@
 
                 <div class="form-group">
                     <label for="id">Kode Perbaikan</label>
-                    <input type="text" id="id" class="form-control"
-                        value="{{ $perbaikan->id }}" disabled>
+                    <input type="text" id="id" class="form-control" value="{{ $perbaikan->id }}" disabled>
                 </div>
 
                 <div class="form-group">
@@ -499,21 +504,7 @@
                     @enderror
                 </div>
 
-                <div class="form-group">
-                    <label for="status">Status Perbaikan</label>
-                    <select id="status" name="status"
-                        class="form-control status-select @error('status') is-invalid @enderror" required>
-                        <option value="Menunggu"
-                            {{ old('status', $perbaikan->status) == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
-                        <option value="Proses" {{ old('status', $perbaikan->status) == 'Proses' ? 'selected' : '' }}>
-                            Proses</option>
-                        <option value="Selesai"
-                            {{ old('status', $perbaikan->status) == 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                    </select>
-                    @error('status')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+
 
                 <div class="form-group">
                     <label for="harga">Harga</label>
@@ -534,37 +525,9 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="form-group">
-    <label>Riwayat Proses Pengerjaan</label>
-    @if(!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
-        <div class="timeline">
-            @foreach($perbaikan->proses_pengerjaan as $index => $proses)
-                <div class="timeline-item">
-                    <div class="timeline-marker">
-                        <i class="fas fa-circle"></i>
-                    </div>
-                    <div class="timeline-content">
-                        <h4 class="timeline-title">{{ $proses['step'] }}</h4>
-                        <p class="timeline-date">{{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}</p>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @else
-        <p class="text-muted">Belum ada proses yang direkam.</p>
-    @endif
-</div>
 
-<div class="form-group">
-    <label for="proses_step">Tambah Proses Pengerjaan Baru</label>
-    <div class="input-group">
-        <input type="text" id="proses_step" name="proses_step" class="form-control" placeholder="Misalnya: Pengambilan sparepart">
-        <div class="input-group-append">
-            <span class="input-group-text"><i class="fas fa-clock"></i> {{ now()->format('H:i:s') }}</span>
-        </div>
-    </div>
-    <small class="form-text text-muted">Masukkan langkah baru dalam proses pengerjaan</small>
-</div>
+
+
                 <div class="form-footer">
                     <a href="{{ route('perbaikan.show', $perbaikan->id) }}" class="btn btn-secondary"
                         style="margin-right: 10px;">

@@ -366,7 +366,7 @@
 
                         <div class="info-row">
                             <div class="info-label">Kode</div>
-                            <div class="info-value">{{ $perbaikan->kode_perbaikan }}</div>
+                            <div class="info-value">{{ $perbaikan->id }}</div>
                         </div>
 
                         <div class="info-row">

@@ -776,99 +776,65 @@
                 </div>
                 <!-- Full Timeline -->
                 <div id="timeline-container" class="timeline-container">
-                    <div class="timeline-title">Riwayat Proses Pengerjaan</div>
-                    <div class="timeline">
-                        @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
-                            @foreach (array_reverse($perbaikan->proses_pengerjaan) as $proses)
-                                @php
-                                    $isStatusChange = strpos($proses['step'], 'Status diubah menjadi') === 0;
-                                    $statusClass = '';
-                                    if ($isStatusChange) {
-                                        if (strpos($proses['step'], 'Menunggu') !== false) {
-                                            $statusClass = 'status-menunggu';
-                                        } elseif (strpos($proses['step'], 'Proses') !== false) {
-                                            $statusClass = 'status-proses';
-                                        } elseif (strpos($proses['step'], 'Selesai') !== false) {
-                                            $statusClass = 'status-selesai';
-                                        }
-                                    }
-                                @endphp
-                                <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}">
-                                    <div class="timeline-marker">
-                                        <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
-                                    </div>
-                                    <div class="timeline-content">
-                                        <div class="timeline-title">{{ $proses['step'] }}</div>
-                                        <div class="timeline-date">
-                                            {{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        @else
-                            <div class="empty-timeline">Belum ada proses yang direkam.</div>
-                        @endif
+    <div class="timeline-title">Riwayat Proses Pengerjaan</div>
+    <div class="timeline">
+        @if (!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
+            @foreach (array_reverse($transaksi->proses_pengerjaan) as $proses)
+                @php
+                    $isStatusChange = strpos($proses['step'], 'Status diubah menjadi') === 0;
+                    $statusClass = '';
+                    if ($isStatusChange) {
+                        if (strpos($proses['step'], 'Menunggu') !== false) {
+                            $statusClass = 'status-menunggu';
+                        } elseif (strpos($proses['step'], 'Proses') !== false) {
+                            $statusClass = 'status-proses';
+                        } elseif (strpos($proses['step'], 'Selesai') !== false) {
+                            $statusClass = 'status-selesai';
+                        }
+                    }
+                @endphp
+                <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}">
+                    <div class="timeline-marker">
+                        <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">{{ $proses['step'] }}</div>
+                        <div class="timeline-date">
+                            {{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    @if (!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
-                        <?php
-                        $prosesArray = $transaksi->proses_pengerjaan;
-                        $latestProcess = $prosesArray[count($prosesArray) - 1];
-                        ?>
-                        <!-- Latest Process -->
-                        <div class="latest-process">
-                            <div class="process-header">
-                                <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
-                                <div class="process-date">
-                                    {{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
-                            </div>
-                            <div class="process-content">{{ $latestProcess['step'] }}</div>
-                            <div class="show-all-link" onclick="toggleTimeline()">
-                                Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
-                            </div>
-                        </div>
+            @endforeach
+        @else
+            <div class="empty-timeline">Belum ada proses yang direkam.</div>
+        @endif
+    </div>
+</div>
 
-                        <!-- Full Timeline (hidden by default) -->
-                        @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
-                            <div class="timeline">
-                                @foreach (array_reverse($perbaikan->proses_pengerjaan) as $proses)
-                                    @php
-                                        $isStatusChange = strpos($proses['step'], 'Status diubah menjadi') === 0;
-                                        $statusClass = '';
-                                        if ($isStatusChange) {
-                                            if (strpos($proses['step'], 'Menunggu') !== false) {
-                                                $statusClass = 'status-menunggu';
-                                            } elseif (strpos($proses['step'], 'Proses') !== false) {
-                                                $statusClass = 'status-proses';
-                                            } elseif (strpos($proses['step'], 'Selesai') !== false) {
-                                                $statusClass = 'status-selesai';
-                                            }
-                                        }
-                                    @endphp
-                                    <div
-                                        class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}">
-                                        <div class="timeline-marker">
-                                            <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
-                                        </div>
-                                        <div class="timeline-content">
-                                            <h4 class="timeline-title">{{ $proses['step'] }}</h4>
-                                            <p class="timeline-date">
-                                                {{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-muted">Belum ada proses yang direkam.</p>
-                        @endif
-                    @else
-                        <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang
-                            direkam.</p>
-                    @endif
-                </div>
+<!-- Latest Process Section (Always Visible) -->
+<div class="card-body">
+    @if (!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
+        <?php
+        $prosesArray = $transaksi->proses_pengerjaan;
+        $latestProcess = $prosesArray[count($prosesArray) - 1];
+        ?>
+        <!-- Latest Process -->
+        <div class="latest-process">
+            <div class="process-header">
+                <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
+                <div class="process-date">
+                    {{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
             </div>
+            <div class="process-content">{{ $latestProcess['step'] }}</div>
+            <div class="show-all-link" onclick="toggleTimeline()">
+                Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
+            </div>
+        </div>
+    @else
+        <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
+    @endif
+</div>
+
 
             <div class="card">
                 <div class="card-header">
