@@ -189,15 +189,25 @@ class PerbaikanController extends Controller
             $perbaikan->harga = $request->harga;
         }
 
+        // Add status change to proses_pengerjaan
+        $currentProcess = $perbaikan->proses_pengerjaan ?? [];
 
+        // Add status change entry
+        $statusMessage = "Status diubah menjadi " . $newStatus;
+        $currentProcess[] = [
+            'step' => $statusMessage,
+            'timestamp' => now()->format('Y-m-d H:i:s')
+        ];
+
+        // Add custom process step if provided
         if ($request->filled('proses_step')) {
-            $currentProcess = $perbaikan->proses_pengerjaan ?? [];
             $currentProcess[] = [
                 'step' => $request->proses_step,
                 'timestamp' => now()->format('Y-m-d H:i:s')
             ];
-            $perbaikan->proses_pengerjaan = $currentProcess;
         }
+
+        $perbaikan->proses_pengerjaan = $currentProcess;
         $perbaikan->save();
 
         if ($request->ajax()) {

@@ -452,7 +452,7 @@
                             @forelse($transaksi as $index => $t)
                                 <tr onclick="window.location='{{ route('transaksi.show', $t->id) }}';" style="cursor: pointer;">
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $t->kode_perbaikan }}</td>
+                                    <td>{{ $t->id }}</td>
                                     <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y') }}</td>
                                     <td>{{ $t->nama_barang }}</td>
                                     <td>{{ $t->pelanggan->nama_pelanggan ?? 'N/A' }}</td>

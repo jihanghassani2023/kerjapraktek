@@ -15,41 +15,41 @@ class SearchController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function suggestions(Request $request)
-    {
-        $query = $request->input('query');
+{
+    $query = $request->input('query');
 
-        if (empty($query)) {
-            return response()->json([]);
-        }
-
-        // Search for repairs matching the query
-        $perbaikan = Perbaikan::with(['pelanggan'])
-            ->where(function($q) use ($query) {
-                $q->where('kode_perbaikan', 'like', "%{$query}%")
-                  ->orWhere('nama_barang', 'like', "%{$query}%")
-                  ->orWhereHas('pelanggan', function($subq) use ($query) {
-                      $subq->where('nama_pelanggan', 'like', "%{$query}%")
-                          ->orWhere('nomor_telp', 'like', "%{$query}%");
-                  });
-            })
-            ->orderBy('created_at', 'desc')
-            ->take(5) // Limit results to 5 for better performance
-            ->get();
-
-        $suggestions = [];
-
-        foreach ($perbaikan as $item) {
-            $suggestions[] = [
-                'id' => $item->id,
-                'kode_perbaikan' => $item->kode_perbaikan,
-                'nama_barang' => $item->nama_barang,
-                'nama_pelanggan' => $item->pelanggan->nama_pelanggan ?? 'N/A',
-                'tanggal' => date('d/m/Y', strtotime($item->tanggal_perbaikan)),
-                'status' => $item->status,
-                'url' => route('admin.transaksi.show', $item->id)
-            ];
-        }
-
-        return response()->json($suggestions);
+    if (empty($query)) {
+        return response()->json([]);
     }
+
+    // Search for repairs matching the query
+    $perbaikan = Perbaikan::with(['pelanggan'])
+        ->where(function($q) use ($query) {
+            $q->where('id', 'like', "%{$query}%")
+              ->orWhere('nama_barang', 'like', "%{$query}%")
+              ->orWhereHas('pelanggan', function($subq) use ($query) {
+                  $subq->where('nama_pelanggan', 'like', "%{$query}%")
+                      ->orWhere('nomor_telp', 'like', "%{$query}%");
+              });
+        })
+        ->orderBy('created_at', 'desc')
+        ->take(5) // Limit results to 5 for better performance
+        ->get();
+
+    $suggestions = [];
+
+    foreach ($perbaikan as $item) {
+        $suggestions[] = [
+            'id' => $item->id,
+            'kode_perbaikan' => $item->id, // Use ID directly
+            'nama_barang' => $item->nama_barang,
+            'nama_pelanggan' => $item->pelanggan->nama_pelanggan ?? 'N/A',
+            'tanggal' => date('d/m/Y', strtotime($item->tanggal_perbaikan)),
+            'status' => $item->status,
+            'url' => route('admin.transaksi.show', $item->id)
+        ];
+    }
+
+    return response()->json($suggestions);
+}
 }

@@ -382,7 +382,7 @@
         <div class="content-section">
             <form id="perbaikanForm" action="{{ route('admin.perbaikan.store') }}" method="POST">
                 @csrf
-                <input type="hidden" name="kode_perbaikan" id="kode_perbaikan" value="{{ old('kode_perbaikan') }}">
+                <input type="hidden" name="id" id="id" value="{{ old('id') }}">
                 <input type="hidden" name="pelanggan_id" id="pelanggan_id" value="{{ old('pelanggan_id') }}">
                 <input type="hidden" name="nomor_telp" id="nomor_telp" value="{{ old('nomor_telp') }}">
                 <input type="hidden" name="email" id="email" value="{{ old('email') }}">
@@ -485,15 +485,17 @@
                     @enderror
                 </div>
                 <div class="form-group">
-    <label for="proses_step">Proses Pengerjaan Awal</label>
-    <div class="input-group">
-        <input type="text" id="proses_step" name="proses_step" class="form-control" placeholder="Misalnya: Penerimaan barang">
-        <div class="input-group-append">
-            <span class="input-group-text"><i class="fas fa-clock"></i> {{ now()->format('H:i:s') }}</span>
-        </div>
-    </div>
-    <small class="form-text text-muted">Opsional: Masukkan langkah awal dari proses pengerjaan</small>
-</div>
+                    <label for="proses_step">Proses Pengerjaan Awal</label>
+                    <div class="input-group">
+                        <input type="text" id="proses_step" name="proses_step" class="form-control"
+                            placeholder="Misalnya: Penerimaan barang">
+                        <div class="input-group-append">
+                            <span class="input-group-text"><i class="fas fa-clock"></i>
+                                {{ now()->format('H:i:s') }}</span>
+                        </div>
+                    </div>
+                    <small class="form-text text-muted">Opsional: Masukkan langkah awal dari proses pengerjaan</small>
+                </div>
 
                 <div style="text-align: right;">
                     <button type="submit" id="submitBtn" class="btn btn-primary">
@@ -508,7 +510,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('perbaikanForm');
             const submitBtn = document.getElementById('submitBtn');
-            const kodeInput = document.getElementById('kode_perbaikan');
             const namaPelangganInput = document.getElementById('nama_pelanggan');
             const pelangganIdInput = document.getElementById('pelanggan_id');
             const nomorTelpInput = document.getElementById('nomor_telp');
@@ -611,6 +612,23 @@
                 }
             });
 
+            // Tambahkan kode ini pada bagian input event 'blur' (ketika input field kehilangan fokus)
+            namaPelangganInput.addEventListener('blur', function() {
+                const query = this.value.trim();
+
+                if (query.length >= 1) {
+                    // Cari kecocokan pelanggan dari data yang sudah diambil
+                    const matchingCustomers = allCustomers.filter(customer =>
+                        customer.nama_pelanggan.toLowerCase() === query.toLowerCase()
+                    );
+
+                    // Jika ditemukan pelanggan yang cocok persis
+                    if (matchingCustomers.length === 1) {
+                        selectCustomer(matchingCustomers[0]);
+                    }
+                }
+            });
+
             // Close autocomplete results when clicking outside
             document.addEventListener('click', function(event) {
                 if (!autocompleteResults.contains(event.target) && event.target !== namaPelangganInput) {
@@ -618,36 +636,27 @@
                 }
             });
 
-            // Submit form handler
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
+            // Submit form handler - PENTING: Hanya validasi form, biarkan form submit secara normal
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function(event) {
+                    if (!validateForm()) {
+                        event.preventDefault();
+                        alert('Silakan lengkapi semua field yang diperlukan.');
+                        return;
+                    }
+                    // Jika validasi lolos, form akan di-submit secara normal
+                    form.submit();
+                });
+            }
 
-                // Validate required fields
+            // Form submit event - sebagai backup jika button handler tidak berfungsi
+            form.addEventListener('submit', function(event) {
                 if (!validateForm()) {
+                    event.preventDefault();
                     alert('Silakan lengkapi semua field yang diperlukan.');
                     return;
                 }
-
-                // Generate a key before submitting
-                fetch('{{ route('admin.perbaikan.generate-key') }}', {
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.kode) {
-                            // Set the generated code and submit the form
-                            kodeInput.value = data.kode;
-                            form.submit();
-                        } else {
-                            alert('Gagal generate kode perbaikan. Silakan coba lagi.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan. Silakan coba lagi.');
-                    });
+                // Jika validasi lolos, form akan di-submit secara normal
             });
 
             // Function to validate form
@@ -658,7 +667,8 @@
                 if (!pelangganIdInput.value) {
                     namaPelangganInput.style.borderColor = 'red';
                     alert(
-                        'Pelanggan tidak ditemukan. Silakan pilih pelanggan dari daftar atau daftarkan pelanggan baru terlebih dahulu.');
+                        'Pelanggan tidak ditemukan. Silakan pilih pelanggan dari daftar atau daftarkan pelanggan baru terlebih dahulu.'
+                    );
                     isValid = false;
                 } else {
                     namaPelangganInput.style.borderColor = '';

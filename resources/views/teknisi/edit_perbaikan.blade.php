@@ -437,9 +437,9 @@
                 @method('PUT')
 
                 <div class="form-group">
-                    <label for="kode_perbaikan">Kode Perbaikan</label>
-                    <input type="text" id="kode_perbaikan" class="form-control"
-                        value="{{ $perbaikan->kode_perbaikan }}" disabled>
+                    <label for="id">Kode Perbaikan</label>
+                    <input type="text" id="id" class="form-control"
+                        value="{{ $perbaikan->id }}" disabled>
                 </div>
 
                 <div class="form-group">

@@ -64,7 +64,6 @@ Route::middleware(['auth'])->group(function () {
         // Perbaikan management
         Route::get('/perbaikan/create', [AdminController::class, 'createPerbaikan'])->name('perbaikan.create');
         Route::post('/perbaikan', [AdminController::class, 'storePerbaikan'])->name('perbaikan.store');
-        Route::get('/generate-key', [AdminController::class, 'generateKey'])->name('perbaikan.generate-key');
         Route::get('/perbaikan/{id}/edit', [AdminController::class, 'editPerbaikan'])->name('perbaikan.edit');
         Route::put('/perbaikan/{id}', [AdminController::class, 'updatePerbaikan'])->name('perbaikan.update');
     });

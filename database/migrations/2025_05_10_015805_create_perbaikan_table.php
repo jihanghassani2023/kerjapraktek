@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
 
 return new class extends Migration
 {
@@ -10,7 +12,6 @@ return new class extends Migration
     {
         Schema::create('perbaikan', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_perbaikan', 20)->unique();
             $table->string('nama_barang', 100);
             $table->string('kategori_device', 50)->nullable();
             $table->date('tanggal_perbaikan');
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->foreignId('pelanggan_id')->nullable()->constrained('pelanggan');
             $table->timestamps();
         });
+        DB::statement('ALTER TABLE perbaikan AUTO_INCREMENT = 50001');
     }
 
     public function down(): void

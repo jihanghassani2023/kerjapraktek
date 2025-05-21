@@ -501,7 +501,7 @@
 
         <div class="content-wrapper">
             <div class="content-header">
-                <h2 class="content-title">Transaksi #{{ $transaksi->kode_perbaikan }}</h2>
+                <h2 class="content-title">Transaksi #{{ $transaksi->id }}</h2>
                 <a href="javascript:window.print()" class="btn btn-print">
                     <i class="fas fa-print"></i> Cetak
                 </a>
@@ -514,7 +514,7 @@
                 <div class="card-body">
                     <div class="info-row">
                         <div class="info-label">Kode Perbaikan</div>
-                        <div class="info-value">{{ $transaksi->kode_perbaikan }}</div>
+                        <div class="info-value">{{ $transaksi->id }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Tanggal Perbaikan</div>

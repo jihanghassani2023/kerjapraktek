@@ -316,7 +316,7 @@
                 @forelse($perbaikan as $index => $p)
                 <tr onclick="window.location.href='{{ route('perbaikan.show', $p->id) }}';">
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $p->kode_perbaikan }}</td>
+                    <td>{{ $p->id }}</td>
                     <td>{{ $p->nama_barang }}</td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('l, j F Y') }}</td>
                     <td>{{ $p->masalah }}</td>

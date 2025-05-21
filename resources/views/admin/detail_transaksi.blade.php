@@ -124,7 +124,7 @@
             padding: 15px 20px;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .user-info {
@@ -380,6 +380,88 @@
             align-items: center;
             margin-bottom: 10px;
         }
+        /* Timeline Styles */
+.timeline {
+    position: relative;
+    margin-left: 20px;
+    padding-left: 20px;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+}
+.timeline-marker {
+    position: absolute;
+    left: -31px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    border: 2px solid #8c3a3a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.timeline-marker i {
+    font-size: 10px;
+    color: #8c3a3a;
+}
+.timeline-content {
+    padding-left: 10px;
+}
+.timeline-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+.timeline-date {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Status change styling */
+.timeline-item.status-change .timeline-marker {
+    border-color: #6c757d;
+}
+.timeline-item.status-change .timeline-marker i {
+    color: #6c757d;
+}
+.timeline-item.status-change .timeline-title {
+    font-style: italic;
+}
+
+/* Status-specific colors */
+.timeline-item.status-menunggu .timeline-marker {
+    border-color: #ff6b6b;
+}
+.timeline-item.status-menunggu .timeline-marker i {
+    color: #ff6b6b;
+}
+.timeline-item.status-menunggu .timeline-title {
+    color: #ff6b6b;
+}
+
+.timeline-item.status-proses .timeline-marker {
+    border-color: #ffaa00;
+}
+.timeline-item.status-proses .timeline-marker i {
+    color: #ffaa00;
+}
+.timeline-item.status-proses .timeline-title {
+    color: #ffaa00;
+}
+
+.timeline-item.status-selesai .timeline-marker {
+    border-color: #28a745;
+}
+.timeline-item.status-selesai .timeline-marker i {
+    color: #28a745;
+}
+.timeline-item.status-selesai .timeline-title {
+    color: #28a745;
+}
 
         .process-title {
             font-weight: bold;
@@ -507,13 +589,37 @@
                 flex-direction: column;
             }
         }
+
+        /* Timeline Styles for Status Changes */
+        .timeline-item.status-change .timeline-marker {
+            background-color: #e9ecef;
+            border-color: #6c757d;
+        }
+
+        .timeline-item.status-change .timeline-title {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .timeline-item.status-change.status-menunggu .timeline-title {
+            color: #ff6b6b;
+        }
+
+        .timeline-item.status-change.status-proses .timeline-title {
+            color: #ffaa00;
+        }
+
+        .timeline-item.status-change.status-selesai .timeline-title {
+            color: #28a745;
+        }
     </style>
 </head>
 
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo"
+                onerror="this.src='https://via.placeholder.com/80'">
         </div>
         <a href="{{ route('admin.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -539,7 +645,8 @@
 
         <form method="POST" action="{{ route('logout') }}" style="margin-top: 0;">
             @csrf
-            <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
+            <button type="submit" class="logout"
+                style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </button>
@@ -576,7 +683,7 @@
 
         <div class="content-wrapper">
             <div class="content-header">
-                <h2 class="content-title">Transaksi #{{ $transaksi->kode_perbaikan }}</h2>
+                <h2 class="content-title">Transaksi #{{ $transaksi->id }}</h2>
                 <a href="javascript:window.print()" class="btn btn-print">
                     <i class="fas fa-print"></i> Cetak
                 </a>
@@ -589,7 +696,7 @@
                 <div class="card-body">
                     <div class="info-row">
                         <div class="info-label">Kode Perbaikan</div>
-                        <div class="info-value">{{ $transaksi->kode_perbaikan }}</div>
+                        <div class="info-value">{{ $transaksi->id }}</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Tanggal Perbaikan</div>
@@ -633,19 +740,19 @@
                     <div class="status-actions">
                         <h4 class="status-title">Ubah Status Perbaikan</h4>
                         <div class="status-buttons">
-                            @if($transaksi->status != 'Menunggu')
+                            @if ($transaksi->status != 'Menunggu')
                                 <button type="button" class="btn-status btn-menunggu" data-status="Menunggu">
                                     Menunggu
                                 </button>
                             @endif
 
-                            @if($transaksi->status != 'Proses')
+                            @if ($transaksi->status != 'Proses')
                                 <button type="button" class="btn-status btn-proses" data-status="Proses">
                                     Proses
                                 </button>
                             @endif
 
-                            @if($transaksi->status != 'Selesai')
+                            @if ($transaksi->status != 'Selesai')
                                 <button type="button" class="btn-status btn-selesai" data-status="Selesai">
                                     Selesai
                                 </button>
@@ -667,17 +774,54 @@
                 <div class="card-header">
                     <h3 class="card-title">Proses Pengerjaan</h3>
                 </div>
+                <!-- Full Timeline -->
+                <div id="timeline-container" class="timeline-container">
+                    <div class="timeline-title">Riwayat Proses Pengerjaan</div>
+                    <div class="timeline">
+                        @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
+                            @foreach (array_reverse($perbaikan->proses_pengerjaan) as $proses)
+                                @php
+                                    $isStatusChange = strpos($proses['step'], 'Status diubah menjadi') === 0;
+                                    $statusClass = '';
+                                    if ($isStatusChange) {
+                                        if (strpos($proses['step'], 'Menunggu') !== false) {
+                                            $statusClass = 'status-menunggu';
+                                        } elseif (strpos($proses['step'], 'Proses') !== false) {
+                                            $statusClass = 'status-proses';
+                                        } elseif (strpos($proses['step'], 'Selesai') !== false) {
+                                            $statusClass = 'status-selesai';
+                                        }
+                                    }
+                                @endphp
+                                <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}">
+                                    <div class="timeline-marker">
+                                        <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title">{{ $proses['step'] }}</div>
+                                        <div class="timeline-date">
+                                            {{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="empty-timeline">Belum ada proses yang direkam.</div>
+                        @endif
+                    </div>
+                </div>
                 <div class="card-body">
-                    @if(!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
+                    @if (!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
                         <?php
-                            $prosesArray = $transaksi->proses_pengerjaan;
-                            $latestProcess = $prosesArray[count($prosesArray) - 1];
+                        $prosesArray = $transaksi->proses_pengerjaan;
+                        $latestProcess = $prosesArray[count($prosesArray) - 1];
                         ?>
                         <!-- Latest Process -->
                         <div class="latest-process">
                             <div class="process-header">
                                 <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
-                                <div class="process-date">{{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
+                                <div class="process-date">
+                                    {{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
                             </div>
                             <div class="process-content">{{ $latestProcess['step'] }}</div>
                             <div class="show-all-link" onclick="toggleTimeline()">
@@ -686,23 +830,42 @@
                         </div>
 
                         <!-- Full Timeline (hidden by default) -->
-                        <div id="timeline-container" class="timeline-container">
+                        @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
                             <div class="timeline">
-                                @foreach(array_reverse($transaksi->proses_pengerjaan) as $proses)
-                                    <div class="timeline-item">
+                                @foreach (array_reverse($perbaikan->proses_pengerjaan) as $proses)
+                                    @php
+                                        $isStatusChange = strpos($proses['step'], 'Status diubah menjadi') === 0;
+                                        $statusClass = '';
+                                        if ($isStatusChange) {
+                                            if (strpos($proses['step'], 'Menunggu') !== false) {
+                                                $statusClass = 'status-menunggu';
+                                            } elseif (strpos($proses['step'], 'Proses') !== false) {
+                                                $statusClass = 'status-proses';
+                                            } elseif (strpos($proses['step'], 'Selesai') !== false) {
+                                                $statusClass = 'status-selesai';
+                                            }
+                                        }
+                                    @endphp
+                                    <div
+                                        class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}">
                                         <div class="timeline-marker">
-                                            <i class="fas fa-circle"></i>
+                                            <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
                                         </div>
                                         <div class="timeline-content">
                                             <h4 class="timeline-title">{{ $proses['step'] }}</h4>
-                                            <p class="timeline-date">{{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}</p>
+                                            <p class="timeline-date">
+                                                {{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}
+                                            </p>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
-                        </div>
+                        @else
+                            <p class="text-muted">Belum ada proses yang direkam.</p>
+                        @endif
                     @else
-                        <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
+                        <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang
+                            direkam.</p>
                     @endif
                 </div>
             </div>
@@ -748,8 +911,10 @@
     </div>
 
     <!-- Custom Confirmation Modal -->
-    <div id="confirmationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 5px; text-align: center; width: 350px;">
+    <div id="confirmationModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 5px; text-align: center; width: 350px;">
             <h3 id="confirmationText" style="margin-bottom: 20px; font-weight: bold; color: #333333;">APAKAH ANDA
                 YAKIN MENGUBAH STATUS?</h3>
             <div>
@@ -775,7 +940,8 @@
             } else {
                 timelineContainer.style.display = 'none';
                 toggleIcon.className = 'fas fa-chevron-down';
-                showAllLink.innerHTML = 'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
+                showAllLink.innerHTML =
+                    'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
 
@@ -808,7 +974,8 @@
                     pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
 
                     // Set confirmation message
-                    confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS MENJADI ' + pendingStatus + '?';
+                    confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS MENJADI ' +
+                        pendingStatus + '?';
 
                     // Show the confirmation modal
                     modal.style.display = 'block';
@@ -859,57 +1026,62 @@
 
                     // Now send the status update request
                     fetch('/admin/transaksi/{{ $transaksi->id }}/status', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': token
-                        },
-                        body: JSON.stringify({
-                            status: pendingStatus
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token
+                            },
+                            body: JSON.stringify({
+                                status: pendingStatus
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.success) {
-                            // If failed, revert UI changes
-                            console.error('Failed to update status:', data.message);
-
-                            // Revert status badge
-                            if (statusBadge) {
-                                statusBadge.className = 'status-badge status-' + oldStatus.toLowerCase();
-                                statusBadge.textContent = oldStatus;
-                            }
-
-                            // Revert button visibility
-                            if (oldStatus === 'Selesai') {
-                                const statusActions = document.querySelector('.status-actions');
-                                if (statusActions) {
-                                    statusActions.style.display = 'none';
-                                }
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Tambahkan kode ini untuk merefresh halaman agar timeline terupdate
+                                window.location.reload();
                             } else {
-                                updateStatusButtons(oldStatus);
-                                const statusActions = document.querySelector('.status-actions');
-                                if (statusActions) {
-                                    statusActions.style.display = 'block';
+                                // If failed, revert UI changes
+                                console.error('Failed to update status:', data.message);
+
+                                // Revert status badge
+                                if (statusBadge) {
+                                    statusBadge.className = 'status-badge status-' + oldStatus
+                                        .toLowerCase();
+                                    statusBadge.textContent = oldStatus;
+                                }
+
+                                // Revert button visibility
+                                if (oldStatus === 'Selesai') {
+                                    const statusActions = document.querySelector('.status-actions');
+                                    if (statusActions) {
+                                        statusActions.style.display = 'none';
+                                    }
+                                } else {
+                                    updateStatusButtons(oldStatus);
+                                    const statusActions = document.querySelector('.status-actions');
+                                    if (statusActions) {
+                                        statusActions.style.display = 'block';
+                                    }
+                                }
+
+                                // Show error message
+                                if (statusAlert) {
+                                    statusAlert.textContent = 'Gagal mengubah status: ' + (data
+                                        .message || 'Terjadi kesalahan');
+                                    statusAlert.style.display = 'block';
+
+                                    // Hide the alert after a few seconds
+                                    setTimeout(() => {
+                                        statusAlert.style.display = 'none';
+                                    }, 3000);
                                 }
                             }
-
-                            // Show error message
-                            if (statusAlert) {
-                                statusAlert.textContent = 'Gagal mengubah status: ' + (data.message || 'Terjadi kesalahan');
-                                statusAlert.style.display = 'block';
-
-                                // Hide// Hide the alert after a few seconds
-                                setTimeout(() => {
-                                    statusAlert.style.display = 'none';
-                                }, 3000);
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error updating status:', error);
-                        // Could add code here to revert UI changes on network error
-                    });
+                        })
+                        .catch(error => {
+                            console.error('Error updating status:', error);
+                            // Could add code here to revert UI changes on network error
+                        });
                 }
             });
 
@@ -998,7 +1170,7 @@
 
             // Ensure full timeline is visible when printing
             const timelineContainer = document.getElementById('timeline-container');
-            if(timelineContainer) {
+            if (timelineContainer) {
                 timelineContainer.style.display = 'block';
             }
         });
@@ -1020,10 +1192,11 @@
 
             // Restore timeline to previous state after printing
             const timelineContainer = document.getElementById('timeline-container');
-            if(timelineContainer && !document.querySelector('.show-all-link').innerHTML.includes('Sembunyikan')) {
+            if (timelineContainer && !document.querySelector('.show-all-link').innerHTML.includes('Sembunyikan')) {
                 timelineContainer.style.display = 'none';
             }
         });
     </script>
 </body>
+
 </html>

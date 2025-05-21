@@ -309,7 +309,7 @@
                 @foreach($perbaikan as $index => $p)
                 <tr onclick="window.location.href='{{ route('perbaikan.show', $p->id) }}';">
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $p->kode_perbaikan }}</td>
+                    <td>{{ $p->id }}</td>
                     <td>{{ $p->nama_barang }}</td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('l, j F Y') }}</td>
                     <td>{{ $p->masalah }}</td>
@@ -331,22 +331,22 @@
             const applyFilterBtn = document.getElementById('applyFilterBtn');
             const monthFilter = document.getElementById('monthFilter');
             const yearFilter = document.getElementById('yearFilter');
-            
+
             applyFilterBtn.addEventListener('click', function() {
                 const month = monthFilter.value;
                 const year = yearFilter.value;
-                
+
                 // Build query string
                 let queryString = '';
                 if (month) queryString += `month=${month}`;
                 if (year) {
                     queryString += queryString ? `&year=${year}` : `year=${year}`;
                 }
-                
+
                 // Redirect with filters
                 window.location.href = `${window.location.pathname}${queryString ? '?' + queryString : ''}`;
             });
-            
+
             // Export button
             document.getElementById('exportBtn').addEventListener('click', function() {
                 // In a real application, this would trigger a download

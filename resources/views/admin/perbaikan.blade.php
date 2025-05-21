@@ -310,7 +310,7 @@
                         @forelse($perbaikan as $index => $p)
                         <tr onclick="window.location.href='{{ route('admin.perbaikan.show', $p->id) }}';">
                             <td>{{ $index + 1 }}</td>
-                            <td>{{ $p->kode_perbaikan }}</td>
+                            <td>{{ $p->id }}</td>
                             <td>{{ $p->nama_barang }}</td>
                             <td>{{ $p->pelanggan->nama_pelanggan }}</td>
                             <td>{{ $p->user->name ?? 'Belum ditugaskan' }}</td>

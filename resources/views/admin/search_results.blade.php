@@ -390,7 +390,7 @@
                             @foreach($perbaikan as $index => $item)
                                 <tr onclick="window.location='/admin/transaksi/{{ $item->id }}';">
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $item->kode_perbaikan }}</td>
+                                    <td>{{ $item->id }}</td>
                                     <td>{{ \Carbon\Carbon::parse($item->tanggal_perbaikan)->format('d/m/Y') }}</td>
                                     <td>{{ $item->nama_barang }}</td>
                                     <td>{{ $item->pelanggan->nama_pelanggan ?? 'N/A' }}</td>

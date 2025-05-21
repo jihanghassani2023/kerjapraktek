@@ -456,7 +456,7 @@
 
         <div class="content-wrapper">
             <div class="content-header">
-                <h2 class="content-title">Edit Perbaikan #{{ $perbaikan->kode_perbaikan }}</h2>
+                <h2 class="content-title">Edit Perbaikan #{{ $perbaikan->id }}</h2>
             </div>
 
             <div class="customer-info">
@@ -480,9 +480,9 @@
                         @method('PUT')
 
                         <div class="form-group">
-                            <label for="kode_perbaikan">Kode Perbaikan</label>
-                            <input type="text" id="kode_perbaikan" class="form-control"
-                                value="{{ $perbaikan->kode_perbaikan }}" disabled>
+                            <label for="id">Kode Perbaikan</label>
+                            <input type="text" id="id" class="form-control"
+                                value="{{ $perbaikan->id }}" disabled>
                         </div>
 
                         <div class="form-group">
