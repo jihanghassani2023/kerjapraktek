@@ -433,7 +433,7 @@
                                     @foreach($perbaikanList as $index => $perbaikan)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
-                                            <td>{{ $perbaikan->nama_barang }}</td>
+                                            <td>{{ $perbaikan->nama_device }}</td>
                                             <td>{{ $perbaikan->masalah }}</td>
                                             <td>{{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d M Y') }}</td>
                                             <td>Rp {{ number_format($perbaikan->harga, 0, ',', '.') }}</td>

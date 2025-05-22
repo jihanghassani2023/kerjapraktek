@@ -351,7 +351,7 @@
 
         <div class="search-bar">
             <form action="/admin/search" method="GET" class="search-form">
-                <input type="text" name="search" class="search-input" placeholder="Cari berdasarkan kode, nama pelanggan, atau barang..." value="{{ $search }}">
+                <input type="text" name="search" class="search-input" placeholder="Cari berdasarkan kode, nama pelanggan, atau device..." value="{{ $search }}">
                 <button type="submit" class="search-button">
                     <i class="fas fa-search"></i>
                 </button>
@@ -379,7 +379,7 @@
                                 <th>No</th>
                                 <th>Kode Perbaikan</th>
                                 <th>Tanggal</th>
-                                <th>Nama Barang</th>
+                                <th>Nama Device</th>
                                 <th>Pelanggan</th>
                                 <th>Teknisi</th>
                                 <th>Status</th>
@@ -392,7 +392,7 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $item->id }}</td>
                                     <td>{{ \Carbon\Carbon::parse($item->tanggal_perbaikan)->format('d/m/Y') }}</td>
-                                    <td>{{ $item->nama_barang }}</td>
+                                    <td>{{ $item->nama_device }}</td>
                                     <td>{{ $item->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $item->user->name ?? 'Belum ditugaskan' }}</td>
                                     <td>

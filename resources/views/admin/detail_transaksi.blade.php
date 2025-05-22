@@ -690,7 +690,7 @@
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Nama Barang</div>
-                                <div class="info-value">{{ $transaksi->nama_barang }}</div>
+                                <div class="info-value">{{ $transaksi->nama_device }}</div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Kategori Device</div>

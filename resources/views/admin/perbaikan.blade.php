@@ -299,7 +299,7 @@
                         <tr>
                             <th>No</th>
                             <th>Kode Perbaikan</th>
-                            <th>Nama Barang</th>
+                            <th>Nama Device</th>
                             <th>Pelanggan</th>
                             <th>Teknisi</th>
                             <th>Tanggal</th>
@@ -311,7 +311,7 @@
                         <tr onclick="window.location.href='{{ route('admin.perbaikan.show', $p->id) }}';">
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $p->id }}</td>
-                            <td>{{ $p->nama_barang }}</td>
+                            <td>{{ $p->nama_device }}</td>
                             <td>{{ $p->pelanggan->nama_pelanggan }}</td>
                             <td>{{ $p->user->name ?? 'Belum ditugaskan' }}</td>
                             <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('d/m/Y') }}</td>

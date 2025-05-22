@@ -611,8 +611,8 @@
                                     {{ \Carbon\Carbon::parse($transaksi->tanggal_perbaikan)->format('d F Y') }}</div>
                             </div>
                             <div class="info-row">
-                                <div class="info-label">Nama Barang</div>
-                                <div class="info-value">{{ $transaksi->nama_barang }}</div>
+                                <div class="info-label">Nama Device</div>
+                                <div class="info-value">{{ $transaksi->nama_device }}</div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Kategori Device</div>

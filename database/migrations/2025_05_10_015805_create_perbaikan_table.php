@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('perbaikan', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_barang', 100);
+            $table->string('nama_device', 100);
             $table->string('kategori_device', 50)->nullable();
             $table->date('tanggal_perbaikan');
             $table->string('masalah', 200);

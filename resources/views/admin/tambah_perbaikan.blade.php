@@ -401,27 +401,27 @@
                 </div>
 
                 <div class="form-group">
-    <label for="user_id">Pilih Teknisi</label>
-    <select class="form-control @error('user_id') is-invalid @enderror" id="user_id" name="user_id"
-        required>
-        <option value="">-- Pilih Teknisi --</option>
-        @foreach ($teknisi as $t)
-            <option value="{{ $t->id }}" {{ old('user_id') == $t->id ? 'selected' : '' }}>
-                {{ $t->name }} - {{ $t->jabatan }}
-            </option>
-        @endforeach
-    </select>
-    @error('user_id')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-</div>
+                    <label for="user_id">Pilih Teknisi</label>
+                    <select class="form-control @error('user_id') is-invalid @enderror" id="user_id" name="user_id"
+                        required>
+                        <option value="">-- Pilih Teknisi --</option>
+                        @foreach ($teknisi as $t)
+                            <option value="{{ $t->id }}" {{ old('user_id') == $t->id ? 'selected' : '' }}>
+                                {{ $t->name }} - {{ $t->jabatan }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('user_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
                 <div class="form-group">
-                    <label for="nama_barang">Nama Barang</label>
-                    <input type="text" id="nama_barang" name="nama_barang"
-                        class="form-control @error('nama_barang') is-invalid @enderror"
-                        value="{{ old('nama_barang') }}" required>
-                    @error('nama_barang')
+                    <label for="nama_device">Nama Device</label>
+                    <input type="text" id="nama_device" name="nama_device"
+                        class="form-control @error('nama_device') is-invalid @enderror"
+                        value="{{ old('nama_device') }}" required>
+                    @error('nama_device')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -659,7 +659,7 @@
                 }
 
                 // Check required fields (excluding hidden fields)
-                const requiredFields = ['nama_pelanggan', 'user_id', 'nama_barang', 'masalah', 'tindakan_perbaikan',
+                const requiredFields = ['nama_pelanggan', 'user_id', 'nama_device', 'masalah', 'tindakan_perbaikan',
                     'harga', 'garansi'
                 ];
                 requiredFields.forEach(field => {

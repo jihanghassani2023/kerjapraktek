@@ -299,7 +299,7 @@
                 <tr>
                     <th>NO</th>
                     <th>KODE PERBAIKAN</th>
-                    <th>NAMA BARANG</th>
+                    <th>NAMA DEVICE</th>
                     <th>TANGGAL PERBAIKAN</th>
                     <th>MASALAH</th>
                     <th>STATUS</th>
@@ -310,7 +310,7 @@
                 <tr onclick="window.location.href='{{ route('perbaikan.show', $p->id) }}';">
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $p->id }}</td>
-                    <td>{{ $p->nama_barang }}</td>
+                    <td>{{ $p->nama_device }}</td>
                     <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('l, j F Y') }}</td>
                     <td>{{ $p->masalah }}</td>
                     <td><span class="status status-selesai">{{ $p->status }}</span></td>

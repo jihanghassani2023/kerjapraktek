@@ -59,7 +59,7 @@ class AdminController extends Controller
 
         $query->where(function ($q) use ($search) {
             $q->where('kode_perbaikan', 'like', "%{$search}%")
-                ->orWhere('nama_barang', 'like', "%{$search}%")
+                ->orWhere('nama_device', 'like', "%{$search}%")
                 ->orWhereHas('pelanggan', function ($subq) use ($search) {
                     $subq->where('nama_pelanggan', 'like', "%{$search}%")
                         ->orWhere('nomor_telp', 'like', "%{$search}%");
@@ -415,7 +415,7 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'pelanggan_id' => 'required|exists:pelanggan,id',
             'user_id' => 'required|exists:users,id',
-            'nama_barang' => 'required|string|max:100',
+            'nama_device' => 'required|string|max:100',
             'masalah' => 'required|string|max:200',
             'tindakan_perbaikan' => 'required|string',
             'harga' => 'required|numeric',
@@ -424,7 +424,7 @@ class AdminController extends Controller
         ], [
             'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
             'user_id.required' => 'Teknisi wajib dipilih.',
-            'nama_barang.required' => 'Nama barang wajib diisi.',
+            'nama_device.required' => 'Nama barang wajib diisi.',
             'kategori_device.required' => 'Kategori device wajib diisi.',
             'masalah.required' => 'Masalah wajib diisi.',
             'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
@@ -442,7 +442,7 @@ class AdminController extends Controller
         $perbaikan = new Perbaikan();
         $perbaikan->pelanggan_id = $request->pelanggan_id;
         $perbaikan->user_id = $request->user_id;
-        $perbaikan->nama_barang = $request->nama_barang;
+        $perbaikan->nama_device = $request->nama_device;
         $perbaikan->kategori_device = $request->kategori_device;
         $perbaikan->masalah = $request->masalah;
         $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;

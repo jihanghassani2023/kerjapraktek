@@ -548,7 +548,7 @@
                                 <th>No</th>
                                 <th>Kode Perbaikan</th>
                                 <th>Tanggal</th>
-                                <th>Barang</th>
+                                <th>Device</th>
                                 <th>Pelanggan</th>
                                 <th>Teknisi</th>
                                 <th>Harga</th>
@@ -562,7 +562,7 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $t->id }}</td>
                                     <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y') }}</td>
-                                    <td>{{ $t->nama_barang }}</td>
+                                    <td>{{ $t->nama_device }}</td>
                                     <td>{{ $t->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $t->user->name ?? 'N/A' }}</td>
                                     <td>Rp. {{ number_format($t->harga, 0, ',', '.') }}</td>

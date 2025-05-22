@@ -448,8 +448,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="nama_barang">Nama Barang</label>
-                    <input type="text" id="nama_barang" class="form-control" value="{{ $perbaikan->nama_barang }}"
+                    <label for="nama_device">Nama Device</label>
+                    <input type="text" id="nama_device" class="form-control" value="{{ $perbaikan->nama_device }}"
                         disabled>
                 </div>
                <div class="form-group">

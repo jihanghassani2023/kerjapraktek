@@ -26,7 +26,7 @@ class SearchController extends Controller
     $perbaikan = Perbaikan::with(['pelanggan'])
         ->where(function($q) use ($query) {
             $q->where('id', 'like', "%{$query}%")
-              ->orWhere('nama_barang', 'like', "%{$query}%")
+              ->orWhere('nama_device', 'like', "%{$query}%")
               ->orWhereHas('pelanggan', function($subq) use ($query) {
                   $subq->where('nama_pelanggan', 'like', "%{$query}%")
                       ->orWhere('nomor_telp', 'like', "%{$query}%");
@@ -42,7 +42,7 @@ class SearchController extends Controller
         $suggestions[] = [
             'id' => $item->id,
             'kode_perbaikan' => $item->id, // Use ID directly
-            'nama_barang' => $item->nama_barang,
+            'nama_device' => $item->nama_device,
             'nama_pelanggan' => $item->pelanggan->nama_pelanggan ?? 'N/A',
             'tanggal' => date('d/m/Y', strtotime($item->tanggal_perbaikan)),
             'status' => $item->status,

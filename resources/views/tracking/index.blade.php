@@ -58,6 +58,19 @@
             font-weight: bold;
         }
 
+        .login-btn {
+            padding: 10px 20px;
+            background-color: #8c3a3a;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .login-btn:hover {
+            background-color: #6d2d2d;
+        }
+
         .main-content {
             flex: 1;
             display: flex;
@@ -127,7 +140,7 @@
 
         .result-container {
             width: 100%;
-            max-width: 360px;
+            max-width: 420px;
             background-color: white;
             border-radius: 20px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -146,7 +159,7 @@
         }
 
         .result-body {
-            padding: 30px;
+            padding: 20px;
         }
 
         .customer-info {
@@ -160,76 +173,153 @@
             color: #333;
         }
 
-        .repair-card {
-            background-color: #f9f9f9;
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            margin-top: 24px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .icon {
+            font-size: 20px;
+            color: #8c3a3a;
+            background: linear-gradient(45deg, #8c3a3a, #e74c3c);
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid #8c3a3a;
+            padding: 8px;
+            color: white;
+        }
+
+        .section-title .count {
+            background: linear-gradient(45deg, #8c3a3a, #e74c3c);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(140, 58, 58, 0.3);
+        }
+
+        .repair-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(140, 58, 58, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .repair-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #8c3a3a 0%, #ff6b6b 100%);
+        }
+
+        .repair-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(140, 58, 58, 0.15);
+        }
+
+        .repair-card.history {
+            background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%);
+            opacity: 0.95;
+        }
+
+        .repair-card.history::before {
+            background: linear-gradient(180deg, #28a745 0%, #20c997 100%);
         }
 
         .repair-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #2c3e50;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 16px;
+        }
+
+        .repair-title span:first-child {
+            background: linear-gradient(45deg, #8c3a3a, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .info-row {
             display: flex;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-size: 14px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
         }
 
         .info-label {
-            width: 130px;
-            font-weight: bold;
-            color: #555;
+            width: 120px;
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .info-value {
             flex: 1;
-            color: #333;
+            color: #495057;
+            font-weight: 500;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 5px 10px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* Tampilan untuk status perbaikan */
         .status-menunggu {
-            background-color: #ffeaea;
-            color: #ff6b6b;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
         }
 
         .status-proses {
-            background-color: #fff4e0;
-            color: #ffaa00;
+            background: linear-gradient(45deg, #ffa726, #ffcc02);
+            color: white;
         }
 
         .status-selesai {
-            background-color: #e7f9e7;
-            color: #28a745;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
         }
 
-        /* Menambahkan sedikit transparansi pada kartu perbaikan yang sudah selesai */
         .repair-card[data-status="Selesai"] {
             background-color: #f9f9f9;
             border-left: 4px solid #28a745;
         }
 
-        /* Kartu perbaikan yang sedang proses */
         .repair-card[data-status="Proses"] {
             border-left: 4px solid #ffaa00;
         }
 
-        /* Kartu perbaikan yang menunggu */
         .repair-card[data-status="Menunggu"] {
             border-left: 4px solid #ff6b6b;
         }
@@ -248,7 +338,6 @@
             background-color: #e0e0e0;
         }
 
-        /* Styling untuk progress pengerjaan */
         .latest-progress {
             margin-top: 15px;
             background-color: rgba(140, 58, 58, 0.05);
@@ -334,6 +423,62 @@
             font-size: 12px;
             color: #777;
         }
+
+        .history-section {
+            margin-top: 30px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        .toggle-history {
+            color: #8c3a3a;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            gap: 8px;
+        }
+
+        .toggle-history:hover {
+            color: #e74c3c;
+            transform: translateX(2px);
+        }
+
+        .toggle-history i {
+            margin-left: 5px;
+        }
+
+        .history-content {
+            display: none;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .completed-info {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 1px solid #28a745;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #155724;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .completed-info i {
+            color: #28a745;
+            font-size: 16px;
+        }
     </style>
 </head>
 
@@ -366,7 +511,7 @@
                     </form>
                 </div>
             </div>
-        @elseif(isset($perbaikanList))
+        @elseif(isset($perbaikanAktif))
             <div class="result-container">
                 <div class="result-header">
                     <h2>SELAMAT DATANG iGENGS!</h2>
@@ -390,99 +535,191 @@
                         @endif
                     </div>
 
-                    <h3>Perbaikan Aktif ({{ $perbaikanList->count() }})</h3>
+                    <!-- Perbaikan Aktif -->
+                    <div class="section-title">
+                        <i class="fas fa-tools icon"></i>
+                        Perbaikan Aktif
+                        <span class="count">{{ $perbaikanAktif->count() }}</span>
+                    </div>
 
-                    @foreach ($perbaikanList as $perbaikan)
-                        <div class="repair-card" data-status="{{ $perbaikan->status }}">
-                            <div class="repair-title">
-                                <span>{{ $perbaikan->nama_barang }}</span>
-                                <span class="status-badge status-{{ strtolower($perbaikan->status) }}">
-                                    {{ $perbaikan->status }}
-                                </span>
-                            </div>
+                    @if($perbaikanAktif->count() > 0)
+                        @foreach ($perbaikanAktif as $perbaikan)
+                            <div class="repair-card" data-status="{{ $perbaikan->status }}">
+                                <div class="repair-title">
+                                    <span>{{ $perbaikan->nama_device }}</span>
+                                    <span class="status-badge status-{{ strtolower($perbaikan->status) }}">
+                                        {{ $perbaikan->status }}
+                                    </span>
+                                </div>
 
-                            <div class="info-row">
-                                <div class="info-label">Kode</div>
-                                <div class="info-value">{{ $perbaikan->id }}</div>
-                            </div>
-
-                            <div class="info-row">
-                                <div class="info-label">Masalah</div>
-                                <div class="info-value">{{ $perbaikan->masalah }}</div>
-                            </div>
-
-                            <div class="info-row">
-                                <div class="info-label">Tindakan Perbaikan</div>
-                                <div class="info-value">{{ $perbaikan->tindakan_perbaikan }}</div>
-                            </div>
-
-                            <div class="info-row">
-                                <div class="info-label">Tanggal Masuk</div>
-                                <div class="info-value">
-                                    {{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y') }}</div>
-                            </div>
-
-                            <div class="info-row">
-                                <div class="info-label">Teknisi</div>
-                                <div class="info-value">{{ $perbaikan->user->name ?? 'Belum ditugaskan' }}</div>
-                            </div>
-
-                            @if ($perbaikan->harga > 0)
                                 <div class="info-row">
-                                    <div class="info-label">Estimasi Biaya</div>
-                                    <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}
+                                    <div class="info-label">Kode</div>
+                                    <div class="info-value">{{ $perbaikan->id }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">Masalah</div>
+                                    <div class="info-value">{{ $perbaikan->masalah }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">Tindakan Perbaikan</div>
+                                    <div class="info-value">{{ $perbaikan->tindakan_perbaikan }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">Tanggal Masuk</div>
+                                    <div class="info-value">
+                                        {{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y') }}</div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-label">Teknisi</div>
+                                    <div class="info-value">{{ $perbaikan->user->name ?? 'Belum ditugaskan' }}</div>
+                                </div>
+
+                                @if ($perbaikan->harga > 0)
+                                    <div class="info-row">
+                                        <div class="info-label">Estimasi Biaya</div>
+                                        <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}
+                                        </div>
                                     </div>
-                                </div>
-                            @endif
+                                @endif
 
-                            @if ($perbaikan->garansi)
-                                <div class="info-row">
-                                    <div class="info-label">Garansi</div>
-                                    <div class="info-value">{{ $perbaikan->garansi }}</div>
-                                </div>
-                            @endif
+                                @if ($perbaikan->garansi)
+                                    <div class="info-row">
+                                        <div class="info-label">Garansi</div>
+                                        <div class="info-value">{{ $perbaikan->garansi }}</div>
+                                    </div>
+                                @endif
 
-                            <!-- Tampilkan progress terakhir -->
+                                @if ($perbaikan->status === 'Selesai')
+                                    <div class="completed-info">
+                                        <i class="fas fa-check-circle"></i> Perbaikan selesai! Anda dapat mengambil device di toko kami.
+                                    </div>
+                                @endif
+
+                                <!-- Progress terakhir -->
+                                @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
+                                    <?php
+                                    $prosesArray = $perbaikan->proses_pengerjaan;
+                                    $latestProcess = $prosesArray[count($prosesArray) - 1];
+                                    ?>
+                                    <div class="latest-progress">
+                                        <div class="progress-header">
+                                            <span>Progress Terakhir:</span>
+                                            <span
+                                                class="progress-date">{{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</span>
+                                        </div>
+                                        <div class="progress-content">{{ $latestProcess['step'] }}</div>
+                                        <div class="progress-link"
+                                            onclick="toggleProgress('progress-{{ $perbaikan->id }}')">
+                                            Lihat semua progress <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Progress lengkap -->
                             @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
-                                <?php
-                                $prosesArray = $perbaikan->proses_pengerjaan;
-                                $latestProcess = $prosesArray[count($prosesArray) - 1];
-                                ?>
-                                <div class="latest-progress">
-                                    <div class="progress-header">
-                                        <span>Progress Terakhir:</span>
-                                        <span
-                                            class="progress-date">{{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</span>
+                                <div id="progress-{{ $perbaikan->id }}" class="full-progress" style="display: none;">
+                                    <div class="progress-title">Riwayat Proses Pengerjaan</div>
+                                    <div class="progress-timeline">
+                                        @foreach (array_reverse($perbaikan->proses_pengerjaan) as $process)
+                                            <div class="progress-item">
+                                                <div class="progress-dot"></div>
+                                                <div class="progress-content">
+                                                    <div class="progress-step">{{ $process['step'] }}</div>
+                                                    <div class="progress-time">
+                                                        {{ \Carbon\Carbon::parse($process['timestamp'])->format('d M Y H:i:s') }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                    <div class="progress-content">{{ $latestProcess['step'] }}</div>
-                                    <div class="progress-link"
-                                        onclick="toggleProgress('progress-{{ $perbaikan->id }}')">
-                                        Lihat semua progress <i class="fas fa-chevron-down"></i>
+                                </div>
+                            @endif
+                        @endforeach
+                    @else
+                        <div class="no-data">
+                            Tidak ada perbaikan aktif saat ini.
+                        </div>
+                    @endif
+
+                    <!-- Riwayat Perbaikan -->
+                    <div class="history-section">
+                        <div class="section-title">
+                            <i class="fas fa-history icon"></i>
+                            <span class="toggle-history" onclick="toggleHistory()">
+                                Riwayat Perbaikan
+                                <span class="count">{{ $riwayatPerbaikan->count() }}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </span>
+                        </div>
+
+                        <div class="history-content" id="history-content">
+                            @if($riwayatPerbaikan->count() > 0)
+                                @foreach ($riwayatPerbaikan as $perbaikan)
+                                    <div class="repair-card history" data-status="{{ $perbaikan->status }}">
+                                        <div class="repair-title">
+                                            <span>{{ $perbaikan->nama_device }}</span>
+                                            <span class="status-badge status-{{ strtolower($perbaikan->status) }}">
+                                                {{ $perbaikan->status }}
+                                            </span>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-label">Kode</div>
+                                            <div class="info-value">{{ $perbaikan->id }}</div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-label">Tanggal Selesai</div>
+                                            <div class="info-value">
+                                                {{ \Carbon\Carbon::parse($perbaikan->updated_at)->format('d F Y') }}
+                                            </div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-label">Masalah</div>
+                                            <div class="info-value">{{ $perbaikan->masalah }}</div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-label">Tindakan Perbaikan</div>
+                                            <div class="info-value">{{ $perbaikan->tindakan_perbaikan }}</div>
+                                        </div>
+
+                                        <div class="info-row">
+                                            <div class="info-label">Teknisi</div>
+                                            <div class="info-value">{{ $perbaikan->user->name ?? 'N/A' }}</div>
+                                        </div>
+
+                                        @if ($perbaikan->harga > 0)
+                                            <div class="info-row">
+                                                <div class="info-label">Biaya</div>
+                                                <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($perbaikan->garansi)
+                                            <div class="info-row">
+                                                <div class="info-label">Garansi</div>
+                                                <div class="info-value">{{ $perbaikan->garansi }}</div>
+                                            </div>
+                                        @endif
                                     </div>
+                                @endforeach
+                            @else
+                                <div class="no-data">
+                                    <i class="fas fa-inbox"></i><br>
+                                    Belum ada riwayat perbaikan.<br>
+                                    <small>Riwayat akan muncul setelah perbaikan selesai lebih dari 10 hari.</small>
                                 </div>
                             @endif
                         </div>
-
-                        <!-- Progress lengkap (awalnya tersembunyi) -->
-                        @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
-                            <div id="progress-{{ $perbaikan->id }}" class="full-progress" style="display: none;">
-                                <div class="progress-title">Riwayat Proses Pengerjaan</div>
-                                <div class="progress-timeline">
-                                    @foreach (array_reverse($perbaikan->proses_pengerjaan) as $process)
-                                        <div class="progress-item">
-                                            <div class="progress-dot"></div>
-                                            <div class="progress-content">
-                                                <div class="progress-step">{{ $process['step'] }}</div>
-                                                <div class="progress-time">
-                                                    {{ \Carbon\Carbon::parse($process['timestamp'])->format('d M Y H:i:s') }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-                    @endforeach
+                    </div>
 
                     <div style="text-align: center;">
                         <a href="{{ route('tracking.index') }}" class="back-btn">
@@ -518,6 +755,19 @@
                 if (icon) icon.className = 'fas fa-chevron-up';
             } else {
                 progressElement.style.display = 'none';
+                if (icon) icon.className = 'fas fa-chevron-down';
+            }
+        }
+
+        function toggleHistory() {
+            const historyContent = document.getElementById('history-content');
+            const icon = event.target.querySelector('i') || event.target.parentElement.querySelector('i');
+
+            if (historyContent.style.display === 'none' || historyContent.style.display === '') {
+                historyContent.style.display = 'block';
+                if (icon) icon.className = 'fas fa-chevron-up';
+            } else {
+                historyContent.style.display = 'none';
                 if (icon) icon.className = 'fas fa-chevron-down';
             }
         }

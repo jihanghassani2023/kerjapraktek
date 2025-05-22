@@ -507,7 +507,7 @@
                         <td>{{ $t->id }}</td>
                         <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d/m/Y') }}</td>
                         <td>{{ $t->pelanggan->nama_pelanggan ?? '-' }}</td>
-                        <td>{{ $t->nama_barang }}</td>
+                        <td>{{ $t->nama_device }}</td>
                         <td>{{ $t->user->name ?? '-' }}</td>
                         <td>
                             <span class="{{ $t->status == 'Selesai' ? 'status-active' : 'status-inactive' }}">
@@ -624,7 +624,7 @@
                     }
 
                     suggestionItem.innerHTML = `
-                        <div class="suggestion-title">${item.id} - ${item.nama_barang}</div>
+                        <div class="suggestion-title">${item.id} - ${item.nama_device}</div>
                         <div class="suggestion-details">
                             <div class="suggestion-detail">
                                 <i class="fas fa-user"></i> ${item.nama_pelanggan}
