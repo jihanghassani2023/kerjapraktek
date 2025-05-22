@@ -452,34 +452,28 @@
                     <input type="text" id="nama_barang" class="form-control" value="{{ $perbaikan->nama_barang }}"
                         disabled>
                 </div>
-                <div class="form-group">
-                    <label for="kategori_device">Kategori Device</label>
-                    <select id="kategori_device" name="kategori_device"
-                        class="form-control @error('kategori_device') is-invalid @enderror" required>
-                        <option value="">-- Pilih Kategori --</option>
-                        <option value="Smartphone"
-                            {{ old('kategori_device', $perbaikan->kategori_device) == 'Smartphone' ? 'selected' : '' }}>
-                            Smartphone</option>
-                        <option value="Laptop"
-                            {{ old('kategori_device', $perbaikan->kategori_device) == 'Laptop' ? 'selected' : '' }}>
-                            Laptop</option>
-                        <option value="Komputer"
-                            {{ old('kategori_device', $perbaikan->kategori_device) == 'Komputer' ? 'selected' : '' }}>
-                            Komputer</option>
-                        <option value="Tablet"
-                            {{ old('kategori_device', $perbaikan->kategori_device) == 'Tablet' ? 'selected' : '' }}>
-                            Tablet</option>
-                        <option value="Printer"
-                            {{ old('kategori_device', $perbaikan->kategori_device) == 'Printer' ? 'selected' : '' }}>
-                            Printer</option>
-                        <option value="Lainnya"
-                            {{ old('kategori_device', $perbaikan->kategori_device) == 'Lainnya' ? 'selected' : '' }}>
-                            Lainnya</option>
-                    </select>
-                    @error('kategori_device')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+               <div class="form-group">
+    <label for="kategori_device">Kategori Device</label>
+    <select id="kategori_device" name="kategori_device"
+        class="form-control @error('kategori_device') is-invalid @enderror" required>
+        <option value="">-- Pilih Kategori --</option>
+        <option value="iPhone"
+            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPhone' ? 'selected' : '' }}>
+            iPhone</option>
+        <option value="iWatch"
+            {{ old('kategori_device', $perbaikan->kategori_device) == 'iWatch' ? 'selected' : '' }}>
+            iWatch</option>
+        <option value="Macbook"
+            {{ old('kategori_device', $perbaikan->kategori_device) == 'Macbook' ? 'selected' : '' }}>
+            Macbook</option>
+        <option value="iPad"
+            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPad' ? 'selected' : '' }}>
+            iPad</option>
+    </select>
+    @error('kategori_device')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
 
                 <div class="form-group">
                     <label for="tanggal_perbaikan">Tanggal Perbaikan</label>

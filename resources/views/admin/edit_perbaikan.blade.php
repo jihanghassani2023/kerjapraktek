@@ -494,34 +494,28 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="form-group">
-                            <label for="kategori_device">Kategori Device</label>
-                            <select id="kategori_device" name="kategori_device"
-                                class="form-control @error('kategori_device') is-invalid @enderror" required>
-                                <option value="">-- Pilih Kategori --</option>
-                                <option value="Smartphone"
-                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'Smartphone' ? 'selected' : '' }}>
-                                    Smartphone</option>
-                                <option value="Laptop"
-                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'Laptop' ? 'selected' : '' }}>
-                                    Laptop</option>
-                                <option value="Komputer"
-                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'Komputer' ? 'selected' : '' }}>
-                                    Komputer</option>
-                                <option value="Tablet"
-                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'Tablet' ? 'selected' : '' }}>
-                                    Tablet</option>
-                                <option value="Printer"
-                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'Printer' ? 'selected' : '' }}>
-                                    Printer</option>
-                                <option value="Lainnya"
-                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'Lainnya' ? 'selected' : '' }}>
-                                    Lainnya</option>
-                            </select>
-                            @error('kategori_device')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                       <div class="form-group">
+    <label for="kategori_device">Kategori Device</label>
+    <select id="kategori_device" name="kategori_device"
+        class="form-control @error('kategori_device') is-invalid @enderror" required>
+        <option value="">-- Pilih Kategori --</option>
+        <option value="iPhone"
+            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPhone' ? 'selected' : '' }}>
+            iPhone</option>
+        <option value="iWatch"
+            {{ old('kategori_device', $perbaikan->kategori_device) == 'iWatch' ? 'selected' : '' }}>
+            iWatch</option>
+        <option value="Macbook"
+            {{ old('kategori_device', $perbaikan->kategori_device) == 'Macbook' ? 'selected' : '' }}>
+            Macbook</option>
+        <option value="iPad"
+            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPad' ? 'selected' : '' }}>
+            iPad</option>
+    </select>
+    @error('kategori_device')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
 
                         <div class="form-group">
                             <label for="tanggal_perbaikan">Tanggal Perbaikan</label>
@@ -547,24 +541,7 @@
                             @enderror
                         </div>
 
-                        <div class="form-group">
-                            <label for="status">Status Perbaikan</label>
-                            <select id="status" name="status"
-                                class="form-control @error('status') is-invalid @enderror" required>
-                                <option value="Menunggu"
-                                    {{ old('status', $perbaikan->status) == 'Menunggu' ? 'selected' : '' }}>Menunggu
-                                </option>
-                                <option value="Proses"
-                                    {{ old('status', $perbaikan->status) == 'Proses' ? 'selected' : '' }}>Proses
-                                </option>
-                                <option value="Selesai"
-                                    {{ old('status', $perbaikan->status) == 'Selesai' ? 'selected' : '' }}>Selesai
-                                </option>
-                            </select>
-                            @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+
 
                         <div class="form-group">
                             <label for="harga">Harga (Rp)</label>
@@ -585,40 +562,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="form-group">
-                            <label for="proses_step">Tambah Proses Pengerjaan Baru</label>
-                            <div class="input-group">
-                                <input type="text" id="proses_step" name="proses_step" class="form-control"
-                                    placeholder="Misalnya: Pengambilan sparepart">
-                                <div class="input-group-append">
-                                    <span class="input-group-text"><i class="fas fa-clock"></i>
-                                        {{ now()->format('H:i:s') }}</span>
-                                </div>
-                            </div>
-                            <small class="form-text text-muted">Masukkan langkah baru dalam proses pengerjaan</small>
-                        </div>
-                        <div class="form-group">
-                            <label>Riwayat Proses Pengerjaan</label>
-                            @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
-                                <div class="timeline">
-                                    @foreach ($perbaikan->proses_pengerjaan as $index => $proses)
-                                        <div class="timeline-item">
-                                            <div class="timeline-marker">
-                                                <i class="fas fa-circle"></i>
-                                            </div>
-                                            <div class="timeline-content">
-                                                <h4 class="timeline-title">{{ $proses['step'] }}</h4>
-                                                <p class="timeline-date">
-                                                    {{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <p class="text-muted">Belum ada proses yang direkam.</p>
-                            @endif
-                        </div>
+
 
                         <div class="form-footer">
                             <a href="{{ route('admin.transaksi.show', $perbaikan->id) }}" class="btn btn-secondary">

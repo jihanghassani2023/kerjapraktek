@@ -326,7 +326,6 @@ table td:last-child {
              <!-- Update the table header and cell for AKSI -->
 <thead>
     <tr>
-        <th>NO</th>
         <th>ID</th>
         <th>NAMA KARYAWAN</th>
         <th>ALAMAT</th>
@@ -337,7 +336,6 @@ table td:last-child {
 <tbody>
     @forelse($karyawan as $index => $k)
           <tr onclick="window.location='{{ route('karyawan.show', $k->id) }}';" style="cursor: pointer;">
-            <td>{{ $index + 1 }}</td>
             <td>{{ $k->id }}</td>
             <td>{{ $k->name }}</td>
             <td>{{ $k->alamat }}</td>

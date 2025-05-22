@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 
@@ -174,6 +175,19 @@
             color: #333;
         }
 
+        /* Grid Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .card {
             background-color: white;
             border-radius: 10px;
@@ -186,6 +200,9 @@
             background-color: #f8f9fa;
             padding: 15px 20px;
             border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .card-title {
@@ -199,14 +216,32 @@
             padding: 20px;
         }
 
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #8c3a3a;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
         .info-row {
             display: flex;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f5f5f5;
         }
 
         .info-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
             border-bottom: none;
         }
 
@@ -218,15 +253,15 @@
 
         .info-value {
             flex: 1;
+            color: #333;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 5px 10px;
+            border-radius: 3px;
             font-size: 14px;
             font-weight: bold;
-            margin-top: 20px;
         }
 
         .status-menunggu {
@@ -362,12 +397,22 @@
             position: relative;
             margin-left: 10px;
             padding-left: 30px;
-            border-left: 2px solid #e0e0e0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 2px;
+            background-color: #e0e0e0;
         }
 
         .timeline-item {
             position: relative;
             margin-bottom: 25px;
+            background-color: transparent !important;
         }
 
         .timeline-item:last-child {
@@ -435,6 +480,42 @@
                 width: 100%;
                 margin-bottom: 5px;
             }
+        }
+
+        /* Status-specific timeline colors */
+        .timeline-item.status-menunggu .timeline-marker {
+            border-color: #ff6b6b;
+        }
+
+        .timeline-item.status-menunggu .timeline-marker i {
+            color: #ff6b6b;
+        }
+
+        .timeline-item.status-proses .timeline-marker {
+            border-color: #ffaa00;
+        }
+
+        .timeline-item.status-proses .timeline-marker i {
+            color: #ffaa00;
+        }
+
+        .timeline-item.status-selesai .timeline-marker {
+            border-color: #28a745;
+        }
+
+        .timeline-item.status-selesai .timeline-marker i {
+            color: #28a745;
+        }
+
+        /* Real-time clock styling */
+        .real-time-clock {
+            padding: 5px 8px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #333;
+            margin-left: 10px;
+            display: inline-block;
         }
     </style>
 </head>
@@ -507,141 +588,183 @@
                 </a>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Detail Perbaikan</h3>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-label">Kode Perbaikan</div>
-                        <div class="info-value">{{ $transaksi->id }}</div>
+            <!-- Grid layout for 2-column design -->
+            <div class="grid-container">
+                <!-- Left Column: Main Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Informasi Perbaikan</h3>
+                        <span id="statusBadge" class="status-badge status-{{ strtolower($transaksi->status) }}">
+                            {{ $transaksi->status }}
+                        </span>
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">Tanggal Perbaikan</div>
-                        <div class="info-value">
-                            {{ \Carbon\Carbon::parse($transaksi->tanggal_perbaikan)->format('d F Y') }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Nama Barang</div>
-                        <div class="info-value">{{ $transaksi->nama_barang }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Kategori Device</div>
-                        <div class="info-value">{{ $transaksi->kategori_device ?? 'Tidak ditentukan' }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Masalah</div>
-                        <div class="info-value">{{ $transaksi->masalah }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Tindakan Perbaikan</div>
-                        <div class="info-value">{{ $transaksi->tindakan_perbaikan }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Harga</div>
-                        <div class="info-value">Rp. {{ number_format($transaksi->harga, 0, ',', '.') }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Garansi</div>
-                        <div class="info-value">{{ $transaksi->garansi ?: 'Tidak ada' }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Status</div>
-                        <div class="info-value">
-                            <span id="statusBadge" class="status-badge status-{{ strtolower($transaksi->status) }}">
-                                {{ $transaksi->status }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Proses Pengerjaan Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Proses Pengerjaan</h3>
-                </div>
-                <div class="card-body">
-                    @if(!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
-                        <?php
-                            $prosesArray = $transaksi->proses_pengerjaan;
-                            $latestProcess = $prosesArray[count($prosesArray) - 1];
-                        ?>
-                        <!-- Latest Process -->
-                        <div class="latest-process">
-                            <div class="process-header">
-                                <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
-                                <div class="process-date">{{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
+                    <div class="card-body">
+                        <!-- Repair Information Section -->
+                        <div class="info-section">
+                            <div class="info-row">
+                                <div class="info-label">Kode Perbaikan</div>
+                                <div class="info-value">{{ $transaksi->id }}</div>
                             </div>
-                            <div class="process-content">{{ $latestProcess['step'] }}</div>
-                            <div class="show-all-link" onclick="toggleTimeline()">
-                                Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
+                            <div class="info-row">
+                                <div class="info-label">Tanggal Perbaikan</div>
+                                <div class="info-value">
+                                    {{ \Carbon\Carbon::parse($transaksi->tanggal_perbaikan)->format('d F Y') }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Nama Barang</div>
+                                <div class="info-value">{{ $transaksi->nama_barang }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Kategori Device</div>
+                                <div class="info-value">{{ $transaksi->kategori_device ?? 'Tidak ditentukan' }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Masalah</div>
+                                <div class="info-value">{{ $transaksi->masalah }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Tindakan Perbaikan</div>
+                                <div class="info-value">{{ $transaksi->tindakan_perbaikan }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Harga</div>
+                                <div class="info-value">Rp. {{ number_format($transaksi->harga, 0, ',', '.') }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Garansi</div>
+                                <div class="info-value">{{ $transaksi->garansi ?: 'Tidak ada' }}</div>
                             </div>
                         </div>
 
-                        <!-- Full Timeline (hidden by default) -->
-                        <div id="timeline-container" class="timeline-container">
-                            <div class="timeline">
-                                @foreach(array_reverse($transaksi->proses_pengerjaan) as $proses)
-                                    <div class="timeline-item">
-                                        <div class="timeline-marker">
-                                            <i class="fas fa-circle"></i>
+                        <!-- Customer Information Section -->
+                        <div class="info-section">
+                            <h3 class="section-title">Informasi Pelanggan</h3>
+                            <div class="info-row">
+                                <div class="info-label">Nama Pelanggan</div>
+                                <div class="info-value">{{ $transaksi->pelanggan->nama_pelanggan }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Nomor Telepon</div>
+                                <div class="info-value">{{ $transaksi->pelanggan->nomor_telp }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Email</div>
+                                <div class="info-value">{{ $transaksi->pelanggan->email ?: '-' }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Technician Information Section -->
+                        <div class="info-section">
+                            <h3 class="section-title">Informasi Teknisi</h3>
+                            <div class="info-row">
+                                <div class="info-label">Nama Teknisi</div>
+                                <div class="info-value">{{ $transaksi->user->name ?? 'Tidak ada' }}</div>
+                            </div>
+                            @if ($transaksi->user)
+                                <div class="info-row">
+                                    <div class="info-label">Email Teknisi</div>
+                                    <div class="info-value">{{ $transaksi->user->email }}</div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Process Timeline -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Proses Pengerjaan</h3>
+                        <div class="real-time-clock" id="realTimeClock">00:00:00</div>
+                    </div>
+                    <div class="card-body">
+                        @if(!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
+                            <?php
+                                $prosesArray = $transaksi->proses_pengerjaan;
+                                $latestProcess = $prosesArray[count($prosesArray) - 1];
+                            ?>
+                            <!-- Latest Process -->
+                            <div class="latest-process">
+                                <div class="process-header">
+                                    <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
+                                    <div class="process-date">{{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
+                                </div>
+                                <div class="process-content">{{ $latestProcess['step'] }}</div>
+                                <div class="show-all-link" onclick="toggleTimeline()">
+                                    Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
+                                </div>
+                            </div>
+
+                            <!-- Full Timeline (hidden by default) -->
+                            <div id="timeline-container" class="timeline-container">
+                                <div class="timeline">
+                                    @foreach(array_reverse($transaksi->proses_pengerjaan) as $proses)
+                                        @php
+                                            $isStatusChange = strpos($proses['step'], 'Status diubah menjadi') === 0;
+                                            $statusClass = '';
+                                            if ($isStatusChange) {
+                                                if (strpos($proses['step'], 'Menunggu') !== false) {
+                                                    $statusClass = 'status-menunggu';
+                                                } elseif (strpos($proses['step'], 'Proses') !== false) {
+                                                    $statusClass = 'status-proses';
+                                                } elseif (strpos($proses['step'], 'Selesai') !== false) {
+                                                    $statusClass = 'status-selesai';
+                                                }
+                                            }
+                                        @endphp
+                                        <div class="timeline-item {{ $isStatusChange ? 'status-change '.$statusClass : '' }}" style="background-color: transparent !important;">
+                                            <div class="timeline-marker">
+                                                <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
+                                            </div>
+                                            <div class="timeline-content">
+                                                <div class="timeline-title">{{ $proses['step'] }}</div>
+                                                <div class="timeline-date">{{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}</div>
+                                            </div>
                                         </div>
-                                        <div class="timeline-content">
-                                            <h4 class="timeline-title">{{ $proses['step'] }}</h4>
-                                            <p class="timeline-date">{{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}</p>
-                                        </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
-                    @else
-                        <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
-                    @endif
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Informasi Pelanggan</h3>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-label">Nama Pelanggan</div>
-                        <div class="info-value">{{ $transaksi->pelanggan->nama_pelanggan }}</div>
+                        @else
+                            <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
+                        @endif
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">Nomor Telepon</div>
-                        <div class="info-value">{{ $transaksi->pelanggan->nomor_telp }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Email</div>
-                        <div class="info-value">{{ $transaksi->pelanggan->email ?: '-' }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Informasi Teknisi</h3>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-label">Nama Teknisi</div>
-                        <div class="info-value">{{ $transaksi->user->name ?? 'Tidak ada' }}</div>
-                    </div>
-                    @if ($transaksi->user)
-                        <div class="info-row">
-                            <div class="info-label">Email Teknisi</div>
-                            <div class="info-value">{{ $transaksi->user->email }}</div>
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Real-time clock function with Jakarta/Indonesian timezone
+        function updateRealTimeClock() {
+            try {
+                // Get current date
+                const now = new Date();
+
+                // Calculate the time in Indonesia (GMT+7)
+                // First get the UTC time in milliseconds
+                const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+
+                // Then create a new date object with the time in Indonesia
+                const jakartaTime = new Date(utcTime + (3600000 * 7));
+
+                const hours = String(jakartaTime.getHours()).padStart(2, '0');
+                const minutes = String(jakartaTime.getMinutes()).padStart(2, '0');
+                const seconds = String(jakartaTime.getSeconds()).padStart(2, '0');
+
+                const clockElement = document.getElementById('realTimeClock');
+                if (clockElement) {
+                    clockElement.textContent = `${hours}:${minutes}:${seconds}`;
+                }
+            } catch (error) {
+                console.error("Error updating clock:", error);
+            }
+        }
+
+        // Update clock every second
+        setInterval(updateRealTimeClock, 1000);
+
+        // Initialize clock immediately
+        updateRealTimeClock();
+
         // Toggle timeline function
         function toggleTimeline() {
             const timelineContainer = document.getElementById('timeline-container');
@@ -691,3 +814,4 @@
 </body>
 
 </html>
+```

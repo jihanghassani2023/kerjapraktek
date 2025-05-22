@@ -189,17 +189,25 @@ class PerbaikanController extends Controller
         $currentProcess = $perbaikan->proses_pengerjaan ?? [];
 
         // Add status change entry
-        $statusMessage = "Status diubah menjadi " . $newStatus;
+        $statusMessage = "";
+        if ($newStatus == 'Menunggu') {
+            $statusMessage = "Menunggu Antrian Perbaikan";
+        } elseif ($newStatus == 'Proses') {
+            $statusMessage = "Device Anda Sedang diproses";
+        } elseif ($newStatus == 'Selesai') {
+            $statusMessage = "Device Anda Telah Selesai";
+        }
+
         $currentProcess[] = [
             'step' => $statusMessage,
-            'timestamp' => now()->format('Y-m-d H:i:s')
+            'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
         ];
 
         // Add custom process step if provided
         if ($request->filled('proses_step')) {
             $currentProcess[] = [
                 'step' => $request->proses_step,
-                'timestamp' => now()->format('Y-m-d H:i:s')
+                'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
             ];
         }
 
@@ -235,7 +243,7 @@ class PerbaikanController extends Controller
         $currentProcess = $perbaikan->proses_pengerjaan ?? [];
         $currentProcess[] = [
             'step' => $request->proses_step,
-            'timestamp' => now()->format('Y-m-d H:i:s')
+            'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
         ];
 
         $perbaikan->proses_pengerjaan = $currentProcess;

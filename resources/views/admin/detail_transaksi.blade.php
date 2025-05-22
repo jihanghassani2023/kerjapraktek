@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 
@@ -174,6 +175,19 @@
             color: #333;
         }
 
+        /* Grid Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .card {
             background-color: white;
             border-radius: 10px;
@@ -202,16 +216,28 @@
             padding: 20px;
         }
 
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #8c3a3a;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
         .info-row {
             display: flex;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .info-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
             margin-bottom: 0;
         }
 
@@ -365,6 +391,114 @@
             border: 1px solid #f5c6cb;
         }
 
+        /* Timeline Styles */
+        .timeline {
+            position: relative;
+            margin-left: 20px;
+            padding-left: 20px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 2px;
+            background-color: #e0e0e0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            background-color: transparent !important;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -31px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid #8c3a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timeline-marker i {
+            font-size: 10px;
+            color: #8c3a3a;
+        }
+
+        .timeline-content {
+            padding-left: 10px;
+        }
+
+        .timeline-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Status change styling */
+        .timeline-item.status-change .timeline-marker {
+            border-color: #6c757d;
+        }
+
+        .timeline-item.status-change .timeline-marker i {
+            color: #6c757d;
+        }
+
+        .timeline-item.status-change .timeline-title {
+            font-style: italic;
+        }
+
+        /* Status-specific colors */
+        .timeline-item.status-menunggu .timeline-marker {
+            border-color: #ff6b6b;
+        }
+
+        .timeline-item.status-menunggu .timeline-marker i {
+            color: #ff6b6b;
+        }
+
+        .timeline-item.status-menunggu .timeline-title {
+            color: #ff6b6b;
+        }
+
+        .timeline-item.status-proses .timeline-marker {
+            border-color: #ffaa00;
+        }
+
+        .timeline-item.status-proses .timeline-marker i {
+            color: #ffaa00;
+        }
+
+        .timeline-item.status-proses .timeline-title {
+            color: #ffaa00;
+        }
+
+        .timeline-item.status-selesai .timeline-marker {
+            border-color: #28a745;
+        }
+
+        .timeline-item.status-selesai .timeline-marker i {
+            color: #28a745;
+        }
+
+        .timeline-item.status-selesai .timeline-title {
+            color: #28a745;
+        }
+
         /* Latest Process Styles */
         .latest-process {
             background-color: #f8f9fa;
@@ -380,88 +514,6 @@
             align-items: center;
             margin-bottom: 10px;
         }
-        /* Timeline Styles */
-.timeline {
-    position: relative;
-    margin-left: 20px;
-    padding-left: 20px;
-}
-.timeline-item {
-    position: relative;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-}
-.timeline-marker {
-    position: absolute;
-    left: -31px;
-    top: 0;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: white;
-    border: 2px solid #8c3a3a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.timeline-marker i {
-    font-size: 10px;
-    color: #8c3a3a;
-}
-.timeline-content {
-    padding-left: 10px;
-}
-.timeline-title {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333;
-}
-.timeline-date {
-    font-size: 12px;
-    color: #666;
-}
-
-/* Status change styling */
-.timeline-item.status-change .timeline-marker {
-    border-color: #6c757d;
-}
-.timeline-item.status-change .timeline-marker i {
-    color: #6c757d;
-}
-.timeline-item.status-change .timeline-title {
-    font-style: italic;
-}
-
-/* Status-specific colors */
-.timeline-item.status-menunggu .timeline-marker {
-    border-color: #ff6b6b;
-}
-.timeline-item.status-menunggu .timeline-marker i {
-    color: #ff6b6b;
-}
-.timeline-item.status-menunggu .timeline-title {
-    color: #ff6b6b;
-}
-
-.timeline-item.status-proses .timeline-marker {
-    border-color: #ffaa00;
-}
-.timeline-item.status-proses .timeline-marker i {
-    color: #ffaa00;
-}
-.timeline-item.status-proses .timeline-title {
-    color: #ffaa00;
-}
-
-.timeline-item.status-selesai .timeline-marker {
-    border-color: #28a745;
-}
-.timeline-item.status-selesai .timeline-marker i {
-    color: #28a745;
-}
-.timeline-item.status-selesai .timeline-title {
-    color: #28a745;
-}
 
         .process-title {
             font-weight: bold;
@@ -494,62 +546,10 @@
             text-decoration: underline;
         }
 
-        /* Timeline Styles */
+        /* Timeline Container */
         .timeline-container {
             display: none;
             margin-top: 20px;
-        }
-
-        .timeline {
-            position: relative;
-            margin-left: 10px;
-            padding-left: 30px;
-            border-left: 2px solid #e0e0e0;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 25px;
-        }
-
-        .timeline-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .timeline-marker {
-            position: absolute;
-            left: -41px;
-            top: 0;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background-color: white;
-            border: 2px solid #8c3a3a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .timeline-marker i {
-            color: #8c3a3a;
-            font-size: 12px;
-        }
-
-        .timeline-content {
-            padding-left: 10px;
-        }
-
-        .timeline-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #333;
-        }
-
-        .timeline-date {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
         }
 
         .actions {
@@ -588,29 +588,6 @@
             .status-buttons {
                 flex-direction: column;
             }
-        }
-
-        /* Timeline Styles for Status Changes */
-        .timeline-item.status-change .timeline-marker {
-            background-color: #e9ecef;
-            border-color: #6c757d;
-        }
-
-        .timeline-item.status-change .timeline-title {
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        .timeline-item.status-change.status-menunggu .timeline-title {
-            color: #ff6b6b;
-        }
-
-        .timeline-item.status-change.status-proses .timeline-title {
-            color: #ffaa00;
-        }
-
-        .timeline-item.status-change.status-selesai .timeline-title {
-            color: #28a745;
         }
     </style>
 </head>
@@ -689,188 +666,178 @@
                 </a>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Detail Perbaikan</h3>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-label">Kode Perbaikan</div>
-                        <div class="info-value">{{ $transaksi->id }}</div>
+            <!-- Grid layout for 2-column design -->
+            <div class="grid-container">
+                <!-- Left Column: Main Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Informasi Perbaikan</h3>
+                        <span id="statusBadge" class="status-badge status-{{ strtolower($transaksi->status) }}">
+                            {{ $transaksi->status }}
+                        </span>
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">Tanggal Perbaikan</div>
-                        <div class="info-value">
-                            {{ \Carbon\Carbon::parse($transaksi->tanggal_perbaikan)->format('d F Y') }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Nama Barang</div>
-                        <div class="info-value">{{ $transaksi->nama_barang }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Kategori Device</div>
-                        <div class="info-value">{{ $transaksi->kategori_device ?? 'Tidak ditentukan' }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Masalah</div>
-                        <div class="info-value">{{ $transaksi->masalah }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Tindakan Perbaikan</div>
-                        <div class="info-value">{{ $transaksi->tindakan_perbaikan }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Harga</div>
-                        <div class="info-value">Rp. {{ number_format($transaksi->harga, 0, ',', '.') }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Garansi</div>
-                        <div class="info-value">{{ $transaksi->garansi ?: 'Tidak ada' }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Status</div>
-                        <div class="info-value">
-                            <span id="statusBadge" class="status-badge status-{{ strtolower($transaksi->status) }}">
-                                {{ $transaksi->status }}
-                            </span>
+                    <div class="card-body">
+                        <!-- Repair Information Section -->
+                        <div class="info-section">
+                            <div class="info-row">
+                                <div class="info-label">Kode Perbaikan</div>
+                                <div class="info-value">{{ $transaksi->id }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Tanggal Perbaikan</div>
+                                <div class="info-value">
+                                    {{ \Carbon\Carbon::parse($transaksi->tanggal_perbaikan)->format('d F Y') }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Nama Barang</div>
+                                <div class="info-value">{{ $transaksi->nama_barang }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Kategori Device</div>
+                                <div class="info-value">{{ $transaksi->kategori_device ?? 'Tidak ditentukan' }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Masalah</div>
+                                <div class="info-value">{{ $transaksi->masalah }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Tindakan Perbaikan</div>
+                                <div class="info-value">{{ $transaksi->tindakan_perbaikan }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Harga</div>
+                                <div class="info-value">Rp. {{ number_format($transaksi->harga, 0, ',', '.') }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Garansi</div>
+                                <div class="info-value">{{ $transaksi->garansi ?: 'Tidak ada' }}</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Status update section -->
-                    <div class="status-actions">
-                        <h4 class="status-title">Ubah Status Perbaikan</h4>
-                        <div class="status-buttons">
-                            @if ($transaksi->status != 'Menunggu')
-                                <button type="button" class="btn-status btn-menunggu" data-status="Menunggu">
-                                    Menunggu
-                                </button>
+                        <!-- Customer Information Section -->
+                        <div class="info-section">
+                            <h3 class="section-title">Informasi Pelanggan</h3>
+                            <div class="info-row">
+                                <div class="info-label">Nama Pelanggan</div>
+                                <div class="info-value">{{ $transaksi->pelanggan->nama_pelanggan }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Nomor Telepon</div>
+                                <div class="info-value">{{ $transaksi->pelanggan->nomor_telp }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Email</div>
+                                <div class="info-value">{{ $transaksi->pelanggan->email ?: '-' }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Technician Information Section -->
+                        <div class="info-section">
+                            <h3 class="section-title">Informasi Teknisi</h3>
+                            <div class="info-row">
+                                <div class="info-label">Nama Teknisi</div>
+                                <div class="info-value">{{ $transaksi->user->name ?? 'Tidak ada' }}</div>
+                            </div>
+                            @if ($transaksi->user)
+                                <div class="info-row">
+                                    <div class="info-label">Email Teknisi</div>
+                                    <div class="info-value">{{ $transaksi->user->email }}</div>
+                                </div>
                             @endif
-
-                            @if ($transaksi->status != 'Proses')
-                                <button type="button" class="btn-status btn-proses" data-status="Proses">
-                                    Proses
-                                </button>
-                            @endif
-
-                            @if ($transaksi->status != 'Selesai')
-                                <button type="button" class="btn-status btn-selesai" data-status="Selesai">
-                                    Selesai
-                                </button>
-                            @endif
                         </div>
-                    </div>
 
-                    <!-- Add this inside the card-body div, after the status-actions section -->
-                    <div class="actions">
-                        <a href="{{ route('admin.perbaikan.edit', $transaksi->id) }}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> Edit Perbaikan
-                        </a>
-                    </div>
-                </div>
-            </div>
+                        <!-- Status update section -->
+                        <div class="status-actions">
+                            <h4 class="status-title">Ubah Status Perbaikan</h4>
+                            <div class="status-buttons">
+                                @if ($transaksi->status == 'Menunggu')
+                                    <button type="button" class="btn-status btn-proses" data-status="Proses">
+                                        Proses
+                                    </button>
+                                @elseif ($transaksi->status == 'Proses')
+                                    <button type="button" class="btn-status btn-selesai" data-status="Selesai">
+                                        Selesai
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
 
-            <!-- Proses Pengerjaan Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Proses Pengerjaan</h3>
-                </div>
-                <!-- Full Timeline -->
-                <div id="timeline-container" class="timeline-container">
-    <div class="timeline-title">Riwayat Proses Pengerjaan</div>
-    <div class="timeline">
-        @if (!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
-            @foreach (array_reverse($transaksi->proses_pengerjaan) as $proses)
-                @php
-                    $isStatusChange = strpos($proses['step'], 'Status diubah menjadi') === 0;
-                    $statusClass = '';
-                    if ($isStatusChange) {
-                        if (strpos($proses['step'], 'Menunggu') !== false) {
-                            $statusClass = 'status-menunggu';
-                        } elseif (strpos($proses['step'], 'Proses') !== false) {
-                            $statusClass = 'status-proses';
-                        } elseif (strpos($proses['step'], 'Selesai') !== false) {
-                            $statusClass = 'status-selesai';
-                        }
-                    }
-                @endphp
-                <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}">
-                    <div class="timeline-marker">
-                        <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
-                    </div>
-                    <div class="timeline-content">
-                        <div class="timeline-title">{{ $proses['step'] }}</div>
-                        <div class="timeline-date">
-                            {{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}
+                        <!-- Action Buttons -->
+                        <div class="actions">
+                            <a href="{{ route('admin.perbaikan.edit', $transaksi->id) }}" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Edit Perbaikan
+                            </a>
                         </div>
                     </div>
                 </div>
-            @endforeach
-        @else
-            <div class="empty-timeline">Belum ada proses yang direkam.</div>
-        @endif
-    </div>
-</div>
 
-<!-- Latest Process Section (Always Visible) -->
-<div class="card-body">
-    @if (!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
-        <?php
-        $prosesArray = $transaksi->proses_pengerjaan;
-        $latestProcess = $prosesArray[count($prosesArray) - 1];
-        ?>
-        <!-- Latest Process -->
-        <div class="latest-process">
-            <div class="process-header">
-                <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
-                <div class="process-date">
-                    {{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
-            </div>
-            <div class="process-content">{{ $latestProcess['step'] }}</div>
-            <div class="show-all-link" onclick="toggleTimeline()">
-                Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
-            </div>
-        </div>
-    @else
-        <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
-    @endif
-</div>
+                <!-- Right Column: Process Timeline -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Proses Pengerjaan</h3>
+                    </div>
+                    <div class="card-body">
+                        @if (!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
+                            <?php
+                            $prosesArray = $transaksi->proses_pengerjaan;
+                            $latestProcess = $prosesArray[count($prosesArray) - 1];
+                            ?>
+                            <!-- Latest Process -->
+                            <div class="latest-process">
+                                <div class="process-header">
+                                    <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
+                                    <div class="process-date">
+                                        {{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}
+                                    </div>
+                                </div>
+                                <div class="process-content">{{ $latestProcess['step'] }}</div>
+                                <div class="show-all-link" onclick="toggleTimeline()">
+                                    Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
+                                </div>
+                            </div>
 
+                            <!-- Full Timeline -->
+                            <div id="timeline-container" class="timeline-container">
+                                <div class="timeline">
+                                    @foreach (array_reverse($transaksi->proses_pengerjaan) as $proses)
+                                        @php
+                                            $isStatusChange =
+                                                $proses['step'] == 'Menunggu Antrian Perbaikan' ||
+                                                $proses['step'] == 'Device Anda Sedang diproses' ||
+                                                $proses['step'] == 'Device Anda Telah Selesai';
 
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Informasi Pelanggan</h3>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-label">Nama Pelanggan</div>
-                        <div class="info-value">{{ $transaksi->pelanggan->nama_pelanggan }}</div>
+                                            // Dan untuk menentukan statusClass
+                                            $statusClass = '';
+                                            if ($isStatusChange) {
+                                                if ($proses['step'] == 'Menunggu Antrian Perbaikan') {
+                                                    $statusClass = 'status-menunggu';
+                                                } elseif ($proses['step'] == 'Device Anda Sedang diproses') {
+                                                    $statusClass = 'status-proses';
+                                                } elseif ($proses['step'] == 'Device Anda Telah Selesai') {
+                                                    $statusClass = 'status-selesai';
+                                                }
+                                            }
+                                        @endphp
+                                        <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}"
+                                            style="background-color: transparent !important;">
+                                            <div class="timeline-marker">
+                                                <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
+                                            </div>
+                                            <div class="timeline-content">
+                                                <div class="timeline-title">{{ $proses['step'] }}</div>
+                                                <div class="timeline-date">
+                                                    {{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang
+                                direkam.</p>
+                        @endif
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">Nomor Telepon</div>
-                        <div class="info-value">{{ $transaksi->pelanggan->nomor_telp }}</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Email</div>
-                        <div class="info-value">{{ $transaksi->pelanggan->email ?: '-' }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Informasi Teknisi</h3>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-label">Nama Teknisi</div>
-                        <div class="info-value">{{ $transaksi->user->name ?? 'Tidak ada' }}</div>
-                    </div>
-                    @if ($transaksi->user)
-                        <div class="info-row">
-                            <div class="info-label">Email Teknisi</div>
-                            <div class="info-value">{{ $transaksi->user->email }}</div>
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -1074,43 +1041,26 @@
             buttonsContainer.innerHTML = '';
 
             // Add appropriate buttons based on status
-            if (status !== 'Selesai') {
-                if (status === 'Menunggu') {
-                    // For Menunggu status, show Proses and Selesai buttons
-                    const prosesButton = document.createElement('button');
-                    prosesButton.type = 'button';
-                    prosesButton.className = 'btn-status btn-proses';
-                    prosesButton.setAttribute('data-status', 'Proses');
-                    prosesButton.textContent = 'Proses';
-                    prosesButton.onclick = showConfirmationModal;
-                    buttonsContainer.appendChild(prosesButton);
-
-                    const selesaiButton = document.createElement('button');
-                    selesaiButton.type = 'button';
-                    selesaiButton.className = 'btn-status btn-selesai';
-                    selesaiButton.setAttribute('data-status', 'Selesai');
-                    selesaiButton.textContent = 'Selesai';
-                    selesaiButton.onclick = showConfirmationModal;
-                    buttonsContainer.appendChild(selesaiButton);
-                } else if (status === 'Proses') {
-                    // For Proses status, show Menunggu and Selesai buttons
-                    const menungguButton = document.createElement('button');
-                    menungguButton.type = 'button';
-                    menungguButton.className = 'btn-status btn-menunggu';
-                    menungguButton.setAttribute('data-status', 'Menunggu');
-                    menungguButton.textContent = 'Menunggu';
-                    menungguButton.onclick = showConfirmationModal;
-                    buttonsContainer.appendChild(menungguButton);
-
-                    const selesaiButton = document.createElement('button');
-                    selesaiButton.type = 'button';
-                    selesaiButton.className = 'btn-status btn-selesai';
-                    selesaiButton.setAttribute('data-status', 'Selesai');
-                    selesaiButton.textContent = 'Selesai';
-                    selesaiButton.onclick = showConfirmationModal;
-                    buttonsContainer.appendChild(selesaiButton);
-                }
+            if (status === 'Menunggu') {
+                // For Menunggu status, show ONLY Proses button
+                const prosesButton = document.createElement('button');
+                prosesButton.type = 'button';
+                prosesButton.className = 'btn-status btn-proses';
+                prosesButton.setAttribute('data-status', 'Proses');
+                prosesButton.textContent = 'Proses';
+                prosesButton.onclick = showConfirmationModal;
+                buttonsContainer.appendChild(prosesButton);
+            } else if (status === 'Proses') {
+                // For Proses status, show ONLY Selesai button
+                const selesaiButton = document.createElement('button');
+                selesaiButton.type = 'button';
+                selesaiButton.className = 'btn-status btn-selesai';
+                selesaiButton.setAttribute('data-status', 'Selesai');
+                selesaiButton.textContent = 'Selesai';
+                selesaiButton.onclick = showConfirmationModal;
+                buttonsContainer.appendChild(selesaiButton);
             }
+            // For Selesai status, no button should be shown
         }
 
         // Helper function to show confirmation modal

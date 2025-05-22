@@ -601,7 +601,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
 
@@ -623,7 +623,8 @@
             color: #333333;
         }
 
-        #confirmYes, #confirmNo {
+        #confirmYes,
+        #confirmNo {
             padding: 8px 30px;
             border: none;
             border-radius: 5px;
@@ -786,7 +787,8 @@
                             <div class="info-row">
                                 <div class="info-label">Status</div>
                                 <div class="info-value">
-                                    <span id="statusBadge" class="status-badge status-{{ strtolower($perbaikan->status) }}">
+                                    <span id="statusBadge"
+                                        class="status-badge status-{{ strtolower($perbaikan->status) }}">
                                         {{ $perbaikan->status }}
                                     </span>
                                 </div>
@@ -832,13 +834,16 @@
                                 <!-- Latest Process -->
                                 <div class="latest-process">
                                     <div class="process-header">
-                                        <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
+                                        <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir
+                                        </div>
                                         <div class="process-date">
-                                            {{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
+                                            {{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}
+                                        </div>
                                     </div>
                                     <div class="process-content">{{ $latestProcess['step'] }}</div>
                                     <div class="show-all-link" onclick="toggleTimeline()">
-                                        Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
+                                        Lihat semua progress <i class="fas fa-chevron-down"
+                                            id="timeline-toggle-icon"></i>
                                     </div>
                                 </div>
 
@@ -847,21 +852,26 @@
                                     <div class="timeline">
                                         @foreach (array_reverse($perbaikan->proses_pengerjaan) as $proses)
                                             @php
-                                                $isStatusChange = strpos($proses['step'], 'Status diubah menjadi') === 0;
+                                                $isStatusChange =
+                                                    $proses['step'] == 'Menunggu Antrian Perbaikan' ||
+                                                    $proses['step'] == 'Device Anda Sedang diproses' ||
+                                                    $proses['step'] == 'Device Anda Telah Selesai';
                                                 $statusClass = '';
                                                 if ($isStatusChange) {
-                                                    if (strpos($proses['step'], 'Menunggu') !== false) {
+                                                    if ($proses['step'] == 'Menunggu Antrian Perbaikan') {
                                                         $statusClass = 'status-menunggu';
-                                                    } elseif (strpos($proses['step'], 'Proses') !== false) {
+                                                    } elseif ($proses['step'] == 'Device Anda Sedang diproses') {
                                                         $statusClass = 'status-proses';
-                                                    } elseif (strpos($proses['step'], 'Selesai') !== false) {
+                                                    } elseif ($proses['step'] == 'Device Anda Telah Selesai') {
                                                         $statusClass = 'status-selesai';
                                                     }
                                                 }
                                             @endphp
-                                            <div class="timeline-item {{ $isStatusChange ? 'status-change '.$statusClass : '' }}" style="background-color: transparent !important;">
+                                            <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}"
+                                                style="background-color: transparent !important;">
                                                 <div class="timeline-marker">
-                                                    <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
+                                                    <i
+                                                        class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
                                                 </div>
                                                 <div class="timeline-content">
                                                     <div class="timeline-title">{{ $proses['step'] }}</div>
@@ -874,7 +884,8 @@
                                     </div>
                                 </div>
                             @else
-                                <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
+                                <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan
+                                    yang direkam.</p>
                             @endif
 
                             <!-- Form Tambah Proses -->
@@ -882,7 +893,8 @@
                                 <form action="{{ route('perbaikan.add-process', $perbaikan->id) }}" method="POST">
                                     @csrf
                                     <div class="input-group">
-                                        <input type="text" name="proses_step" class="form-control" placeholder="Tambahkan langkah proses baru..." required>
+                                        <input type="text" name="proses_step" class="form-control"
+                                            placeholder="Tambahkan langkah proses baru..." required>
                                         <div class="input-group-append">
                                             <button type="submit" class="btn btn-primary">
                                                 <i class="fas fa-plus"></i> Tambah
@@ -904,26 +916,17 @@
                             <div class="status-actions">
                                 <h4 class="status-title">Ubah Status Perbaikan</h4>
                                 <div class="status-buttons">
-                                    @if($perbaikan->status != 'Menunggu')
-                                        <button type="button" class="btn-status btn-menunggu" data-status="Menunggu">
-                                            Menunggu
-                                        </button>
-                                    @endif
-
-                                    @if($perbaikan->status != 'Proses')
+                                    @if ($perbaikan->status == 'Menunggu')
                                         <button type="button" class="btn-status btn-proses" data-status="Proses">
                                             Proses
                                         </button>
-                                    @endif
-
-                                    @if($perbaikan->status != 'Selesai')
+                                    @elseif($perbaikan->status == 'Proses')
                                         <button type="button" class="btn-status btn-selesai" data-status="Selesai">
                                             Selesai
                                         </button>
                                     @endif
                                 </div>
                             </div>
-
                             <div class="actions mt-3">
                                 <a href="{{ route('perbaikan.edit', $perbaikan->id) }}" class="btn btn-primary">
                                     <i class="fas fa-edit"></i> Edit Perbaikan
@@ -932,7 +935,8 @@
                         </div>
                     </div>
                 </div>
-            </div></div>
+            </div>
+        </div>
     </div>
 
     <!-- Custom Confirmation Modal -->
@@ -1037,26 +1041,26 @@
 
                     // Now send the status update request in the background
                     fetch('/perbaikan/{{ $perbaikan->id }}/status', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': token
-                        },
-                        body: JSON.stringify({
-                            status: pendingStatus,
-                            tindakan_perbaikan: "{{ $perbaikan->tindakan_perbaikan }}",
-                            harga: {{ $perbaikan->harga }}
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token
+                            },
+                            body: JSON.stringify({
+                                status: pendingStatus,
+                                tindakan_perbaikan: "{{ $perbaikan->tindakan_perbaikan }}",
+                                harga: {{ $perbaikan->harga }}
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Success! Do nothing visible to user since we already updated UI
-                        console.log("Status updated successfully");
-                    })
-                    .catch(error => {
-                        // Error occurred, but don't show to user
-                        console.error('Error updating status:', error);
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            // Success! Do nothing visible to user since we already updated UI
+                            console.log("Status updated successfully");
+                        })
+                        .catch(error => {
+                            // Error occurred, but don't show to user
+                            console.error('Error updating status:', error);
+                        });
                 }
             });
 
@@ -1068,7 +1072,14 @@
                 if (!timeline) return;
 
                 // Create status message
-                const statusText = "Status diubah menjadi " + newStatus;
+                let statusText = "";
+                if (newStatus === 'Menunggu') {
+                    statusText = "Menunggu Antrian Perbaikan";
+                } else if (newStatus === 'Proses') {
+                    statusText = "Device Anda Sedang diproses";
+                } else if (newStatus === 'Selesai') {
+                    statusText = "Device Anda Telah Selesai";
+                }
 
                 // Determine status class
                 let statusClass = '';
@@ -1081,19 +1092,24 @@
                 }
 
                 // Get current date and time in proper format
+                // Get current date and time in Palembang timezone (GMT+7)
                 const now = new Date();
-                const dateStr = now.toLocaleDateString('id-ID', {
+
+                // Calculate the time in Indonesia (GMT+7)
+                const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const jakartaTime = new Date(utcTime + (3600000 * 7));
+
+                const dateStr = jakartaTime.toLocaleDateString('id-ID', {
                     day: '2-digit',
                     month: 'short',
                     year: 'numeric'
                 });
-                const timeStr = now.toLocaleTimeString('id-ID', {
+                const timeStr = jakartaTime.toLocaleTimeString('id-ID', {
                     hour: '2-digit',
                     minute: '2-digit',
                     second: '2-digit'
                 });
                 const datetime = `${dateStr} ${timeStr}`;
-
                 // Create new timeline item element
                 const newItem = document.createElement('div');
                 newItem.className = `timeline-item status-change ${statusClass}`;
@@ -1156,43 +1172,26 @@
             buttonsContainer.innerHTML = '';
 
             // Add appropriate buttons based on status
-            if (status !== 'Selesai') {
-                if (status === 'Menunggu') {
-                    // For Menunggu status, show Proses and Selesai buttons
-                    const prosesButton = document.createElement('button');
-                    prosesButton.type = 'button';
-                    prosesButton.className = 'btn-status btn-proses';
-                    prosesButton.setAttribute('data-status', 'Proses');
-                    prosesButton.textContent = 'Proses';
-                    prosesButton.onclick = showConfirmationModal;
-                    buttonsContainer.appendChild(prosesButton);
-
-                    const selesaiButton = document.createElement('button');
-                    selesaiButton.type = 'button';
-                    selesaiButton.className = 'btn-status btn-selesai';
-                    selesaiButton.setAttribute('data-status', 'Selesai');
-                    selesaiButton.textContent = 'Selesai';
-                    selesaiButton.onclick = showConfirmationModal;
-                    buttonsContainer.appendChild(selesaiButton);
-                } else if (status === 'Proses') {
-                    // For Proses status, show Menunggu and Selesai buttons
-                    const menungguButton = document.createElement('button');
-                    menungguButton.type = 'button';
-                    menungguButton.className = 'btn-status btn-menunggu';
-                    menungguButton.setAttribute('data-status', 'Menunggu');
-                    menungguButton.textContent = 'Menunggu';
-                    menungguButton.onclick = showConfirmationModal;
-                    buttonsContainer.appendChild(menungguButton);
-
-                    const selesaiButton = document.createElement('button');
-                    selesaiButton.type = 'button';
-                    selesaiButton.className = 'btn-status btn-selesai';
-                    selesaiButton.setAttribute('data-status', 'Selesai');
-                    selesaiButton.textContent = 'Selesai';
-                    selesaiButton.onclick = showConfirmationModal;
-                    buttonsContainer.appendChild(selesaiButton);
-                }
+            if (status === 'Menunggu') {
+                // For Menunggu status, show ONLY Proses button
+                const prosesButton = document.createElement('button');
+                prosesButton.type = 'button';
+                prosesButton.className = 'btn-status btn-proses';
+                prosesButton.setAttribute('data-status', 'Proses');
+                prosesButton.textContent = 'Proses';
+                prosesButton.onclick = showConfirmationModal;
+                buttonsContainer.appendChild(prosesButton);
+            } else if (status === 'Proses') {
+                // For Proses status, show ONLY Selesai button
+                const selesaiButton = document.createElement('button');
+                selesaiButton.type = 'button';
+                selesaiButton.className = 'btn-status btn-selesai';
+                selesaiButton.setAttribute('data-status', 'Selesai');
+                selesaiButton.textContent = 'Selesai';
+                selesaiButton.onclick = showConfirmationModal;
+                buttonsContainer.appendChild(selesaiButton);
             }
+            // For Selesai status, no buttons will be shown
         }
 
         // Helper function to show confirmation modal
@@ -1227,7 +1226,8 @@
             } else {
                 timelineContainer.style.display = 'none';
                 toggleIcon.className = 'fas fa-chevron-down';
-                showAllLink.innerHTML = 'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
+                showAllLink.innerHTML =
+                    'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
 
@@ -1256,4 +1256,5 @@
         });
     </script>
 </body>
+
 </html>

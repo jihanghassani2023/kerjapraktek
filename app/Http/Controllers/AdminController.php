@@ -196,12 +196,19 @@ class AdminController extends Controller
         $currentProcess = $perbaikan->proses_pengerjaan ?? [];
 
         // Add status change entry
-        $statusMessage = "Status diubah menjadi " . $newStatus;
+        $statusMessage = "";
+        if ($newStatus == 'Menunggu') {
+            $statusMessage = "Menunggu Antrian Perbaikan";
+        } elseif ($newStatus == 'Proses') {
+            $statusMessage = "Device Anda Sedang diproses";
+        } elseif ($newStatus == 'Selesai') {
+            $statusMessage = "Device Anda Telah Selesai";
+        }
+
         $currentProcess[] = [
             'step' => $statusMessage,
-            'timestamp' => now()->format('Y-m-d H:i:s')
+            'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
         ];
-
         $perbaikan->proses_pengerjaan = $currentProcess;
         $perbaikan->save();
 
@@ -284,7 +291,6 @@ class AdminController extends Controller
             'masalah' => 'required|string',
             'tindakan_perbaikan' => 'required|string',
             'kategori_device' => 'required|string|max:50',
-            'status' => 'required|in:Menunggu,Proses,Selesai',
             'harga' => 'required|numeric',
             'garansi' => 'required|string',
             'proses_step' => 'nullable|string',
@@ -300,7 +306,6 @@ class AdminController extends Controller
             'masalah' => $request->masalah,
             'tindakan_perbaikan' => $request->tindakan_perbaikan,
             'kategori_device' => $request->kategori_device,
-            'status' => $request->status,
             'harga' => $request->harga,
             'garansi' => $request->garansi,
         ];
@@ -397,7 +402,10 @@ class AdminController extends Controller
     {
         $user = Auth::user();
         $pelanggan = Pelanggan::all();
-        $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
+       $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])
+    ->orderBy('jabatan', 'desc') // Kepala Teknisi akan muncul di atas
+    ->orderBy('name', 'asc')     // Kemudian urutkan berdasarkan nama
+    ->get();
 
         return view('admin.tambah_perbaikan', compact('user', 'pelanggan', 'teknisi'));
     }
@@ -442,12 +450,10 @@ class AdminController extends Controller
         $perbaikan->garansi = $request->garansi;
         $perbaikan->tanggal_perbaikan = date('Y-m-d');
         $perbaikan->status = 'Menunggu';
-        if ($request->filled('proses_step')) {
-            $perbaikan->proses_pengerjaan = [[
-                'step' => $request->proses_step,
-                'timestamp' => now()->format('Y-m-d H:i:s')
-            ]];
-        }
+        $perbaikan->proses_pengerjaan = [[
+            'step' => 'Menunggu Antrian Perbaikan',
+            'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
+        ]];
         $perbaikan->save();
         return redirect()->route('admin.transaksi')
             ->with('success', 'Perbaikan berhasil disimpan');

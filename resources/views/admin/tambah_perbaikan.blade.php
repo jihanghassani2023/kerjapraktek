@@ -401,20 +401,20 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="user_id">Pilih Teknisi</label>
-                    <select class="form-control @error('user_id') is-invalid @enderror" id="user_id" name="user_id"
-                        required>
-                        <option value="">-- Pilih Teknisi --</option>
-                        @foreach ($teknisi as $t)
-                            <option value="{{ $t->id }}" {{ old('user_id') == $t->id ? 'selected' : '' }}>
-                                {{ $t->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('user_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+    <label for="user_id">Pilih Teknisi</label>
+    <select class="form-control @error('user_id') is-invalid @enderror" id="user_id" name="user_id"
+        required>
+        <option value="">-- Pilih Teknisi --</option>
+        @foreach ($teknisi as $t)
+            <option value="{{ $t->id }}" {{ old('user_id') == $t->id ? 'selected' : '' }}>
+                {{ $t->name }} - {{ $t->jabatan }}
+            </option>
+        @endforeach
+    </select>
+    @error('user_id')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
 
                 <div class="form-group">
                     <label for="nama_barang">Nama Barang</label>
@@ -431,24 +431,19 @@
                     <select id="kategori_device" name="kategori_device"
                         class="form-control @error('kategori_device') is-invalid @enderror" required>
                         <option value="">-- Pilih Kategori --</option>
-                        <option value="Smartphone" {{ old('kategori_device') == 'Smartphone' ? 'selected' : '' }}>
-                            Smartphone</option>
-                        <option value="Laptop" {{ old('kategori_device') == 'Laptop' ? 'selected' : '' }}>Laptop
-                        </option>
-                        <option value="Komputer" {{ old('kategori_device') == 'Komputer' ? 'selected' : '' }}>Komputer
-                        </option>
-                        <option value="Tablet" {{ old('kategori_device') == 'Tablet' ? 'selected' : '' }}>Tablet
-                        </option>
-                        <option value="Printer" {{ old('kategori_device') == 'Printer' ? 'selected' : '' }}>Printer
-                        </option>
-                        <option value="Lainnya" {{ old('kategori_device') == 'Lainnya' ? 'selected' : '' }}>Lainnya
-                        </option>
+                        <option value="iPhone" {{ old('kategori_device') == 'iPhone' ? 'selected' : '' }}>
+                            iPhone</option>
+                        <option value="iWatch" {{ old('kategori_device') == 'iWatch' ? 'selected' : '' }}>
+                            iWatch</option>
+                        <option value="Macbook" {{ old('kategori_device') == 'Macbook' ? 'selected' : '' }}>
+                            Macbook</option>
+                        <option value="iPad" {{ old('kategori_device') == 'iPad' ? 'selected' : '' }}>
+                            iPad</option>
                     </select>
                     @error('kategori_device')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-
                 <div class="form-group">
                     <label for="masalah">Masalah</label>
                     <textarea id="masalah" name="masalah" class="form-control @error('masalah') is-invalid @enderror" required>{{ old('masalah') }}</textarea>
@@ -484,18 +479,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="form-group">
-                    <label for="proses_step">Proses Pengerjaan Awal</label>
-                    <div class="input-group">
-                        <input type="text" id="proses_step" name="proses_step" class="form-control"
-                            placeholder="Misalnya: Penerimaan barang">
-                        <div class="input-group-append">
-                            <span class="input-group-text"><i class="fas fa-clock"></i>
-                                {{ now()->format('H:i:s') }}</span>
-                        </div>
-                    </div>
-                    <small class="form-text text-muted">Opsional: Masukkan langkah awal dari proses pengerjaan</small>
-                </div>
+
 
                 <div style="text-align: right;">
                     <button type="submit" id="submitBtn" class="btn btn-primary">
