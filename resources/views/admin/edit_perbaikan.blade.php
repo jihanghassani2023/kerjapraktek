@@ -553,11 +553,20 @@
                             @enderror
                         </div>
 
-                        <div class="form-group">
+                       <div class="form-group">
                             <label for="garansi">Garansi</label>
-                            <input type="text" id="garansi" name="garansi"
-                                class="form-control @error('garansi') is-invalid @enderror"
-                                value="{{ old('garansi', $perbaikan->garansi) }}" required>
+                            <select id="garansi" name="garansi"
+                                class="form-control @error('garansi') is-invalid @enderror" required>
+                                <option value="">-- Pilih Garansi --</option>
+                                <option value="1 Bulan"
+                                    {{ old('garansi', $perbaikan->garansi) == '1 Bulan' ? 'selected' : '' }}>
+                                    1 Bulan
+                                </option>
+                                <option value="12 Bulan"
+                                    {{ old('garansi', $perbaikan->garansi) == '12 Bulan' ? 'selected' : '' }}>
+                                    12 Bulan
+                                </option>
+                            </select>
                             @error('garansi')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

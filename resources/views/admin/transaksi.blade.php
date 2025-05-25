@@ -507,9 +507,16 @@
                         <select name="month" class="filter-select"
                             onchange="document.getElementById('filterForm').submit()">
                             <option value="">Semua Bulan</option>
+                            @php
+                                $namaBulan = [
+                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                ];
+                            @endphp
                             @for ($i = 1; $i <= 12; $i++)
                                 <option value="{{ $i }}" {{ $month == $i ? 'selected' : '' }}>
-                                    {{ date('F', mktime(0, 0, 0, $i, 1)) }}
+                                    {{ $namaBulan[$i] }}
                                 </option>
                             @endfor
                         </select>
@@ -561,7 +568,8 @@
                                     style="cursor: pointer;">
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $t->id }}</td>
-                                    <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}</td>
+                                    <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}
+                                    </td>
                                     <td>{{ $t->nama_device }}</td>
                                     <td>{{ $t->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $t->user->name ?? 'N/A' }}</td>

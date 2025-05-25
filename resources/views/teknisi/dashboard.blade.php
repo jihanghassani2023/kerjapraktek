@@ -279,6 +279,15 @@
                     <p>{{ $sedangMenunggu }}</p>
                 </div>
             </div>
+             <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Sedang Proses</h3>
+                    <p>{{ $sedangProses }}</p>
+                </div>
+            </div>
             <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-check-circle"></i>

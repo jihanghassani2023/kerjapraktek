@@ -23,6 +23,10 @@ class PerbaikanController extends Controller
             ->where('status', 'Menunggu')
             ->count();
 
+        $sedangProses = Perbaikan::where('user_id', $user->id)
+            ->where('status', 'Proses')
+            ->count();
+
         $perbaikanSelesaiHari = Perbaikan::where('user_id', $user->id)
             ->where('status', 'Selesai')
             ->whereDate('tanggal_perbaikan', date('Y-m-d'))
@@ -43,7 +47,7 @@ class PerbaikanController extends Controller
                 $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
                 return $item;
             });
-        return view('teknisi.dashboard', compact('user', 'perbaikan', 'sedangMenunggu', 'perbaikanSelesaiHari', 'perbaikanSelesaiBulan'));
+        return view('teknisi.dashboard', compact('user', 'perbaikan', 'sedangMenunggu', 'sedangProses', 'perbaikanSelesaiHari', 'perbaikanSelesaiBulan'));
     }
 
     /**

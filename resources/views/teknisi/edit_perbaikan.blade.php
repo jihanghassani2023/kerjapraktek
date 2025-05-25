@@ -452,85 +452,91 @@
                     <input type="text" id="nama_device" class="form-control" value="{{ $perbaikan->nama_device }}"
                         disabled>
                 </div>
-               <div class="form-group">
-    <label for="kategori_device">Kategori Device</label>
-    <select id="kategori_device" name="kategori_device"
-        class="form-control @error('kategori_device') is-invalid @enderror" required>
-        <option value="">-- Pilih Kategori --</option>
-        <option value="iPhone"
-            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPhone' ? 'selected' : '' }}>
-            iPhone</option>
-        <option value="iWatch"
-            {{ old('kategori_device', $perbaikan->kategori_device) == 'iWatch' ? 'selected' : '' }}>
-            iWatch</option>
-        <option value="Macbook"
-            {{ old('kategori_device', $perbaikan->kategori_device) == 'Macbook' ? 'selected' : '' }}>
-            Macbook</option>
-        <option value="iPad"
-            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPad' ? 'selected' : '' }}>
-            iPad</option>
-    </select>
-    @error('kategori_device')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-</div>
+                <div class="form-group">
+                    <label for="kategori_device">Kategori Device</label>
+                    <select id="kategori_device" name="kategori_device"
+                        class="form-control @error('kategori_device') is-invalid @enderror" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="iPhone"
+                            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPhone' ? 'selected' : '' }}>
+                            iPhone</option>
+                        <option value="iWatch"
+                            {{ old('kategori_device', $perbaikan->kategori_device) == 'iWatch' ? 'selected' : '' }}>
+                            iWatch</option>
+                        <option value="Macbook"
+                            {{ old('kategori_device', $perbaikan->kategori_device) == 'Macbook' ? 'selected' : '' }}>
+                            Macbook</option>
+                        <option value="iPad"
+                            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPad' ? 'selected' : '' }}>
+                            iPad</option>
+                    </select>
+                    @error('kategori_device')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
                 <div class="form-group">
                     <label for="tanggal_perbaikan">Tanggal Perbaikan</label>
                     <input type="text" id="tanggal_perbaikan" class="form-control"
                         value="{{ \App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan) }}"
-                </div>
+                        </div>
 
-                <div class="form-group">
-                    <label for="masalah">Keterangan Masalah</label>
-                    <textarea id="masalah" name="masalah" class="form-control @error('masalah') is-invalid @enderror" required>{{ old('masalah', $perbaikan->masalah) }}</textarea>
-                    @error('masalah')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                    <div class="form-group">
+                        <label for="masalah">Keterangan Masalah</label>
+                        <textarea id="masalah" name="masalah" class="form-control @error('masalah') is-invalid @enderror" required>{{ old('masalah', $perbaikan->masalah) }}</textarea>
+                        @error('masalah')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-                <div class="form-group">
-                    <label for="tindakan_perbaikan">Tindakan Perbaikan</label>
-                    <textarea id="tindakan_perbaikan" name="tindakan_perbaikan"
-                        class="form-control @error('tindakan_perbaikan') is-invalid @enderror" required>{{ old('tindakan_perbaikan', $perbaikan->tindakan_perbaikan) }}</textarea>
-                    @error('tindakan_perbaikan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-
-
-                <div class="form-group">
-                    <label for="harga">Harga</label>
-                    <input type="number" id="harga" name="harga"
-                        class="form-control @error('harga') is-invalid @enderror"
-                        value="{{ old('harga', $perbaikan->harga) }}" required>
-                    @error('harga')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="garansi">Garansi</label>
-                    <input type="text" id="garansi" name="garansi"
-                        class="form-control @error('garansi') is-invalid @enderror"
-                        value="{{ old('garansi', $perbaikan->garansi) }}" required>
-                    @error('garansi')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                    <div class="form-group">
+                        <label for="tindakan_perbaikan">Tindakan Perbaikan</label>
+                        <textarea id="tindakan_perbaikan" name="tindakan_perbaikan"
+                            class="form-control @error('tindakan_perbaikan') is-invalid @enderror" required>{{ old('tindakan_perbaikan', $perbaikan->tindakan_perbaikan) }}</textarea>
+                        @error('tindakan_perbaikan')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
 
 
 
-                <div class="form-footer">
-                    <a href="{{ route('perbaikan.show', $perbaikan->id) }}" class="btn btn-secondary"
-                        style="margin-right: 10px;">
-                        <i class="fas fa-times"></i> Batal
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Simpan Perubahan
-                    </button>
-                </div>
+                    <div class="form-group">
+                        <label for="harga">Harga</label>
+                        <input type="number" id="harga" name="harga"
+                            class="form-control @error('harga') is-invalid @enderror"
+                            value="{{ old('harga', $perbaikan->harga) }}" required>
+                        @error('harga')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="garansi">Garansi</label>
+                        <select id="garansi" name="garansi"
+                            class="form-control @error('garansi') is-invalid @enderror" required>
+                            <option value="">-- Pilih Garansi --</option>
+                            <option value="1 Bulan"
+                                {{ old('garansi', $perbaikan->garansi) == '1 Bulan' ? 'selected' : '' }}>
+                                1 Bulan
+                            </option>
+                            <option value="12 Bulan"
+                                {{ old('garansi', $perbaikan->garansi) == '12 Bulan' ? 'selected' : '' }}>
+                                12 Bulan
+                            </option>
+                        </select>
+                        @error('garansi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="form-footer">
+                        <a href="{{ route('perbaikan.show', $perbaikan->id) }}" class="btn btn-secondary"
+                            style="margin-right: 10px;">
+                            <i class="fas fa-times"></i> Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Simpan Perubahan
+                        </button>
+                    </div>
             </form>
         </div>
     </div>

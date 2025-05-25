@@ -416,9 +416,16 @@
                     <form action="{{ route('transaksi.index') }}" method="GET" id="filterForm">
                         <select name="month" class="filter-select" onchange="document.getElementById('filterForm').submit()">
                             <option value="">Semua Bulan</option>
+                            @php
+                                $namaBulan = [
+                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                ];
+                            @endphp
                             @for($i = 1; $i <= 12; $i++)
                                 <option value="{{ $i }}" {{ $month == $i ? 'selected' : '' }}>
-                                    {{ date('F', mktime(0, 0, 0, $i, 1)) }}
+                                    {{ $namaBulan[$i] }}
                                 </option>
                             @endfor
                         </select>
