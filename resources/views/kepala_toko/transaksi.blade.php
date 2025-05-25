@@ -301,15 +301,29 @@
         .teknisi-stats {
             display: flex;
             gap: 15px;
+            flex-wrap: wrap;
         }
         .teknisi-stat {
             background-color: #f8f9fa;
-            padding: 5px 10px;
+            padding: 8px 12px;
             border-radius: 4px;
             font-size: 0.9em;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
         }
         .teknisi-stat i {
             margin-right: 5px;
+            width: 16px;
+            text-align: center;
+        }
+        /* Color coding for different stats */
+        .teknisi-stat .fa-check-circle {
+            color: #28a745;
+        }
+        .teknisi-stat .fa-clock {
+            color: #ffc107;
+        }
+        .teknisi-stat .fa-money-bill {
             color: #8c3a3a;
         }
         @media (max-width: 768px) {
@@ -453,7 +467,7 @@
                                 <tr onclick="window.location='{{ route('transaksi.show', $t->id) }}';" style="cursor: pointer;">
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $t->id }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y') }}</td>
+                                   <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}</td>
                                     <td>{{ $t->nama_device }}</td>
                                     <td>{{ $t->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $t->user->name ?? 'N/A' }}</td>
@@ -481,10 +495,16 @@
                                 <div class="teknisi-name">{{ $stats['name'] }}</div>
                                 <div class="teknisi-stats">
                                     <div class="teknisi-stat">
-                                        <i class="fas fa-tools"></i> {{ $stats['repair_count'] }} Perbaikan
+                                        <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                                        {{ $stats['repair_count'] }} Selesai
                                     </div>
                                     <div class="teknisi-stat">
-                                        <i class="fas fa-money-bill"></i> Rp. {{ number_format($stats['income'], 0, ',', '.') }}
+                                        <i class="fas fa-clock" style="color: #ffc107;"></i>
+                                        {{ $stats['pending_count'] }} Proses/Menunggu
+                                    </div>
+                                    <div class="teknisi-stat">
+                                        <i class="fas fa-money-bill"></i> Rp.
+                                        {{ number_format($stats['income'], 0, ',', '.') }}
                                     </div>
                                 </div>
                             </div>

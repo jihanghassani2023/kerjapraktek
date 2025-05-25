@@ -391,7 +391,7 @@
                                 <tr onclick="window.location='/admin/transaksi/{{ $item->id }}';">
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $item->id }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($item->tanggal_perbaikan)->format('d/m/Y') }}</td>
+                                 <td>{{ $item->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan) }}</td>
                                     <td>{{ $item->nama_device }}</td>
                                     <td>{{ $item->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $item->user->name ?? 'Belum ditugaskan' }}</td>

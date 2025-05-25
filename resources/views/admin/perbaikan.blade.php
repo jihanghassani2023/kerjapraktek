@@ -314,7 +314,7 @@
                             <td>{{ $p->nama_device }}</td>
                             <td>{{ $p->pelanggan->nama_pelanggan }}</td>
                             <td>{{ $p->user->name ?? 'Belum ditugaskan' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('d/m/Y') }}</td>
+                            <td>{{ $p->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($p->tanggal_perbaikan) }}</td>
                             <td>
                                 <span class="status status-{{ strtolower($p->status) }}">
                                     {{ $p->status }}

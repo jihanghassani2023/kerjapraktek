@@ -311,7 +311,7 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $p->id }}</td>
                     <td>{{ $p->nama_device }}</td>
-                    <td>{{ \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('l, j F Y') }}</td>
+                    <td>{{ $p->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($p->tanggal_perbaikan) }}</td>
                     <td>{{ $p->masalah }}</td>
                     <td><span class="status status-selesai">{{ $p->status }}</span></td>
                 </tr>

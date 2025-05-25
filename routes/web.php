@@ -78,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('transaksi')->name('transaksi.')->middleware(['auth'])->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('index');
         Route::get('/export', [TransaksiController::class, 'export'])->name('export');
-        Route::get('/{id}', [TransaksiController::class, 'show'])->name('show')->where('id', '[0-9]+');
+        Route::get('/{id}', [TransaksiController::class, 'show'])->name('show')->where('id', 'MG[0-9]{5}');
     });
 
     // Karyawan routes - for kepala toko

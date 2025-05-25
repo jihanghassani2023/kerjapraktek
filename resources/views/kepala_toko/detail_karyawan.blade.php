@@ -435,7 +435,7 @@
                                             <td>{{ $index + 1 }}</td>
                                             <td>{{ $perbaikan->nama_device }}</td>
                                             <td>{{ $perbaikan->masalah }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d M Y') }}</td>
+                                            <td>{{ $perbaikan->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan) }}</td>
                                             <td>Rp {{ number_format($perbaikan->harga, 0, ',', '.') }}</td>
                                             <td><span class="status-{{ strtolower($perbaikan->status) }}">{{ $perbaikan->status }}</span></td>
                                         </tr>

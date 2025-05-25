@@ -505,7 +505,7 @@
                     @forelse($latestTransaksi as $t)
                     <tr onclick="window.location='{{ route('admin.transaksi.show', $t->id) }}';" style="cursor: pointer;">
                         <td>{{ $t->id }}</td>
-                        <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d/m/Y') }}</td>
+                        <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}</td>
                         <td>{{ $t->pelanggan->nama_pelanggan ?? '-' }}</td>
                         <td>{{ $t->nama_device }}</td>
                         <td>{{ $t->user->name ?? '-' }}</td>

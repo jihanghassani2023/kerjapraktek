@@ -6,6 +6,7 @@ use App\Models\Perbaikan;
 use App\Models\Pelanggan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\DateHelper;
 use Illuminate\Support\Facades\Validator;
 
 class PerbaikanController extends Controller
@@ -37,8 +38,11 @@ class PerbaikanController extends Controller
         $perbaikan = Perbaikan::where('user_id', $user->id)
             ->with('pelanggan')
             ->orderBy('created_at', 'desc')
-            ->get();
-
+            ->get()
+            ->map(function ($item) {
+                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                return $item;
+            });
         return view('teknisi.dashboard', compact('user', 'perbaikan', 'sedangMenunggu', 'perbaikanSelesaiHari', 'perbaikanSelesaiBulan'));
     }
 
@@ -263,7 +267,11 @@ class PerbaikanController extends Controller
         $perbaikan = Perbaikan::where('user_id', $user->id)
             ->with('pelanggan')
             ->orderBy('tanggal_perbaikan', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                return $item;
+            });
 
         return view('teknisi.progress', compact('user', 'perbaikan'));
     }
@@ -280,7 +288,11 @@ class PerbaikanController extends Controller
             ->with('pelanggan')
             ->where('status', 'Selesai')
             ->orderBy('tanggal_perbaikan', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                return $item;
+            });
 
         return view('teknisi.laporan', compact('user', 'perbaikan'));
     }

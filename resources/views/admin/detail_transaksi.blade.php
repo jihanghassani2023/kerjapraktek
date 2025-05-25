@@ -686,7 +686,8 @@
                             <div class="info-row">
                                 <div class="info-label">Tanggal Perbaikan</div>
                                 <div class="info-value">
-                                    {{ \Carbon\Carbon::parse($transaksi->tanggal_perbaikan)->format('d F Y') }}</div>
+                                    {{ \App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan) }}
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Nama Barang</div>

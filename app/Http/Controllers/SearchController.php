@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DateHelper;
 use App\Models\Perbaikan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,14 +41,15 @@ class SearchController extends Controller
 
     foreach ($perbaikan as $item) {
         $suggestions[] = [
-            'id' => $item->id,
-            'kode_perbaikan' => $item->id, // Use ID directly
-            'nama_device' => $item->nama_device,
-            'nama_pelanggan' => $item->pelanggan->nama_pelanggan ?? 'N/A',
-            'tanggal' => date('d/m/Y', strtotime($item->tanggal_perbaikan)),
-            'status' => $item->status,
-            'url' => route('admin.transaksi.show', $item->id)
-        ];
+    'id' => $item->id,
+    'kode_perbaikan' => $item->id,
+    'nama_device' => $item->nama_device,
+    'nama_pelanggan' => $item->pelanggan->nama_pelanggan ?? 'N/A',
+    'tanggal' => DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan),
+    'status' => $item->status,
+    'url' => route('admin.transaksi.show', $item->id)
+];
+
     }
 
     return response()->json($suggestions);

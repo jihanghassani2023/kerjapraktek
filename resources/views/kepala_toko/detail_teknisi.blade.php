@@ -452,7 +452,7 @@
                                                 <td>{{ $index + 1 }}</td>
                                                 <td>{{ $repair->kode_perbaikan }}</td>
                                                 <td>{{ $repair->nama_device }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($repair->tanggal_perbaikan)->format('d M Y') }}</td>
+                                                <td>{{ $repair->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($repair->tanggal_perbaikan) }}</td>
                                                 <td>{{ $repair->masalah }}</td>
                                                 <td>Rp {{ number_format($repair->harga, 0, ',', '.') }}</td>
                                                 <td>

@@ -230,15 +230,6 @@
             box-shadow: 0 8px 30px rgba(140, 58, 58, 0.15);
         }
 
-        .repair-card.history {
-            background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%);
-            opacity: 0.95;
-        }
-
-        .repair-card.history::before {
-            background: linear-gradient(180deg, #28a745 0%, #20c997 100%);
-        }
-
         .repair-title {
             font-weight: 700;
             margin-bottom: 16px;
@@ -424,36 +415,6 @@
             color: #777;
         }
 
-        .history-section {
-            margin-top: 30px;
-            border-top: 2px solid #eee;
-            padding-top: 20px;
-        }
-
-        .toggle-history {
-            color: #8c3a3a;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            gap: 8px;
-        }
-
-        .toggle-history:hover {
-            color: #e74c3c;
-            transform: translateX(2px);
-        }
-
-        .toggle-history i {
-            margin-left: 5px;
-        }
-
-        .history-content {
-            display: none;
-        }
-
         .no-data {
             text-align: center;
             color: #666;
@@ -535,10 +496,10 @@
                         @endif
                     </div>
 
-                    <!-- Perbaikan Aktif -->
+                    <!-- Status Perbaikan -->
                     <div class="section-title">
                         <i class="fas fa-tools icon"></i>
-                        Perbaikan Aktif
+                        Status Perbaikan
                         <span class="count">{{ $perbaikanAktif->count() }}</span>
                     </div>
 
@@ -570,7 +531,7 @@
                                 <div class="info-row">
                                     <div class="info-label">Tanggal Masuk</div>
                                     <div class="info-value">
-                                        {{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y') }}</div>
+                                        {{ $perbaikan->tanggal_formatted }}</div>
                                 </div>
 
                                 <div class="info-row">
@@ -646,82 +607,7 @@
                         </div>
                     @endif
 
-                    <!-- Riwayat Perbaikan -->
-                    <div class="history-section">
-                        <div class="section-title">
-                            <i class="fas fa-history icon"></i>
-                            <span class="toggle-history" onclick="toggleHistory()">
-                                Riwayat Perbaikan
-                                <span class="count">{{ $riwayatPerbaikan->count() }}</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </span>
-                        </div>
-
-                        <div class="history-content" id="history-content">
-                            @if($riwayatPerbaikan->count() > 0)
-                                @foreach ($riwayatPerbaikan as $perbaikan)
-                                    <div class="repair-card history" data-status="{{ $perbaikan->status }}">
-                                        <div class="repair-title">
-                                            <span>{{ $perbaikan->nama_device }}</span>
-                                            <span class="status-badge status-{{ strtolower($perbaikan->status) }}">
-                                                {{ $perbaikan->status }}
-                                            </span>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <div class="info-label">Kode</div>
-                                            <div class="info-value">{{ $perbaikan->id }}</div>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <div class="info-label">Tanggal Selesai</div>
-                                            <div class="info-value">
-                                                {{ \Carbon\Carbon::parse($perbaikan->updated_at)->format('d F Y') }}
-                                            </div>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <div class="info-label">Masalah</div>
-                                            <div class="info-value">{{ $perbaikan->masalah }}</div>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <div class="info-label">Tindakan Perbaikan</div>
-                                            <div class="info-value">{{ $perbaikan->tindakan_perbaikan }}</div>
-                                        </div>
-
-                                        <div class="info-row">
-                                            <div class="info-label">Teknisi</div>
-                                            <div class="info-value">{{ $perbaikan->user->name ?? 'N/A' }}</div>
-                                        </div>
-
-                                        @if ($perbaikan->harga > 0)
-                                            <div class="info-row">
-                                                <div class="info-label">Biaya</div>
-                                                <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}
-                                                </div>
-                                            </div>
-                                        @endif
-
-                                        @if ($perbaikan->garansi)
-                                            <div class="info-row">
-                                                <div class="info-label">Garansi</div>
-                                                <div class="info-value">{{ $perbaikan->garansi }}</div>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            @else
-                                <div class="no-data">
-                                    <i class="fas fa-inbox"></i><br>
-                                    Belum ada riwayat perbaikan.<br>
-                                    <small>Riwayat akan muncul setelah perbaikan selesai lebih dari 10 hari.</small>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div style="text-align: center;">
+                    <div style="text-align: center; margin-top: 30px;">
                         <a href="{{ route('tracking.index') }}" class="back-btn">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
@@ -755,19 +641,6 @@
                 if (icon) icon.className = 'fas fa-chevron-up';
             } else {
                 progressElement.style.display = 'none';
-                if (icon) icon.className = 'fas fa-chevron-down';
-            }
-        }
-
-        function toggleHistory() {
-            const historyContent = document.getElementById('history-content');
-            const icon = event.target.querySelector('i') || event.target.parentElement.querySelector('i');
-
-            if (historyContent.style.display === 'none' || historyContent.style.display === '') {
-                historyContent.style.display = 'block';
-                if (icon) icon.className = 'fas fa-chevron-up';
-            } else {
-                historyContent.style.display = 'none';
                 if (icon) icon.className = 'fas fa-chevron-down';
             }
         }

@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('perbaikan', function (Blueprint $table) {
-            $table->id();
+            $table->string('id', 10)->primary(); // TAMBAH BARIS INI
             $table->string('nama_device', 100);
             $table->string('kategori_device', 50)->nullable();
             $table->date('tanggal_perbaikan');
@@ -25,7 +25,6 @@ return new class extends Migration
             $table->foreignId('pelanggan_id')->nullable()->constrained('pelanggan');
             $table->timestamps();
         });
-        DB::statement('ALTER TABLE perbaikan AUTO_INCREMENT = 50001');
     }
 
     public function down(): void

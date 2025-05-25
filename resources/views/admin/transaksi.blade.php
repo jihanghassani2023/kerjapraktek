@@ -561,7 +561,7 @@
                                     style="cursor: pointer;">
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $t->id }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y') }}</td>
+                                    <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}</td>
                                     <td>{{ $t->nama_device }}</td>
                                     <td>{{ $t->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $t->user->name ?? 'N/A' }}</td>

@@ -488,6 +488,23 @@
             border-radius: 4px;
         }
 
+        /* Status Selesai Message */
+        .status-completed-message {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .status-completed-message i {
+            margin-right: 8px;
+            color: #28a745;
+        }
+
         /* Latest Process */
         .latest-process {
             background-color: transparent;
@@ -757,8 +774,8 @@
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Tanggal Perbaikan</div>
-                                <div class="info-value">
-                                    {{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y') }}</div>
+                              <div class="info-value">
+    {{ \App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan) }}</div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Nama Device</div>
@@ -888,21 +905,29 @@
                                     yang direkam.</p>
                             @endif
 
-                            <!-- Form Tambah Proses -->
-                            <div class="add-process-form">
-                                <form action="{{ route('perbaikan.add-process', $perbaikan->id) }}" method="POST">
-                                    @csrf
-                                    <div class="input-group">
-                                        <input type="text" name="proses_step" class="form-control"
-                                            placeholder="Tambahkan langkah proses baru..." required>
-                                        <div class="input-group-append">
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-plus"></i> Tambah
-                                            </button>
+                            <!-- Form Tambah Proses - HANYA TAMPIL JIKA STATUS PROSES -->
+                            @if ($perbaikan->status == 'Proses')
+                                <div class="add-process-form" id="addProcessForm">
+                                    <form action="{{ route('perbaikan.add-process', $perbaikan->id) }}" method="POST">
+                                        @csrf
+                                        <div class="input-group">
+                                            <input type="text" name="proses_step" class="form-control"
+                                                placeholder="Tambahkan langkah proses baru..." required>
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-plus"></i> Tambah
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </form>
-                            </div>
+                                    </form>
+                                </div>
+                            @elseif ($perbaikan->status == 'Selesai')
+                                <!-- Pesan Status Selesai -->
+                                <div class="status-completed-message">
+                                    <i class="fas fa-check-circle"></i>
+                                    Perbaikan telah selesai. Tidak dapat menambah proses lagi.
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -913,9 +938,9 @@
                         </div>
                         <div class="card-body">
                             <!-- Status update section -->
-                            <div class="status-actions">
+                            <div class="status-actions" id="statusActionsSection">
                                 <h4 class="status-title">Ubah Status Perbaikan</h4>
-                                <div class="status-buttons">
+                                <div class="status-buttons" id="statusButtonsContainer">
                                     @if ($perbaikan->status == 'Menunggu')
                                         <button type="button" class="btn-status btn-proses" data-status="Proses">
                                             Proses
@@ -1012,16 +1037,8 @@
                         statusBadge.textContent = pendingStatus;
                     }
 
-                    // If status is now "Selesai", hide the status change section immediately
-                    if (pendingStatus === 'Selesai') {
-                        const statusActions = document.querySelector('.status-actions');
-                        if (statusActions) {
-                            statusActions.style.display = 'none';
-                        }
-                    } else {
-                        // Otherwise, update which buttons should be visible immediately
-                        updateStatusButtons(pendingStatus);
-                    }
+                    // Update status actions section based on new status
+                    updateStatusActionsSection(pendingStatus);
 
                     // Also update any other UI elements that show the status
                     const detailStatus = document.querySelector('.detail-status');
@@ -1035,6 +1052,9 @@
                             detailStatus.style.color = '#ff6b6b';
                         }
                     }
+
+                    // Update input form visibility based on status
+                    updateInputFormVisibility(pendingStatus);
 
                     // Create a new timeline item for display without refresh
                     addNewTimelineItem(pendingStatus);
@@ -1064,6 +1084,128 @@
                 }
             });
 
+            // Function to update status actions section
+            function updateStatusActionsSection(newStatus) {
+                const statusActionsSection = document.getElementById('statusActionsSection');
+                const statusButtonsContainer = document.getElementById('statusButtonsContainer');
+
+                if (newStatus === 'Selesai') {
+                    // Hide entire status actions section when completed
+                    statusActionsSection.style.display = 'none';
+                } else {
+                    // Update buttons based on new status
+                    statusButtonsContainer.innerHTML = '';
+
+                    if (newStatus === 'Menunggu') {
+                        const prosesButton = document.createElement('button');
+                        prosesButton.type = 'button';
+                        prosesButton.className = 'btn-status btn-proses';
+                        prosesButton.setAttribute('data-status', 'Proses');
+                        prosesButton.textContent = 'Proses';
+                        addButtonClickHandler(prosesButton);
+                        statusButtonsContainer.appendChild(prosesButton);
+                    } else if (newStatus === 'Proses') {
+                        const selesaiButton = document.createElement('button');
+                        selesaiButton.type = 'button';
+                        selesaiButton.className = 'btn-status btn-selesai';
+                        selesaiButton.setAttribute('data-status', 'Selesai');
+                        selesaiButton.textContent = 'Selesai';
+                        addButtonClickHandler(selesaiButton);
+                        statusButtonsContainer.appendChild(selesaiButton);
+                    }
+                }
+            }
+
+            // Function to update input form visibility
+            function updateInputFormVisibility(newStatus) {
+                const addProcessForm = document.getElementById('addProcessForm');
+                const statusCompletedMessage = document.querySelector('.status-completed-message');
+
+                if (newStatus === 'Proses') {
+                    // Show input form when status is Proses
+                    if (!addProcessForm) {
+                        // Create input form if it doesn't exist
+                        createInputForm();
+                    } else {
+                        addProcessForm.style.display = 'block';
+                    }
+                    // Hide completed message if it exists
+                    if (statusCompletedMessage) {
+                        statusCompletedMessage.style.display = 'none';
+                    }
+                } else if (newStatus === 'Selesai') {
+                    // Hide input form when status is Selesai
+                    if (addProcessForm) {
+                        addProcessForm.style.display = 'none';
+                    }
+                    // Show completed message
+                    if (!statusCompletedMessage) {
+                        createCompletedMessage();
+                    } else {
+                        statusCompletedMessage.style.display = 'block';
+                    }
+                } else {
+                    // For Menunggu status, hide input form
+                    if (addProcessForm) {
+                        addProcessForm.style.display = 'none';
+                    }
+                    if (statusCompletedMessage) {
+                        statusCompletedMessage.style.display = 'none';
+                    }
+                }
+            }
+
+            // Function to create input form dynamically
+            function createInputForm() {
+                const cardBody = document.querySelector('.card-body');
+                const inputFormHTML = `
+                    <div class="add-process-form" id="addProcessForm">
+                        <form action="{{ route('perbaikan.add-process', $perbaikan->id) }}" method="POST">
+                            @csrf
+                            <div class="input-group">
+                                <input type="text" name="proses_step" class="form-control"
+                                    placeholder="Tambahkan langkah proses baru..." required>
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Tambah
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                cardBody.insertAdjacentHTML('beforeend', inputFormHTML);
+            }
+
+            // Function to create completed message dynamically
+            function createCompletedMessage() {
+                const cardBody = document.querySelector('.card-body');
+                const completedMessageHTML = `
+                    <div class="status-completed-message">
+                        <i class="fas fa-check-circle"></i>
+                        Perbaikan telah selesai. Tidak dapat menambah proses lagi.
+                    </div>
+                `;
+                cardBody.insertAdjacentHTML('beforeend', completedMessageHTML);
+            }
+
+            // Function to add click handler to buttons
+            function addButtonClickHandler(button) {
+                button.addEventListener('click', function() {
+                    pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
+
+                    if (pendingStatus === 'Proses') {
+                        confirmText.textContent = 'APAKAH DEVICE INI AKAN ANDA KERJAKAN?';
+                    } else if (pendingStatus === 'Selesai') {
+                        confirmText.textContent = 'APAKAH DEVICE INI SUDAH SELESAI?';
+                    } else {
+                        confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS?';
+                    }
+
+                    modal.style.display = 'block';
+                });
+            }
+
             // Function to add a new timeline item without refresh
             function addNewTimelineItem(newStatus) {
                 // Get the timeline container
@@ -1091,11 +1233,8 @@
                     statusClass = 'status-selesai';
                 }
 
-                // Get current date and time in proper format
                 // Get current date and time in Palembang timezone (GMT+7)
                 const now = new Date();
-
-                // Calculate the time in Indonesia (GMT+7)
                 const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
                 const jakartaTime = new Date(utcTime + (3600000 * 7));
 
@@ -1110,10 +1249,11 @@
                     second: '2-digit'
                 });
                 const datetime = `${dateStr} ${timeStr}`;
+
                 // Create new timeline item element
                 const newItem = document.createElement('div');
                 newItem.className = `timeline-item status-change ${statusClass}`;
-                newItem.style.backgroundColor = 'transparent'; // Memastikan tidak ada background color
+                newItem.style.backgroundColor = 'transparent';
                 newItem.innerHTML = `
                     <div class="timeline-marker">
                         <i class="fas fa-flag"></i>
@@ -1141,12 +1281,6 @@
                 if (processDate) {
                     processDate.textContent = datetime;
                 }
-
-                // If there is an "empty timeline" message, remove it
-                const emptyTimeline = document.querySelector('.empty-timeline');
-                if (emptyTimeline) {
-                    emptyTimeline.remove();
-                }
             }
 
             // Handle confirmation: NO
@@ -1162,56 +1296,6 @@
                 }
             });
         });
-
-        // Function to update button display based on status
-        function updateStatusButtons(status) {
-            // Remove all buttons first
-            const buttonsContainer = document.querySelector('.status-buttons');
-            if (!buttonsContainer) return;
-
-            buttonsContainer.innerHTML = '';
-
-            // Add appropriate buttons based on status
-            if (status === 'Menunggu') {
-                // For Menunggu status, show ONLY Proses button
-                const prosesButton = document.createElement('button');
-                prosesButton.type = 'button';
-                prosesButton.className = 'btn-status btn-proses';
-                prosesButton.setAttribute('data-status', 'Proses');
-                prosesButton.textContent = 'Proses';
-                prosesButton.onclick = showConfirmationModal;
-                buttonsContainer.appendChild(prosesButton);
-            } else if (status === 'Proses') {
-                // For Proses status, show ONLY Selesai button
-                const selesaiButton = document.createElement('button');
-                selesaiButton.type = 'button';
-                selesaiButton.className = 'btn-status btn-selesai';
-                selesaiButton.setAttribute('data-status', 'Selesai');
-                selesaiButton.textContent = 'Selesai';
-                selesaiButton.onclick = showConfirmationModal;
-                buttonsContainer.appendChild(selesaiButton);
-            }
-            // For Selesai status, no buttons will be shown
-        }
-
-        // Helper function to show confirmation modal
-        function showConfirmationModal() {
-            const pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
-            const confirmText = document.getElementById('confirmationText');
-
-            if (pendingStatus === 'Proses') {
-                confirmText.textContent = 'APAKAH DEVICE INI AKAN ANDA KERJAKAN?';
-            } else if (pendingStatus === 'Selesai') {
-                confirmText.textContent = 'APAKAH DEVICE INI SUDAH SELESAI?';
-            } else {
-                confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS?';
-            }
-
-            document.getElementById('confirmationModal').style.display = 'block';
-
-            // Store the status in a global-ish scope for the confirmation handler
-            window.pendingStatus = pendingStatus;
-        }
 
         // Toggle timeline function
         function toggleTimeline() {

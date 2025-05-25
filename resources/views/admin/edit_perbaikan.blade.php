@@ -520,7 +520,7 @@
                         <div class="form-group">
                             <label for="tanggal_perbaikan">Tanggal Perbaikan</label>
                             <input type="text" id="tanggal_perbaikan" class="form-control"
-                                value="{{ \Carbon\Carbon::parse($perbaikan->tanggal_perbaikan)->format('d F Y') }}"
+                                value="{{ \App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan) }}"
                                 disabled>
                         </div>
 

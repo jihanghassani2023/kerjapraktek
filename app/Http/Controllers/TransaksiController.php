@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DateHelper;
 use App\Models\Perbaikan;
 use App\Models\User;
 use App\Models\Karyawan;
@@ -13,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class TransaksiController extends Controller
 {
-    // First implementation of export - keep this one
+    // Fixed export method
     public function export(Request $request)
     {
         // Get filter parameters
@@ -28,10 +29,13 @@ class TransaksiController extends Controller
                 ->whereYear('tanggal_perbaikan', $year);
         }
 
-        $transaksi = $query->with(['user', 'pelanggan'])
-            ->orderBy('tanggal_perbaikan', 'desc')
-            ->get();
-
+        $transaksi = $query->with('user')
+    ->orderBy('tanggal_perbaikan', 'desc')
+    ->get()
+    ->map(function($item) {
+        $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+        return $item;
+    });
         // Create a new spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -40,7 +44,7 @@ class TransaksiController extends Controller
         $sheet->setCellValue('A1', 'No.');
         $sheet->setCellValue('B1', 'Kode Perbaikan');
         $sheet->setCellValue('C1', 'Tanggal');
-        $sheet->setCellValue('D1', 'Barang');
+        $sheet->setCellValue('D1', 'Device');
         $sheet->setCellValue('E1', 'Pelanggan');
         $sheet->setCellValue('F1', 'Teknisi');
         $sheet->setCellValue('G1', 'Harga');
@@ -50,9 +54,9 @@ class TransaksiController extends Controller
         $row = 2;
         foreach ($transaksi as $index => $t) {
             $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $t->kode_perbaikan);
+            $sheet->setCellValue('B' . $row, $t->id); // Fix: Use $t->id instead of $t->kode_perbaikan
             $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
-            $sheet->setCellValue('D' . $row, $t->nama_barang);
+            $sheet->setCellValue('D' . $row, $t->nama_device); // Fix: Use $t->nama_device instead of $t->nama_barang
             $sheet->setCellValue('E' . $row, $t->pelanggan ? $t->pelanggan->nama_pelanggan : 'N/A');
             $sheet->setCellValue('F' . $row, $t->user ? $t->user->name : 'N/A');
             $sheet->setCellValue('G' . $row, $t->harga);
@@ -100,25 +104,36 @@ class TransaksiController extends Controller
             ->whereYear('tanggal_perbaikan', date('Y'))
             ->sum('harga');
 
-        // Get technicians with their repair count
-        $teknisi = User::where('role', 'teknisi')->get();
+        // Fix: Get technicians with their repair count (same as admin)
+        $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
         $teknisiStats = [];
 
         foreach ($teknisi as $t) {
+            // Get count of completed repairs
             $repairCount = Perbaikan::where('user_id', $t->id)
                 ->where('status', 'Selesai')
                 ->whereMonth('tanggal_perbaikan', $month)
                 ->whereYear('tanggal_perbaikan', $year)
                 ->count();
 
+            // Get count of pending/in-process repairs
+            $pendingCount = Perbaikan::where('user_id', $t->id)
+                ->whereIn('status', ['Menunggu', 'Proses'])
+                ->whereMonth('tanggal_perbaikan', $month)
+                ->whereYear('tanggal_perbaikan', $year)
+                ->count();
+
+            // Calculate income from all repairs
+            $income = Perbaikan::where('user_id', $t->id)
+                ->whereMonth('tanggal_perbaikan', $month)
+                ->whereYear('tanggal_perbaikan', $year)
+                ->sum('harga');
+
             $teknisiStats[] = [
                 'name' => $t->name,
                 'repair_count' => $repairCount,
-                'income' => Perbaikan::where('user_id', $t->id)
-                    ->where('status', 'Selesai')
-                    ->whereMonth('tanggal_perbaikan', $month)
-                    ->whereYear('tanggal_perbaikan', $year)
-                    ->sum('harga')
+                'pending_count' => $pendingCount,
+                'income' => $income
             ];
         }
 
@@ -143,12 +158,6 @@ class TransaksiController extends Controller
         return view('kepala_toko.detail_transaksi', compact('user', 'transaksi'));
     }
 
-    // Delete this second export method since it's a duplicate
-    // public function export(Request $request)
-    // {
-    //     return redirect()->back()->with('info', 'Fitur export data akan segera tersedia');
-    // }
-
     public function dashboard()
     {
         $user = Auth::user();
@@ -161,27 +170,44 @@ class TransaksiController extends Controller
         $currentMonth = date('m');
         $currentYear = date('Y');
 
+        // Update: Get counts for each status for monthly chart
         $monthlyRepairCounts = [];
         for ($i = 1; $i <= 12; $i++) {
-            $count = Perbaikan::where('status', 'Selesai')
+            $selesaiCount = Perbaikan::where('status', 'Selesai')
+                ->whereMonth('tanggal_perbaikan', $i)
+                ->whereYear('tanggal_perbaikan', $currentYear)
+                ->count();
+
+            $prosesCount = Perbaikan::where('status', 'Proses')
+                ->whereMonth('tanggal_perbaikan', $i)
+                ->whereYear('tanggal_perbaikan', $currentYear)
+                ->count();
+
+            $menungguCount = Perbaikan::where('status', 'Menunggu')
                 ->whereMonth('tanggal_perbaikan', $i)
                 ->whereYear('tanggal_perbaikan', $currentYear)
                 ->count();
 
             $monthlyRepairCounts[] = [
                 'month' => date('F', mktime(0, 0, 0, $i, 10)),
-                'count' => $count
+                'selesai' => $selesaiCount,
+                'proses' => $prosesCount,
+                'menunggu' => $menungguCount
             ];
         }
 
         // Change to only count Teknisi and Kepala Teknisi
-       $teknisiCount = User::where('role', 'teknisi', 'kepala teknisi')->count();
+       $teknisiCount = User::whereIn('role', ['teknisi', 'kepala teknisi'])->count();
 
         $latestTransaksi = Perbaikan::with('user')
-            ->where('status', 'Selesai')
-            ->orderBy('tanggal_perbaikan', 'desc')
-            ->take(3)
-            ->get();
+    ->where('status', 'Selesai')
+    ->orderBy('tanggal_perbaikan', 'desc')
+    ->take(3)
+    ->get()
+    ->map(function($item) {
+        $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+        return $item;
+    });
 
         $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
             ->whereDate('tanggal_perbaikan', date('Y-m-d'))

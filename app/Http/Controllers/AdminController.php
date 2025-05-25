@@ -8,6 +8,7 @@ use App\Models\Pelanggan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Helpers\DateHelper;
 
 class AdminController extends Controller
 {
@@ -29,7 +30,11 @@ class AdminController extends Controller
         $latestTransaksi = Perbaikan::with(['user', 'pelanggan'])
             ->orderBy('created_at', 'desc')
             ->take(5)
-            ->get();
+            ->get()
+            ->map(function($item) {
+        $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+        return $item;
+    });
 
         return view('admin.dashboard', compact(
             'user',
@@ -86,8 +91,12 @@ class AdminController extends Controller
         }
 
         $transaksi = $query->with(['user', 'pelanggan'])
-            ->orderBy('tanggal_perbaikan', 'desc')
-            ->get();
+    ->orderBy('tanggal_perbaikan', 'desc')
+    ->get()
+    ->map(function($item) {
+        $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+        return $item;
+    });
 
         // Calculate summary statistics
         $totalTransaksi = $transaksi->sum('harga');

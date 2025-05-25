@@ -203,6 +203,32 @@
             width: 100%;
             margin-top: 20px;
         }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        .legend-selesai {
+            background-color: #28a745;
+        }
+        .legend-proses {
+            background-color: #ffc107;
+        }
+        .legend-menunggu {
+            background-color: #dc3545;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -300,10 +326,24 @@
 
         <div class="content-section">
             <div class="section-header">
-                <h3 class="section-title">Statistik Perbaikan Bulanan ({{ date('Y') }})</h3>
+                <h3 class="section-title">Statistik Status Perbaikan Bulanan ({{ date('Y') }})</h3>
             </div>
             <div class="chart-container">
                 <canvas id="monthlyRepairChart"></canvas>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-selesai"></div>
+                    <span>Selesai</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-proses"></div>
+                    <span>Proses</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-menunggu"></div>
+                    <span>Menunggu</span>
+                </div>
             </div>
         </div>
     </div>
@@ -315,31 +355,66 @@
             const monthlyData = @json($monthlyRepairCounts ?? []);
 
             const labels = monthlyData.map(item => item.month);
-            const counts = monthlyData.map(item => item.count);
+            const selesaiData = monthlyData.map(item => item.selesai);
+            const prosesData = monthlyData.map(item => item.proses);
+            const menungguData = monthlyData.map(item => item.menunggu);
 
             const ctx = document.getElementById('monthlyRepairChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Jumlah Perbaikan',
-                        data: counts,
-                        backgroundColor: '#8c3a3a',
-                        borderColor: '#6d2d2d',
-                        borderWidth: 1
-                    }]
+                    datasets: [
+                        {
+                            label: 'Selesai',
+                            data: selesaiData,
+                            backgroundColor: '#28a745',
+                            borderColor: '#218838',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Proses',
+                            data: prosesData,
+                            backgroundColor: '#ffc107',
+                            borderColor: '#e0a800',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Menunggu',
+                            data: menungguData,
+                            backgroundColor: '#dc3545',
+                            borderColor: '#c82333',
+                            borderWidth: 1
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // Hide default legend since we have custom legend
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
                     scales: {
+                        x: {
+                            stacked: false,
+                        },
                         y: {
                             beginAtZero: true,
                             ticks: {
                                 precision: 0
                             }
                         }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
                     }
                 }
             });
