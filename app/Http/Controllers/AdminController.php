@@ -31,10 +31,10 @@ class AdminController extends Controller
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get()
-            ->map(function($item) {
-        $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
-        return $item;
-    });
+            ->map(function ($item) {
+                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                return $item;
+            });
 
         return view('admin.dashboard', compact(
             'user',
@@ -91,12 +91,12 @@ class AdminController extends Controller
         }
 
         $transaksi = $query->with(['user', 'pelanggan'])
-    ->orderBy('tanggal_perbaikan', 'desc')
-    ->get()
-    ->map(function($item) {
-        $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
-        return $item;
-    });
+            ->orderBy('tanggal_perbaikan', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                return $item;
+            });
 
         // Calculate summary statistics
         $totalTransaksi = $transaksi->sum('harga');
@@ -251,14 +251,22 @@ class AdminController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama_pelanggan' => 'required|string|max:50',
-            'nomor_telp' => 'required|string|max:13|regex:/^[0-9]+$/', // Only digits, max 13
-            'email' => 'nullable|email|max:100',
+            'nomor_telp' => [
+                'required',
+                'string',
+                'max:13',
+                'regex:/^[0-9]+$/',
+                'unique:pelanggan,nomor_telp' // Tambahkan validasi unique
+            ],
+            'email' => 'nullable|email|max:100|unique:pelanggan,email', // Tambahkan unique untuk email juga
         ], [
             'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
             'nomor_telp.required' => 'Nomor telepon wajib diisi.',
             'nomor_telp.max' => 'Nomor telepon maksimal 13 digit.',
             'nomor_telp.regex' => 'Nomor telepon hanya boleh berisi angka.',
+            'nomor_telp.unique' => 'Nomor telepon sudah terdaftar. Gunakan nomor lain.',
             'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar. Gunakan email lain.',
         ]);
 
         if ($validator->fails()) {
@@ -357,14 +365,27 @@ class AdminController extends Controller
 
         $validator = Validator::make($request->all(), [
             'nama_pelanggan' => 'required|string|max:50',
-            'nomor_telp' => 'required|string|max:13|regex:/^[0-9]+$/', // Only digits, max 13
-            'email' => 'nullable|email|max:100',
+            'nomor_telp' => [
+                'required',
+                'string',
+                'max:13',
+                'regex:/^[0-9]+$/',
+                'unique:pelanggan,nomor_telp,' . $id // Ignore current record saat update
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:100',
+                'unique:pelanggan,email,' . $id // Ignore current record saat update
+            ],
         ], [
             'nama_pelanggan.required' => 'Nama pelanggan wajib diisi.',
             'nomor_telp.required' => 'Nomor telepon wajib diisi.',
             'nomor_telp.max' => 'Nomor telepon maksimal 13 digit.',
             'nomor_telp.regex' => 'Nomor telepon hanya boleh berisi angka.',
+            'nomor_telp.unique' => 'Nomor telepon sudah terdaftar. Gunakan nomor lain.',
             'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar. Gunakan email lain.',
         ]);
 
         if ($validator->fails()) {
@@ -411,10 +432,10 @@ class AdminController extends Controller
     {
         $user = Auth::user();
         $pelanggan = Pelanggan::all();
-       $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])
-    ->orderBy('jabatan', 'desc') // Kepala Teknisi akan muncul di atas
-    ->orderBy('name', 'asc')     // Kemudian urutkan berdasarkan nama
-    ->get();
+        $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])
+            ->orderBy('jabatan', 'desc') // Kepala Teknisi akan muncul di atas
+            ->orderBy('name', 'asc')     // Kemudian urutkan berdasarkan nama
+            ->get();
 
         return view('admin.tambah_perbaikan', compact('user', 'pelanggan', 'teknisi'));
     }

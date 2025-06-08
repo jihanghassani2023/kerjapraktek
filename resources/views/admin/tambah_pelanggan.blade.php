@@ -184,10 +184,14 @@
             outline: none;
             box-shadow: 0 0 0 0.2rem rgba(140, 58, 58, 0.25);
         }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
         .invalid-feedback {
             color: #dc3545;
             font-size: 0.9em;
             margin-top: 5px;
+            display: block;
         }
         .alert {
             padding: 12px 15px;
@@ -199,6 +203,17 @@
             background-color: #f8d7da;
             border-color: #dc3545;
             color: #721c24;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .help-text {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 3px;
+            display: none;
         }
         @media (max-width: 768px) {
             .sidebar {
@@ -256,7 +271,7 @@
                     <div class="user-name">{{ $user->name }}</div>
                     <div class="user-role">Admin</div>
                 </div>
-                <div class="<div class="user-avatar">
+                <div class="user-avatar">
                     <i class="fas fa-user"></i>
                 </div>
             </div>
@@ -271,7 +286,8 @@
 
         @if ($errors->any())
             <div class="alert alert-danger">
-                <ul style="margin: 0; padding-left: 20px;">
+                <strong><i class="fas fa-exclamation-triangle"></i> Terdapat kesalahan:</strong>
+                <ul style="margin: 8px 0 0 0; padding-left: 20px;">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -279,34 +295,55 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
+            </div>
+        @endif
+
         <div class="content-section">
-            <form action="{{ route('admin.pelanggan.store') }}" method="POST">
+            <form action="{{ route('admin.pelanggan.store') }}" method="POST" id="customerForm">
                 @csrf
                 <div class="form-group">
-                    <label for="nama_pelanggan">Nama Pelanggan</label>
-                    <input type="text" class="form-control @error('nama_pelanggan') is-invalid @enderror" id="nama_pelanggan" name="nama_pelanggan" value="{{ old('nama_pelanggan') }}" required>
+                    <label for="nama_pelanggan">Nama Pelanggan <span style="color: red;">*</span></label>
+                    <input type="text" class="form-control @error('nama_pelanggan') is-invalid @enderror"
+                           id="nama_pelanggan" name="nama_pelanggan"
+                           value="{{ old('nama_pelanggan') }}"
+                           placeholder="Masukkan nama lengkap pelanggan"
+                           required>
                     @error('nama_pelanggan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="nomor_telp">Nomor Telepon</label>
-                    <input type="text" class="form-control @error('nomor_telp') is-invalid @enderror" id="nomor_telp" name="nomor_telp" value="{{ old('nomor_telp') }}" required>
+                    <label for="nomor_telp">Nomor Telepon <span style="color: red;">*</span></label>
+                    <input type="text" class="form-control @error('nomor_telp') is-invalid @enderror"
+                           id="nomor_telp" name="nomor_telp"
+                           value="{{ old('nomor_telp') }}"
+                           placeholder="Contoh: 081234567890"
+                           maxlength="13"
+                           required>
                     @error('nomor_telp')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email (Opsional)</label>
-                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control @error('email') is-invalid @enderror"
+                           id="email" name="email"
+                           value="{{ old('email') }}"
+                           placeholder="contoh@email.com">
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div style="text-align: right;">
+                <div style="text-align: right; margin-top: 30px;">
+                    <a href="{{ route('admin.pelanggan') }}" class="btn btn-secondary" style="margin-right: 10px;">
+                        <i class="fas fa-times"></i> Batal
+                    </a>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Simpan
                     </button>
@@ -314,112 +351,112 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('customerForm');
+            const nomorTelpInput = document.getElementById('nomor_telp');
+            const namaInput = document.getElementById('nama_pelanggan');
+
+            // Validasi real-time untuk nomor telepon
+            if (nomorTelpInput) {
+                nomorTelpInput.addEventListener('input', function() {
+                    // Hapus karakter non-numerik
+                    this.value = this.value.replace(/[^0-9]/g, '');
+
+                    // Batasi hingga 13 digit
+                    if (this.value.length > 13) {
+                        this.value = this.value.slice(0, 13);
+                    }
+
+                    // Hapus styling error jika input valid
+                    if (this.value.length <= 13 && /^[0-9]*$/.test(this.value)) {
+                        this.classList.remove('is-invalid');
+                        const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                        if (errorDiv) {
+                            errorDiv.style.display = 'none';
+                        }
+                    }
+                });
+
+                // Validasi saat blur (kehilangan fokus)
+                nomorTelpInput.addEventListener('blur', function() {
+                    const value = this.value.trim();
+                    if (value && (value.length < 8 || value.length > 13)) {
+                        this.classList.add('is-invalid');
+                        let errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                        if (!errorDiv) {
+                            errorDiv = document.createElement('div');
+                            errorDiv.className = 'invalid-feedback';
+                            this.parentNode.appendChild(errorDiv);
+                        }
+                        errorDiv.textContent = 'Nomor telepon harus 8-13 digit.';
+                        errorDiv.style.display = 'block';
+                    }
+                });
+            }
+
+            // Validasi real-time untuk nama
+            if (namaInput) {
+                namaInput.addEventListener('input', function() {
+                    if (this.value.length > 50) {
+                        this.value = this.value.slice(0, 50);
+                    }
+
+                    // Hapus styling error jika input valid
+                    if (this.value.trim().length > 0 && this.value.length <= 50) {
+                        this.classList.remove('is-invalid');
+                        const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                        if (errorDiv) {
+                            errorDiv.style.display = 'none';
+                        }
+                    }
+                });
+            }
+
+            // Validasi form sebelum submit
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    let isValid = true;
+
+                    // Validasi nama pelanggan
+                    const namaValue = namaInput.value.trim();
+                    if (!namaValue || namaValue.length === 0) {
+                        isValid = false;
+                        showFieldError(namaInput, 'Nama pelanggan wajib diisi.');
+                    } else if (namaValue.length > 50) {
+                        isValid = false;
+                        showFieldError(namaInput, 'Nama pelanggan maksimal 50 karakter.');
+                    }
+
+                    // Validasi nomor telepon
+                    const phoneValue = nomorTelpInput.value.trim();
+                    if (!phoneValue) {
+                        isValid = false;
+                        showFieldError(nomorTelpInput, 'Nomor telepon wajib diisi.');
+                    } else if (!/^[0-9]{8,13}$/.test(phoneValue)) {
+                        isValid = false;
+                        showFieldError(nomorTelpInput, 'Nomor telepon harus 8-13 digit dan hanya berisi angka.');
+                    }
+
+                    if (!isValid) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            function showFieldError(field, message) {
+                field.classList.add('is-invalid');
+                let errorDiv = field.parentNode.querySelector('.invalid-feedback');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    field.parentNode.appendChild(errorDiv);
+                }
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>
-<script>
-    // JavaScript untuk validasi frontend
-
-    // Menunggu hingga DOM sepenuhnya dimuat
-    document.addEventListener('DOMContentLoaded', function() {
-        // Temukan form dan input yang relevan
-        const form = document.querySelector('form');
-        const nomorTelpInput = document.getElementById('nomor_telp');
-        const hargaInput = document.getElementById('harga'); // Mungkin tidak ada di semua form
-
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                let isValid = true;
-
-                // Validasi nomor telepon - hanya angka dan maksimal 13 digit
-                if (nomorTelpInput) {
-                    const phoneValue = nomorTelpInput.value.trim();
-                    const phoneRegex = /^[0-9]{1,13}$/;
-
-                    if (!phoneRegex.test(phoneValue)) {
-                        isValid = false;
-                        // Buat atau perbarui pesan kesalahan
-                        let errorDiv = nomorTelpInput.nextElementSibling;
-                        if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
-                            errorDiv = document.createElement('div');
-                            errorDiv.className = 'invalid-feedback';
-                            nomorTelpInput.parentNode.insertBefore(errorDiv, nomorTelpInput.nextSibling);
-                        }
-
-                        errorDiv.textContent = phoneValue.length > 13 ?
-                            'Nomor telepon maksimal 13 digit.' :
-                            'Nomor telepon hanya boleh berisi angka.';
-
-                        errorDiv.style.display = 'block';
-                        nomorTelpInput.classList.add('is-invalid');
-                    } else {
-                        // Hapus kesalahan jika valid
-                        nomorTelpInput.classList.remove('is-invalid');
-                        const errorDiv = nomorTelpInput.nextElementSibling;
-                        if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
-                            errorDiv.style.display = 'none';
-                        }
-                    }
-                }
-
-                // Validasi input harga jika ada - hanya angka
-                if (hargaInput) {
-                    const hargaValue = hargaInput.value.trim();
-
-                    if (hargaValue !== '' && !/^\d+(\.\d{1,2})?$/.test(hargaValue)) {
-                        isValid = false;
-                        // Buat atau perbarui pesan kesalahan
-                        let errorDiv = hargaInput.nextElementSibling;
-                        if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
-                            errorDiv = document.createElement('div');
-                            errorDiv.className = 'invalid-feedback';
-                            hargaInput.parentNode.insertBefore(errorDiv, hargaInput.nextSibling);
-                        }
-
-                        errorDiv.textContent = 'Harga harus berupa angka.';
-                        errorDiv.style.display = 'block';
-                        hargaInput.classList.add('is-invalid');
-                    } else {
-                        // Hapus kesalahan jika valid
-                        hargaInput.classList.remove('is-invalid');
-                        const errorDiv = hargaInput.nextElementSibling;
-                        if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
-                            errorDiv.style.display = 'none';
-                        }
-                    }
-                }
-
-                // Mencegah pengiriman form jika validasi gagal
-                if (!isValid) {
-                    e.preventDefault();
-                }
-            });
-        }
-
-        // Validasi real-time untuk input nomor telepon
-        if (nomorTelpInput) {
-            nomorTelpInput.addEventListener('input', function() {
-                // Hapus karakter non-numerik saat diketik
-                this.value = this.value.replace(/[^0-9]/g, '');
-
-                // Batasi hingga 13 digit
-                if (this.value.length > 13) {
-                    this.value = this.value.slice(0, 13);
-                }
-            });
-        }
-
-        // Validasi real-time untuk input harga
-        if (hargaInput) {
-            hargaInput.addEventListener('input', function() {
-                // Hanya izinkan angka dan titik desimal
-                this.value = this.value.replace(/[^0-9.]/g, '');
-
-                // Pastikan hanya ada satu titik desimal
-                const parts = this.value.split('.');
-                if (parts.length > 2) {
-                    this.value = parts[0] + '.' + parts.slice(1).join('');
-                }
-            });
-        }
-    });
-</script>

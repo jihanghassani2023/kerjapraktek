@@ -278,6 +278,17 @@
             background-color: #f5f5f5;
         }
 
+        /* Fixed Status Colors Based on Status */
+        .status-menunggu {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-proses {
+            color: #fd7e14;
+            font-weight: bold;
+        }
+
         .status-selesai {
             color: #28a745;
             font-weight: bold;
@@ -305,7 +316,6 @@
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
-            /* Tambahkan ini agar responsif pada layar kecil */
         }
 
         .teknisi-stat {
@@ -315,17 +325,14 @@
             font-size: 0.9em;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             min-width: 120px;
-            /* Beri lebar minimum */
         }
 
         .teknisi-stat i {
             margin-right: 5px;
             width: 16px;
-            /* Lebar tetap untuk ikon */
             text-align: center;
         }
 
-        /* Warna untuk status yang berbeda */
         .teknisi-stat .fa-check-circle {
             color: #28a745;
         }
@@ -391,23 +398,6 @@
         .teknisi-name {
             font-weight: bold;
             margin-bottom: 5px;
-        }
-
-        .teknisi-stats {
-            display: flex;
-            gap: 15px;
-        }
-
-        .teknisi-stat {
-            background-color: #f8f9fa;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-
-        .teknisi-stat i {
-            margin-right: 5px;
-            color: #8c3a3a;
         }
 
         @media (max-width: 768px) {
@@ -574,7 +564,9 @@
                                     <td>{{ $t->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $t->user->name ?? 'N/A' }}</td>
                                     <td>Rp. {{ number_format($t->harga, 0, ',', '.') }}</td>
-                                    <td><span class="status-selesai">{{ $t->status }}</span></td>
+                                    <td>
+                                        <span class="status-{{ strtolower($t->status) }}">{{ $t->status }}</span>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
