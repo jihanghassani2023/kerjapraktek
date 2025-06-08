@@ -974,126 +974,262 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Execute when DOM is fully loaded
+<script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Get current status
-            const currentStatus = '{{ $perbaikan->status }}';
-
-            // Hide status change section if status is already "Selesai"
-            if (currentStatus === 'Selesai') {
-                const statusActions = document.querySelector('.status-actions');
-                if (statusActions) {
-                    statusActions.style.display = 'none';
-                }
-            }
-
-            // Set up the confirmation modal
             const modal = document.getElementById('confirmationModal');
             const confirmText = document.getElementById('confirmationText');
             const confirmYes = document.getElementById('confirmYes');
             const confirmNo = document.getElementById('confirmNo');
-
-            // Variables to store the status we want to change to
             let pendingStatus = '';
+            let isProcessing = false;
 
-            // Attach click handlers to all status buttons
-            document.querySelectorAll('.btn-status').forEach(button => {
-                button.addEventListener('click', function() {
-                    // Get the status from data attribute or button content
-                    pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
+            // Hide status actions if already completed
+            if ('{{ $perbaikan->status }}' === 'Selesai') {
+                const statusActions = document.querySelector('.status-actions');
+                if (statusActions) statusActions.style.display = 'none';
+            }
 
-                    // Set confirmation message based on the status
-                    if (pendingStatus === 'Proses') {
-                        confirmText.textContent = 'APAKAH DEVICE INI AKAN ANDA KERJAKAN?';
-                    } else if (pendingStatus === 'Selesai') {
-                        confirmText.textContent = 'APAKAH DEVICE INI SUDAH SELESAI?';
-                    } else {
-                        confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS?';
+            // Attach event listeners to status buttons
+            function attachListeners() {
+                document.querySelectorAll('.btn-status').forEach(button => {
+                    const newButton = button.cloneNode(true);
+                    button.parentNode.replaceChild(newButton, button);
+
+                    newButton.addEventListener('click', function() {
+                        if (isProcessing) return;
+
+                        pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
+
+                        if (pendingStatus === 'Proses') {
+                            confirmText.textContent = 'APAKAH DEVICE INI AKAN ANDA KERJAKAN?';
+                        } else if (pendingStatus === 'Selesai') {
+                            confirmText.textContent = 'APAKAH DEVICE INI SUDAH SELESAI?';
+                        }
+
+                        modal.style.display = 'block';
+                    });
+                });
+            }
+
+            attachListeners();
+
+            // Handle YES confirmation
+            confirmYes.addEventListener('click', function() {
+                if (!pendingStatus || isProcessing) return;
+
+                isProcessing = true;
+                modal.style.display = 'none';
+
+                // Show loading notification
+                showNotification('Mengubah status...', 'info');
+
+                // Disable buttons
+                document.querySelectorAll('.btn-status').forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                });
+
+                // Get CSRF token
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                // Prepare request data
+                const requestData = {
+                    status: pendingStatus,
+                    tindakan_perbaikan: "{{ addslashes($perbaikan->tindakan_perbaikan) }}",
+                    harga: {{ $perbaikan->harga }}
+                };
+
+                // Make AJAX request with proper headers
+                fetch('/perbaikan/{{ $perbaikan->id }}/status', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Update basic UI first
+                        updateBasicUI(data.status);
 
-                    // Show the confirmation modal
-                    modal.style.display = 'block';
+                        // Add new timeline entry manually with current timestamp
+                        addNewTimelineEntry(data.status);
+
+                        showNotification('Status berhasil diperbarui!', 'success');
+                    } else {
+                        throw new Error(data.message || 'Gagal mengubah status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Gagal mengubah status: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    isProcessing = false;
+                    // Re-enable buttons
+                    document.querySelectorAll('.btn-status').forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    });
                 });
             });
 
-            // Handle confirmation: YES
-            confirmYes.addEventListener('click', function() {
-                if (pendingStatus) {
-                    // Get CSRF token
-                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-                    // Hide the modal
-                    modal.style.display = 'none';
-
-                    // Capture the old status before updating UI
-                    const statusBadge = document.getElementById('statusBadge');
-                    const oldStatus = statusBadge ? statusBadge.textContent.trim() : '';
-
-                    // IMMEDIATELY UPDATE UI - Update UI before waiting for server
-                    if (statusBadge) {
-                        statusBadge.className = 'status-badge status-' + pendingStatus.toLowerCase();
-                        statusBadge.textContent = pendingStatus;
-                    }
-
-                    // Update status actions section based on new status
-                    updateStatusActionsSection(pendingStatus);
-
-                    // Also update any other UI elements that show the status
-                    const detailStatus = document.querySelector('.detail-status');
-                    if (detailStatus) {
-                        detailStatus.textContent = pendingStatus;
-                        if (pendingStatus === 'Selesai') {
-                            detailStatus.style.color = '#28a745';
-                        } else if (pendingStatus === 'Proses') {
-                            detailStatus.style.color = '#ffaa00';
-                        } else {
-                            detailStatus.style.color = '#ff6b6b';
-                        }
-                    }
-
-                    // Update input form visibility based on status
-                    updateInputFormVisibility(pendingStatus);
-
-                    // Create a new timeline item for display without refresh
-                    addNewTimelineItem(pendingStatus);
-
-                    // Now send the status update request in the background
-                    fetch('/perbaikan/{{ $perbaikan->id }}/status', {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': token
-                            },
-                            body: JSON.stringify({
-                                status: pendingStatus,
-                                tindakan_perbaikan: "{{ $perbaikan->tindakan_perbaikan }}",
-                                harga: {{ $perbaikan->harga }}
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            // Success! Do nothing visible to user since we already updated UI
-                            console.log("Status updated successfully");
-                        })
-                        .catch(error => {
-                            // Error occurred, but don't show to user
-                            console.error('Error updating status:', error);
-                        });
+            // Function to update basic UI elements
+            function updateBasicUI(newStatus) {
+                // Update status badge
+                const statusBadge = document.getElementById('statusBadge');
+                if (statusBadge) {
+                    statusBadge.className = 'status-badge status-' + newStatus.toLowerCase();
+                    statusBadge.textContent = newStatus;
                 }
-            });
 
-            // Function to update status actions section
-            function updateStatusActionsSection(newStatus) {
+                // Update detail status in header
+                const detailStatus = document.querySelector('.detail-status');
+                if (detailStatus) {
+                    detailStatus.textContent = newStatus;
+                    if (newStatus === 'Selesai') {
+                        detailStatus.style.color = '#28a745';
+                    } else if (newStatus === 'Proses') {
+                        detailStatus.style.color = '#ffaa00';
+                    } else {
+                        detailStatus.style.color = '#ff6b6b';
+                    }
+                }
+
+                // Update status action buttons
+                updateStatusButtons(newStatus);
+
+                // Update input form visibility
+                updateInputFormVisibility(newStatus);
+
+                // Re-attach event listeners
+                attachListeners();
+            }
+
+            // Function to add new timeline entry manually
+            function addNewTimelineEntry(newStatus) {
+                // Determine status message
+                let statusMessage = "";
+                if (newStatus === 'Menunggu') {
+                    statusMessage = "Menunggu Antrian Perbaikan";
+                } else if (newStatus === 'Proses') {
+                    statusMessage = "Device Anda Sedang diproses";
+                } else if (newStatus === 'Selesai') {
+                    statusMessage = "Device Anda Telah Selesai";
+                }
+
+                // Get current timestamp in Jakarta timezone
+                const now = new Date();
+                const jakartaTime = new Date(now.getTime() + (7 * 60 * 60 * 1000)); // UTC+7
+
+                const formattedDate = jakartaTime.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                const formattedTime = jakartaTime.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const displayTime = `${formattedDate} ${formattedTime}`;
+
+                // Update latest process section
+                const latestProcessContent = document.querySelector('.process-content');
+                if (latestProcessContent) {
+                    latestProcessContent.textContent = statusMessage;
+                }
+
+                const processDate = document.querySelector('.process-date');
+                if (processDate) {
+                    processDate.textContent = displayTime;
+                }
+
+                // Ensure latest process section is visible
+                const latestProcessDiv = document.querySelector('.latest-process');
+                if (latestProcessDiv) {
+                    latestProcessDiv.style.display = 'block';
+
+                    // Highlight the latest process
+                    latestProcessDiv.style.backgroundColor = '#e7f9e7';
+                    latestProcessDiv.style.border = '2px solid #28a745';
+                    latestProcessDiv.style.transition = 'all 0.3s ease';
+
+                    setTimeout(() => {
+                        latestProcessDiv.style.backgroundColor = 'transparent';
+                        latestProcessDiv.style.border = '1px solid #eee';
+                    }, 3000);
+
+                    // Scroll to the progress section
+                    latestProcessDiv.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+
+                // Add to full timeline if visible
+                const timeline = document.querySelector('.timeline');
+                if (timeline) {
+                    // Determine status class
+                    let statusClass = '';
+                    if (newStatus === 'Menunggu') {
+                        statusClass = 'status-menunggu';
+                    } else if (newStatus === 'Proses') {
+                        statusClass = 'status-proses';
+                    } else if (newStatus === 'Selesai') {
+                        statusClass = 'status-selesai';
+                    }
+
+                    // Create new timeline item
+                    const newTimelineItem = document.createElement('div');
+                    newTimelineItem.className = `timeline-item status-change ${statusClass}`;
+                    newTimelineItem.style.backgroundColor = 'transparent';
+
+                    const fullDateTime = jakartaTime.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }) + ' ' + jakartaTime.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+
+                    newTimelineItem.innerHTML = `
+                        <div class="timeline-marker">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">${statusMessage}</div>
+                            <div class="timeline-date">${fullDateTime}</div>
+                        </div>
+                    `;
+
+                    // Add to the beginning of the timeline
+                    if (timeline.firstChild) {
+                        timeline.insertBefore(newTimelineItem, timeline.firstChild);
+                    } else {
+                        timeline.appendChild(newTimelineItem);
+                    }
+                }
+            }
+
+            // Function to update status action buttons
+            function updateStatusButtons(newStatus) {
                 const statusActionsSection = document.getElementById('statusActionsSection');
                 const statusButtonsContainer = document.getElementById('statusButtonsContainer');
 
                 if (newStatus === 'Selesai') {
-                    // Hide entire status actions section when completed
                     statusActionsSection.style.display = 'none';
                 } else {
-                    // Update buttons based on new status
                     statusButtonsContainer.innerHTML = '';
 
                     if (newStatus === 'Menunggu') {
@@ -1102,7 +1238,6 @@
                         prosesButton.className = 'btn-status btn-proses';
                         prosesButton.setAttribute('data-status', 'Proses');
                         prosesButton.textContent = 'Proses';
-                        addButtonClickHandler(prosesButton);
                         statusButtonsContainer.appendChild(prosesButton);
                     } else if (newStatus === 'Proses') {
                         const selesaiButton = document.createElement('button');
@@ -1110,7 +1245,6 @@
                         selesaiButton.className = 'btn-status btn-selesai';
                         selesaiButton.setAttribute('data-status', 'Selesai');
                         selesaiButton.textContent = 'Selesai';
-                        addButtonClickHandler(selesaiButton);
                         statusButtonsContainer.appendChild(selesaiButton);
                     }
                 }
@@ -1122,30 +1256,24 @@
                 const statusCompletedMessage = document.querySelector('.status-completed-message');
 
                 if (newStatus === 'Proses') {
-                    // Show input form when status is Proses
                     if (!addProcessForm) {
-                        // Create input form if it doesn't exist
                         createInputForm();
                     } else {
                         addProcessForm.style.display = 'block';
                     }
-                    // Hide completed message if it exists
                     if (statusCompletedMessage) {
                         statusCompletedMessage.style.display = 'none';
                     }
                 } else if (newStatus === 'Selesai') {
-                    // Hide input form when status is Selesai
                     if (addProcessForm) {
                         addProcessForm.style.display = 'none';
                     }
-                    // Show completed message
                     if (!statusCompletedMessage) {
                         createCompletedMessage();
                     } else {
                         statusCompletedMessage.style.display = 'block';
                     }
                 } else {
-                    // For Menunggu status, hide input form
                     if (addProcessForm) {
                         addProcessForm.style.display = 'none';
                     }
@@ -1155,7 +1283,7 @@
                 }
             }
 
-            // Function to create input form dynamically
+            // Function to create input form
             function createInputForm() {
                 const cardBody = document.querySelector('.card-body');
                 const inputFormHTML = `
@@ -1177,7 +1305,7 @@
                 cardBody.insertAdjacentHTML('beforeend', inputFormHTML);
             }
 
-            // Function to create completed message dynamically
+            // Function to create completed message
             function createCompletedMessage() {
                 const cardBody = document.querySelector('.card-body');
                 const completedMessageHTML = `
@@ -1189,112 +1317,46 @@
                 cardBody.insertAdjacentHTML('beforeend', completedMessageHTML);
             }
 
-            // Function to add click handler to buttons
-            function addButtonClickHandler(button) {
-                button.addEventListener('click', function() {
-                    pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
-
-                    if (pendingStatus === 'Proses') {
-                        confirmText.textContent = 'APAKAH DEVICE INI AKAN ANDA KERJAKAN?';
-                    } else if (pendingStatus === 'Selesai') {
-                        confirmText.textContent = 'APAKAH DEVICE INI SUDAH SELESAI?';
-                    } else {
-                        confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS?';
-                    }
-
-                    modal.style.display = 'block';
-                });
-            }
-
-            // Function to add a new timeline item without refresh
-            function addNewTimelineItem(newStatus) {
-                // Get the timeline container
-                const timeline = document.querySelector('.timeline');
-
-                if (!timeline) return;
-
-                // Create status message
-                let statusText = "";
-                if (newStatus === 'Menunggu') {
-                    statusText = "Menunggu Antrian Perbaikan";
-                } else if (newStatus === 'Proses') {
-                    statusText = "Device Anda Sedang diproses";
-                } else if (newStatus === 'Selesai') {
-                    statusText = "Device Anda Telah Selesai";
-                }
-
-                // Determine status class
-                let statusClass = '';
-                if (newStatus === 'Menunggu') {
-                    statusClass = 'status-menunggu';
-                } else if (newStatus === 'Proses') {
-                    statusClass = 'status-proses';
-                } else if (newStatus === 'Selesai') {
-                    statusClass = 'status-selesai';
-                }
-
-                // Get current date and time in Palembang timezone (GMT+7)
-                const now = new Date();
-                const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-                const jakartaTime = new Date(utcTime + (3600000 * 7));
-
-                const dateStr = jakartaTime.toLocaleDateString('id-ID', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                });
-                const timeStr = jakartaTime.toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-                const datetime = `${dateStr} ${timeStr}`;
-
-                // Create new timeline item element
-                const newItem = document.createElement('div');
-                newItem.className = `timeline-item status-change ${statusClass}`;
-                newItem.style.backgroundColor = 'transparent';
-                newItem.innerHTML = `
-                    <div class="timeline-marker">
-                        <i class="fas fa-flag"></i>
-                    </div>
-                    <div class="timeline-content">
-                        <div class="timeline-title">${statusText}</div>
-                        <div class="timeline-date">${datetime}</div>
-                    </div>
-                `;
-
-                // Add to the beginning of the timeline
-                if (timeline.firstChild) {
-                    timeline.insertBefore(newItem, timeline.firstChild);
-                } else {
-                    timeline.appendChild(newItem);
-                }
-
-                // Also update the latest process section
-                const latestProcessContent = document.querySelector('.process-content');
-                if (latestProcessContent) {
-                    latestProcessContent.textContent = statusText;
-                }
-
-                const processDate = document.querySelector('.process-date');
-                if (processDate) {
-                    processDate.textContent = datetime;
-                }
-            }
-
-            // Handle confirmation: NO
+            // Handle NO confirmation
             confirmNo.addEventListener('click', function() {
-                // Just hide the modal
                 modal.style.display = 'none';
+                pendingStatus = '';
             });
 
-            // Close the modal if user clicks outside of it
+            // Close modal on outside click
             window.addEventListener('click', function(event) {
                 if (event.target === modal) {
                     modal.style.display = 'none';
+                    pendingStatus = '';
                 }
             });
+
+            // Notification function
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                const bgColor = type === 'success' ? '#28a745' : type === 'info' ? '#17a2b8' : '#dc3545';
+
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px 20px;
+                    border-radius: 5px;
+                    color: white;
+                    font-weight: bold;
+                    z-index: 9999;
+                    background-color: ${bgColor};
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 3000);
+            }
         });
 
         // Toggle timeline function
@@ -1310,8 +1372,7 @@
             } else {
                 timelineContainer.style.display = 'none';
                 toggleIcon.className = 'fas fa-chevron-down';
-                showAllLink.innerHTML =
-                    'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
+                showAllLink.innerHTML = 'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
 
@@ -1338,7 +1399,6 @@
 
             document.querySelector('.actions').style.display = 'flex';
         });
-    </script>
-</body>
+    </script>    </body>
 
 </html>

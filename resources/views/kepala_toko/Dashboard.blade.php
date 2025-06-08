@@ -193,10 +193,44 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         .section-title {
             font-size: 1.2em;
             color: #333;
+        }
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-controls select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            color: #333;
+            font-size: 14px;
+            min-width: 120px;
+        }
+        .filter-controls select:focus {
+            outline: none;
+            border-color: #8c3a3a;
+        }
+        .filter-controls button {
+            padding: 8px 15px;
+            background-color: #8c3a3a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .filter-controls button:hover {
+            background-color: #6d2d2d;
         }
         .chart-container {
             height: 300px;
@@ -244,6 +278,14 @@
             }
             .stats-container {
                 flex-direction: column;
+            }
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .filter-controls {
+                width: 100%;
+                justify-content: flex-start;
             }
         }
     </style>
@@ -293,15 +335,15 @@
         <div style="margin-top: 30px;"></div>
 
         <div class="stats-container">
-           <div class="stat-card">
-    <div class="stat-icon karyawan">
-        <i class="fas fa-users"></i>
-    </div>
-    <div class="stat-info">
-        <h3>Total Teknisi</h3>
-        <p>{{ $teknisiCount ?? 0 }}</p>
-    </div>
-</div>
+            <div class="stat-card">
+                <div class="stat-icon karyawan">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Total Teknisi</h3>
+                    <p>{{ $teknisiCount ?? 0 }}</p>
+                </div>
+            </div>
 
             <div class="stat-card">
                 <div class="stat-icon harian">
@@ -318,7 +360,13 @@
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>Total Transaksi Bulanan</h3>
+                    <h3>
+                        @if($selectedMonth === 'all')
+                            Total Transaksi Tahunan
+                        @else
+                            Total Transaksi {{ $monthOptions[$selectedMonth] ?? 'Bulanan' }}
+                        @endif
+                    </h3>
                     <p>Rp. {{ number_format($totalTransaksiBulanIni ?? 0, 0, ',', '.') }}</p>
                 </div>
             </div>
@@ -326,7 +374,34 @@
 
         <div class="content-section">
             <div class="section-header">
-                <h3 class="section-title">Statistik Status Perbaikan Bulanan ({{ date('Y') }})</h3>
+                <h3 class="section-title">
+                    @if($selectedMonth === 'all')
+                        Statistik Status Perbaikan Bulanan ({{ $selectedYear ?? date('Y') }})
+                    @else
+                        Statistik Status Perbaikan {{ $monthOptions[$selectedMonth] ?? 'Bulan' }} {{ $selectedYear ?? date('Y') }} (Per Minggu)
+                    @endif
+                </h3>
+                <div class="filter-controls">
+                    <form method="GET" action="{{ route('kepala-toko.dashboard') }}" style="display: flex; gap: 10px; align-items: center;">
+                        <select name="year" id="yearSelect">
+                            @foreach($yearOptions ?? [] as $year)
+                                <option value="{{ $year }}" {{ ($selectedYear ?? date('Y')) == $year ? 'selected' : '' }}>
+                                    {{ $year }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <select name="month" id="monthSelect">
+                            @foreach($monthOptions ?? [] as $value => $name)
+                                <option value="{{ $value }}" {{ ($selectedMonth ?? 'all') == $value ? 'selected' : '' }}>
+                                    {{ $name }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <button type="submit">Filter</button>
+                    </form>
+                </div>
             </div>
             <div class="chart-container">
                 <canvas id="monthlyRepairChart"></canvas>
@@ -398,16 +473,38 @@
                         tooltip: {
                             mode: 'index',
                             intersect: false,
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].label;
+                                },
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + ' perbaikan';
+                                }
+                            }
                         }
                     },
                     scales: {
                         x: {
                             stacked: false,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
                         },
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                precision: 0
+                                precision: 0,
+                                stepSize: 1,
+                                callback: function(value) {
+                                    return value + ' perbaikan';
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
                             }
                         }
                     },

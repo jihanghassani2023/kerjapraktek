@@ -30,12 +30,12 @@ class TransaksiController extends Controller
         }
 
         $transaksi = $query->with('user')
-    ->orderBy('tanggal_perbaikan', 'desc')
-    ->get()
-    ->map(function($item) {
-        $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
-        return $item;
-    });
+            ->orderBy('tanggal_perbaikan', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                return $item;
+            });
         // Create a new spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -158,82 +158,174 @@ class TransaksiController extends Controller
         return view('kepala_toko.detail_transaksi', compact('user', 'transaksi'));
     }
 
-    public function dashboard()
-    {
-        $user = Auth::user();
+    public function dashboard(Request $request)
+{
+    $user = Auth::user();
 
-         $karyawan = User::whereIn('role', ['admin', 'teknisi', 'kepala teknisi'])
+    // Get selected year and month from request, default to current
+    $selectedYear = $request->input('year', date('Y'));
+    $selectedMonth = $request->input('month', 'all'); // Default to 'all' for all months
+
+    $karyawan = User::whereIn('role', ['admin', 'teknisi', 'kepala teknisi'])
         ->orderBy('created_at', 'desc')
         ->take(3)
         ->get();
 
-        $currentMonth = date('m');
-        $currentYear = date('Y');
+    // Update: Get counts for each status based on selected month/year
+    $monthlyRepairCounts = [];
 
-        // Update: Get counts for each status for monthly chart
-        $monthlyRepairCounts = [];
+    if ($selectedMonth === 'all') {
+        // Show all months for the selected year
         for ($i = 1; $i <= 12; $i++) {
             $selesaiCount = Perbaikan::where('status', 'Selesai')
                 ->whereMonth('tanggal_perbaikan', $i)
-                ->whereYear('tanggal_perbaikan', $currentYear)
+                ->whereYear('tanggal_perbaikan', $selectedYear)
                 ->count();
 
             $prosesCount = Perbaikan::where('status', 'Proses')
                 ->whereMonth('tanggal_perbaikan', $i)
-                ->whereYear('tanggal_perbaikan', $currentYear)
+                ->whereYear('tanggal_perbaikan', $selectedYear)
                 ->count();
 
             $menungguCount = Perbaikan::where('status', 'Menunggu')
                 ->whereMonth('tanggal_perbaikan', $i)
-                ->whereYear('tanggal_perbaikan', $currentYear)
+                ->whereYear('tanggal_perbaikan', $selectedYear)
                 ->count();
 
             $monthlyRepairCounts[] = [
-                'month' => date('F', mktime(0, 0, 0, $i, 10)),
+                'month' => date('M', mktime(0, 0, 0, $i, 10)), // Short month name for better fit
                 'selesai' => $selesaiCount,
                 'proses' => $prosesCount,
                 'menunggu' => $menungguCount
             ];
         }
+    } else {
+        // Show only the selected month (weekly breakdown)
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $selectedMonth, $selectedYear);
+        $weeksInMonth = ceil($daysInMonth / 7);
 
-        // Change to only count Teknisi and Kepala Teknisi
-       $teknisiCount = User::whereIn('role', ['teknisi', 'kepala teknisi'])->count();
+        for ($week = 1; $week <= $weeksInMonth; $week++) {
+            $startDay = ($week - 1) * 7 + 1;
+            $endDay = min($week * 7, $daysInMonth);
 
+            $startDate = date('Y-m-d', mktime(0, 0, 0, $selectedMonth, $startDay, $selectedYear));
+            $endDate = date('Y-m-d', mktime(0, 0, 0, $selectedMonth, $endDay, $selectedYear));
+
+            $selesaiCount = Perbaikan::where('status', 'Selesai')
+                ->whereBetween('tanggal_perbaikan', [$startDate, $endDate])
+                ->count();
+
+            $prosesCount = Perbaikan::where('status', 'Proses')
+                ->whereBetween('tanggal_perbaikan', [$startDate, $endDate])
+                ->count();
+
+            $menungguCount = Perbaikan::where('status', 'Menunggu')
+                ->whereBetween('tanggal_perbaikan', [$startDate, $endDate])
+                ->count();
+
+            $monthlyRepairCounts[] = [
+                'month' => "Minggu {$week}",
+                'selesai' => $selesaiCount,
+                'proses' => $prosesCount,
+                'menunggu' => $menungguCount
+            ];
+        }
+    }
+
+    // Count only Teknisi and Kepala Teknisi
+    $teknisiCount = User::whereIn('role', ['teknisi', 'kepala teknisi'])->count();
+
+    // Get latest transactions based on filter
+    if ($selectedMonth === 'all') {
         $latestTransaksi = Perbaikan::with('user')
-    ->where('status', 'Selesai')
-    ->orderBy('tanggal_perbaikan', 'desc')
-    ->take(3)
-    ->get()
-    ->map(function($item) {
-        $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
-        return $item;
-    });
+            ->where('status', 'Selesai')
+            ->whereYear('tanggal_perbaikan', $selectedYear)
+            ->orderBy('tanggal_perbaikan', 'desc')
+            ->take(3)
+            ->get()
+            ->map(function($item) {
+                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                return $item;
+            });
 
-        $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
-            ->whereDate('tanggal_perbaikan', date('Y-m-d'))
-            ->sum('harga');
-
+        // Calculate transactions for selected year
         $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
-            ->whereMonth('tanggal_perbaikan', date('m'))
-            ->whereYear('tanggal_perbaikan', date('Y'))
+            ->whereYear('tanggal_perbaikan', $selectedYear)
             ->sum('harga');
 
         $repairsByTeknisi = Perbaikan::selectRaw('user_id, count(*) as count')
             ->where('status', 'Selesai')
-            ->whereMonth('tanggal_perbaikan', date('m'))
-            ->whereYear('tanggal_perbaikan', date('Y'))
+            ->whereYear('tanggal_perbaikan', $selectedYear)
             ->groupBy('user_id')
             ->get();
+    } else {
+        $latestTransaksi = Perbaikan::with('user')
+            ->where('status', 'Selesai')
+            ->whereMonth('tanggal_perbaikan', $selectedMonth)
+            ->whereYear('tanggal_perbaikan', $selectedYear)
+            ->orderBy('tanggal_perbaikan', 'desc')
+            ->take(3)
+            ->get()
+            ->map(function($item) {
+                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                return $item;
+            });
 
-        return view('kepala_toko.dashboard', compact(
-            'user',
-            'karyawan',
-            'teknisiCount',
-            'monthlyRepairCounts',
-            'latestTransaksi',
-            'totalTransaksiHariIni',
-            'totalTransaksiBulanIni',
-            'repairsByTeknisi'
-        ));
+        // Calculate transactions for selected month and year
+        $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
+            ->whereMonth('tanggal_perbaikan', $selectedMonth)
+            ->whereYear('tanggal_perbaikan', $selectedYear)
+            ->sum('harga');
+
+        $repairsByTeknisi = Perbaikan::selectRaw('user_id, count(*) as count')
+            ->where('status', 'Selesai')
+            ->whereMonth('tanggal_perbaikan', $selectedMonth)
+            ->whereYear('tanggal_perbaikan', $selectedYear)
+            ->groupBy('user_id')
+            ->get();
     }
-}
+
+    // Generate year options (current year ± 5 years)
+    $currentYear = date('Y');
+    $yearOptions = [];
+    for ($year = $currentYear - 5; $year <= $currentYear + 2; $year++) {
+        $yearOptions[] = $year;
+    }
+
+    // Calculate transactions for today (always current date)
+    $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
+        ->whereDate('tanggal_perbaikan', date('Y-m-d'))
+        ->sum('harga');
+
+    // Generate month options
+    $monthOptions = [
+        'all' => 'Semua Bulan',
+        '01' => 'Januari',
+        '02' => 'Februari',
+        '03' => 'Maret',
+        '04' => 'April',
+        '05' => 'Mei',
+        '06' => 'Juni',
+        '07' => 'Juli',
+        '08' => 'Agustus',
+        '09' => 'September',
+        '10' => 'Oktober',
+        '11' => 'November',
+        '12' => 'Desember'
+    ];
+
+    return view('kepala_toko.dashboard', compact(
+        'user',
+        'karyawan',
+        'teknisiCount',
+        'monthlyRepairCounts',
+        'latestTransaksi',
+        'totalTransaksiHariIni',
+        'totalTransaksiBulanIni',
+        'repairsByTeknisi',
+        'selectedYear',
+        'selectedMonth',
+        'yearOptions',
+        'monthOptions'
+    ));
+}}
