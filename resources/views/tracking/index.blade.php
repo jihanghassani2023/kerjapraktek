@@ -101,6 +101,7 @@
 
         .input-group {
             margin-bottom: 25px;
+            position: relative;
         }
 
         .input-control {
@@ -110,6 +111,33 @@
             border-radius: 8px;
             font-size: 14px;
             background-color: #f0f0f0;
+        }
+
+
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+            text-align: left;
+            padding-left: 2px;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .submit-btn {
@@ -462,13 +490,19 @@
                 </div>
                 <div class="tracking-form">
                     <div class="tracking-title">SILAHKAN<br>MASUKAN NOMOR TELEPON</div>
-                    <form action="{{ route('tracking.check') }}" method="POST">
+                    <form action="{{ route('tracking.check') }}" method="POST" id="trackingForm">
                         @csrf
                         <div class="input-group">
-                            <input type="text" name="key" class="input-control" placeholder="Nomor Telepon Anda"
-                                required>
+                            <input type="text"
+                                   id="phoneInput"
+                                   name="key"
+                                   class="input-control"
+                                   placeholder="Nomor Telepon Anda"
+                                   maxlength="13"
+                                   value="{{ old('key') }}">
+                            <div class="error-message" id="errorMessage">Nomor telepon tidak boleh kosong.</div>
                         </div>
-                        <button type="submit" class="submit-btn">SUBMIT</button>
+                        <button type="submit" class="submit-btn" id="submitBtn">SUBMIT</button>
                     </form>
                 </div>
             </div>
@@ -618,13 +652,24 @@
             <div class="tracking-container">
                 <div class="tracking-form">
                     <div class="tracking-title">SILAHKAN<br>MASUKAN NOMOR TELEPON</div>
-                    <form action="{{ route('tracking.check') }}" method="POST">
+                    <form action="{{ route('tracking.check') }}" method="POST" id="trackingForm">
                         @csrf
                         <div class="input-group">
-                            <input type="text" name="key" class="input-control" placeholder="Nomor Telepon Anda"
-                                required>
+                            <input type="text"
+                                   id="phoneInput"
+                                   name="key"
+                                   class="input-control"
+                                   placeholder="Nomor Telepon Anda"
+                                   maxlength="13"
+                                   value="{{ old('key') }}">
+
+                            @if ($errors->has('key'))
+                                <div class="error-message show">{{ $errors->first('key') }}</div>
+                            @else
+                                <div class="error-message" id="errorMessage">Nomor telepon tidak boleh kosong.</div>
+                            @endif
                         </div>
-                        <button type="submit" class="submit-btn">SUBMIT</button>
+                        <button type="submit" class="submit-btn" id="submitBtn">SUBMIT</button>
                     </form>
                 </div>
             </div>
@@ -632,6 +677,7 @@
     </div>
 
     <script>
+        // Script untuk toggle progress
         function toggleProgress(id) {
             const progressElement = document.getElementById(id);
             const icon = event.target.tagName === 'I' ? event.target : event.target.querySelector('i');
@@ -644,6 +690,68 @@
                 if (icon) icon.className = 'fas fa-chevron-down';
             }
         }
+
+        // Script validasi nomor telepon - HANYA TIDAK BOLEH KOSONG
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('phoneInput');
+            const errorMessage = document.getElementById('errorMessage');
+            const trackingForm = document.getElementById('trackingForm');
+
+            // Jika tidak ada element, keluar dari script
+            if (!phoneInput) return;
+
+            // Fungsi untuk filter hanya angka
+            function filterNumbers(value) {
+                return value.replace(/[^0-9]/g, '');
+            }
+
+            // Auto filter input hanya angka
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                const numbersOnly = filterNumbers(value);
+
+                if (value !== numbersOnly) {
+                    e.target.value = numbersOnly;
+                }
+            });
+
+            // Filter paste input
+            phoneInput.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                    const value = filterNumbers(e.target.value);
+                    e.target.value = value;
+                }, 0);
+            });
+
+            // Prevent non-numeric keypress
+            phoneInput.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.which);
+                if (!/[0-9]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+
+            // Validasi HANYA tidak boleh kosong saat submit
+            if (trackingForm) {
+                trackingForm.addEventListener('submit', function(e) {
+                    const phoneValue = phoneInput.value.trim();
+
+                    if (!phoneValue || phoneValue === '') {
+                        e.preventDefault();
+                        if (errorMessage) {
+                            errorMessage.classList.add('show');
+                        }
+                        phoneInput.focus();
+                        return false;
+                    }
+
+                    // Hide error jika ada isi
+                    if (errorMessage) {
+                        errorMessage.classList.remove('show');
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

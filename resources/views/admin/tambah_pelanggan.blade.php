@@ -340,6 +340,7 @@
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    <div class="invalid-feedback" id="email-error" style="display: none;"></div>
                 </div>
 
                 <div style="text-align: right; margin-top: 30px;">
@@ -359,8 +360,10 @@
             const form = document.getElementById('customerForm');
             const nomorTelpInput = document.getElementById('nomor_telp');
             const namaInput = document.getElementById('nama_pelanggan');
+            const emailInput = document.getElementById('email');
             const namaError = document.getElementById('nama-error');
             const telpError = document.getElementById('telp-error');
+            const emailError = document.getElementById('email-error');
 
             // Fungsi untuk menampilkan error dengan style yang halus
             function showError(input, errorDiv, message) {
@@ -377,6 +380,51 @@
             function hideError(input, errorDiv) {
                 input.classList.remove('is-invalid');
                 errorDiv.style.display = 'none';
+            }
+
+            // Validasi real-time untuk nama pelanggan
+            if (namaInput) {
+                namaInput.addEventListener('input', function() {
+                    let value = this.value;
+
+                    // Hapus angka dari input nama
+                    const cleanValue = value.replace(/[0-9]/g, '');
+
+                    // Jika ada perubahan (ada angka yang dihapus), update value
+                    if (value !== cleanValue) {
+                        this.value = cleanValue;
+                        // Tampilkan error sementara untuk memberi tahu user
+                        showError(this, namaError, 'Nama hanya boleh diisi dengan huruf.');
+                        setTimeout(() => {
+                            if (cleanValue.trim().length > 0) {
+                                hideError(this, namaError);
+                            }
+                        }, 2000); // Error hilang setelah 2 detik
+                    }
+
+                    // Batasi maksimal 50 karakter
+                    if (this.value.length > 50) {
+                        this.value = this.value.slice(0, 50);
+                        showError(this, namaError, 'Nama pelanggan maksimal 50 karakter.');
+                    }
+
+                    // Hapus error jika input mulai valid
+                    if (this.value.trim().length > 0 && !/[0-9]/.test(this.value)) {
+                        hideError(this, namaError);
+                    }
+                });
+
+                // Validasi lengkap saat blur
+                namaInput.addEventListener('blur', function() {
+                    const value = this.value.trim();
+                    if (value && /[0-9]/.test(value)) {
+                        showError(this, namaError, 'Nama hanya boleh diisi dengan huruf.');
+                    } else if (value && value.length < 2) {
+                        showError(this, namaError, 'Nama pelanggan minimal 2 karakter.');
+                    } else if (value && value.length > 50) {
+                        showError(this, namaError, 'Nama pelanggan maksimal 50 karakter.');
+                    }
+                });
             }
 
             // Validasi real-time untuk nomor telepon
@@ -407,16 +455,20 @@
                 });
             }
 
-            // Validasi real-time untuk nama
-            if (namaInput) {
-                namaInput.addEventListener('input', function() {
-                    if (this.value.length > 50) {
-                        this.value = this.value.slice(0, 50);
+            // Validasi email
+            if (emailInput) {
+                emailInput.addEventListener('blur', function() {
+                    const value = this.value.trim();
+                    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        showError(this, emailError, 'Format email tidak valid.');
+                    } else {
+                        hideError(this, emailError);
                     }
+                });
 
-                    // Hapus error jika input mulai valid
+                emailInput.addEventListener('input', function() {
                     if (this.value.trim().length > 0) {
-                        hideError(this, namaError);
+                        hideError(this, emailError);
                     }
                 });
             }
@@ -432,12 +484,21 @@
                     // Reset semua error
                     hideError(namaInput, namaError);
                     hideError(nomorTelpInput, telpError);
+                    hideError(emailInput, emailError);
 
                     // Validasi nama pelanggan
                     const namaValue = namaInput.value.trim();
                     if (!namaValue || namaValue.length === 0) {
                         isValid = false;
                         showError(namaInput, namaError, 'Nama pelanggan wajib diisi.');
+                        if (!firstErrorField) firstErrorField = namaInput;
+                    } else if (/[0-9]/.test(namaValue)) {
+                        isValid = false;
+                        showError(namaInput, namaError, 'Nama hanya boleh diisi dengan huruf.');
+                        if (!firstErrorField) firstErrorField = namaInput;
+                    } else if (namaValue.length < 2) {
+                        isValid = false;
+                        showError(namaInput, namaError, 'Nama pelanggan minimal 2 karakter.');
                         if (!firstErrorField) firstErrorField = namaInput;
                     } else if (namaValue.length > 50) {
                         isValid = false;
@@ -457,9 +518,16 @@
                         if (!firstErrorField) firstErrorField = nomorTelpInput;
                     }
 
+                    // Validasi email (opsional)
+                    const emailValue = emailInput.value.trim();
+                    if (emailValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+                        isValid = false;
+                        showError(emailInput, emailError, 'Format email tidak valid.');
+                        if (!firstErrorField) firstErrorField = emailInput;
+                    }
+
                     // Jika validasi berhasil, submit form
                     if (isValid) {
-                        // Submit form secara programmatik
                         form.submit();
                     } else {
                         // Focus ke field error pertama

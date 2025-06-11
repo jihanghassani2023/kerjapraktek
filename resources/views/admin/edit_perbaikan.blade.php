@@ -263,6 +263,10 @@
             background-color: #e9ecef;
         }
 
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
         textarea.form-control {
             min-height: 100px;
             resize: vertical;
@@ -369,6 +373,7 @@
             color: #dc3545;
             font-size: 0.9em;
             margin-top: 5px;
+            display: block;
         }
 
         @media (max-width: 768px) {
@@ -475,7 +480,7 @@
                     <h3 class="card-title">Form Edit Perbaikan</h3>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.perbaikan.update', $perbaikan->id) }}" method="POST">
+                    <form action="{{ route('admin.perbaikan.update', $perbaikan->id) }}" method="POST" id="editPerbaikanForm" novalidate>
                         @csrf
                         @method('PUT')
 
@@ -489,33 +494,35 @@
                             <label for="nama_device">Nama Device</label>
                             <input type="text" id="nama_device" name="nama_device"
                                 class="form-control @error('nama_device') is-invalid @enderror"
-                                value="{{ old('nama_device', $perbaikan->nama_device) }}" required>
+                                value="{{ old('nama_device', $perbaikan->nama_device) }}">
                             @error('nama_device')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <div class="invalid-feedback" id="nama-device-error" style="display: none;"></div>
                         </div>
                        <div class="form-group">
-    <label for="kategori_device">Kategori Device</label>
-    <select id="kategori_device" name="kategori_device"
-        class="form-control @error('kategori_device') is-invalid @enderror" required>
-        <option value="">-- Pilih Kategori --</option>
-        <option value="iPhone"
-            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPhone' ? 'selected' : '' }}>
-            iPhone</option>
-        <option value="iWatch"
-            {{ old('kategori_device', $perbaikan->kategori_device) == 'iWatch' ? 'selected' : '' }}>
-            iWatch</option>
-        <option value="Macbook"
-            {{ old('kategori_device', $perbaikan->kategori_device) == 'Macbook' ? 'selected' : '' }}>
-            Macbook</option>
-        <option value="iPad"
-            {{ old('kategori_device', $perbaikan->kategori_device) == 'iPad' ? 'selected' : '' }}>
-            iPad</option>
-    </select>
-    @error('kategori_device')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-</div>
+                            <label for="kategori_device">Kategori Device</label>
+                            <select id="kategori_device" name="kategori_device"
+                                class="form-control @error('kategori_device') is-invalid @enderror">
+                                <option value="">-- Pilih Kategori --</option>
+                                <option value="iPhone"
+                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'iPhone' ? 'selected' : '' }}>
+                                    iPhone</option>
+                                <option value="iWatch"
+                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'iWatch' ? 'selected' : '' }}>
+                                    iWatch</option>
+                                <option value="Macbook"
+                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'Macbook' ? 'selected' : '' }}>
+                                    Macbook</option>
+                                <option value="iPad"
+                                    {{ old('kategori_device', $perbaikan->kategori_device) == 'iPad' ? 'selected' : '' }}>
+                                    iPad</option>
+                            </select>
+                            @error('kategori_device')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="invalid-feedback" id="kategori-device-error" style="display: none;"></div>
+                        </div>
 
                         <div class="form-group">
                             <label for="tanggal_perbaikan">Tanggal Perbaikan</label>
@@ -526,37 +533,38 @@
 
                         <div class="form-group">
                             <label for="masalah">Masalah</label>
-                            <textarea id="masalah" name="masalah" class="form-control @error('masalah') is-invalid @enderror" required>{{ old('masalah', $perbaikan->masalah) }}</textarea>
+                            <textarea id="masalah" name="masalah" class="form-control @error('masalah') is-invalid @enderror">{{ old('masalah', $perbaikan->masalah) }}</textarea>
                             @error('masalah')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <div class="invalid-feedback" id="masalah-error" style="display: none;"></div>
                         </div>
 
                         <div class="form-group">
                             <label for="tindakan_perbaikan">Tindakan Perbaikan</label>
                             <textarea id="tindakan_perbaikan" name="tindakan_perbaikan"
-                                class="form-control @error('tindakan_perbaikan') is-invalid @enderror" required>{{ old('tindakan_perbaikan', $perbaikan->tindakan_perbaikan) }}</textarea>
+                                class="form-control @error('tindakan_perbaikan') is-invalid @enderror">{{ old('tindakan_perbaikan', $perbaikan->tindakan_perbaikan) }}</textarea>
                             @error('tindakan_perbaikan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <div class="invalid-feedback" id="tindakan-perbaikan-error" style="display: none;"></div>
                         </div>
-
-
 
                         <div class="form-group">
                             <label for="harga">Harga (Rp)</label>
                             <input type="number" id="harga" name="harga"
                                 class="form-control @error('harga') is-invalid @enderror"
-                                value="{{ old('harga', $perbaikan->harga) }}" required>
+                                value="{{ old('harga', $perbaikan->harga) }}">
                             @error('harga')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <div class="invalid-feedback" id="harga-error" style="display: none;"></div>
                         </div>
 
                        <div class="form-group">
                             <label for="garansi">Garansi</label>
                             <select id="garansi" name="garansi"
-                                class="form-control @error('garansi') is-invalid @enderror" required>
+                                class="form-control @error('garansi') is-invalid @enderror">
                                 <option value="">-- Pilih Garansi --</option>
                                 <option value="1 Bulan"
                                     {{ old('garansi', $perbaikan->garansi) == '1 Bulan' ? 'selected' : '' }}>
@@ -570,8 +578,8 @@
                             @error('garansi')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <div class="invalid-feedback" id="garansi-error" style="display: none;"></div>
                         </div>
-
 
                         <div class="form-footer">
                             <a href="{{ route('admin.transaksi.show', $perbaikan->id) }}" class="btn btn-secondary">
@@ -589,14 +597,118 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Validation for numeric input
+            const form = document.getElementById('editPerbaikanForm');
+
+            // Error elements
+            const errorElements = {
+                'nama_device': document.getElementById('nama-device-error'),
+                'kategori_device': document.getElementById('kategori-device-error'),
+                'masalah': document.getElementById('masalah-error'),
+                'harga': document.getElementById('harga-error'),
+                'garansi': document.getElementById('garansi-error')
+            };
+
+            // Fungsi untuk menampilkan error
+            function showError(fieldName, message) {
+                const field = document.getElementById(fieldName);
+                const errorDiv = errorElements[fieldName];
+
+                if (field) {
+                    field.classList.add('is-invalid');
+                    field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    field.focus();
+                }
+
+                if (errorDiv) {
+                    errorDiv.textContent = message;
+                    errorDiv.style.display = 'block';
+                }
+            }
+
+            // Fungsi untuk menghilangkan error
+            function hideError(fieldName) {
+                const field = document.getElementById(fieldName);
+                const errorDiv = errorElements[fieldName];
+
+                if (field) {
+                    field.classList.remove('is-invalid');
+                }
+
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            }
+
+            // Add input event listeners to hide errors when typing
+            ['nama_device', 'kategori_device', 'masalah', 'harga', 'garansi'].forEach(fieldName => {
+                const field = document.getElementById(fieldName);
+                if (field) {
+                    field.addEventListener('input', function() {
+                        if (this.value.trim()) {
+                            hideError(fieldName);
+                        }
+                    });
+                }
+            });
+
+            // Numeric validation for harga
             const hargaInput = document.getElementById('harga');
             if (hargaInput) {
                 hargaInput.addEventListener('input', function() {
-                    // Remove non-numeric characters
                     this.value = this.value.replace(/[^0-9]/g, '');
                 });
             }
+
+            // Form submit handler
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Always prevent default
+
+                let isValid = true;
+                let firstErrorField = null;
+
+                // Reset all errors
+                Object.keys(errorElements).forEach(fieldName => {
+                    hideError(fieldName);
+                });
+
+                // Validate required fields
+                const requiredFields = [
+                    { name: 'nama_device', message: 'Nama device wajib diisi.' },
+                    { name: 'kategori_device', message: 'Kategori device wajib dipilih.' },
+                    { name: 'masalah', message: 'Masalah wajib diisi.' },
+                    { name: 'harga', message: 'Harga wajib diisi.' },
+                    { name: 'garansi', message: 'Garansi wajib dipilih.' }
+                ];
+
+                requiredFields.forEach(field => {
+                    const input = document.getElementById(field.name);
+                    if (input && !input.value.trim()) {
+                        isValid = false;
+                        showError(field.name, field.message);
+                        if (!firstErrorField) firstErrorField = input;
+                    }
+                });
+
+                // Validate harga is number and > 0
+                const hargaInput = document.getElementById('harga');
+                if (hargaInput && hargaInput.value.trim()) {
+                    const hargaValue = parseFloat(hargaInput.value);
+                    if (isNaN(hargaValue) || hargaValue <= 0) {
+                        isValid = false;
+                        showError('harga', 'Harga harus berupa angka yang valid dan lebih dari 0.');
+                        if (!firstErrorField) firstErrorField = hargaInput;
+                    }
+                }
+
+                // If validation passes, submit form
+                if (isValid) {
+                    form.submit();
+                } else {
+                    if (firstErrorField) {
+                        firstErrorField.focus();
+                    }
+                }
+            });
         });
     </script>
 </body>
