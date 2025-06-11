@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Karyawan - MG TECH</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Tambah User - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -203,6 +204,8 @@
             color: #333;
         }
 
+
+
         .form-control {
             width: 100%;
             padding: 10px 12px;
@@ -222,15 +225,32 @@
             background-color: #e9ecef;
         }
 
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
         textarea.form-control {
             min-height: 100px;
             resize: vertical;
+        }
+
+        select.form-control {
+            cursor: pointer;
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         .invalid-feedback {
             color: #dc3545;
             font-size: 0.9em;
             margin-top: 5px;
+            display: block;
         }
 
         .alert {
@@ -244,6 +264,12 @@
             background-color: #f8d7da;
             border-color: #dc3545;
             color: #721c24;
+        }
+
+        .password-requirements {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
         }
 
         @media (max-width: 768px) {
@@ -278,7 +304,7 @@
         </a>
         <a href="{{ route('karyawan.index') }}" class="menu-item active">
             <i class="fas fa-users"></i>
-            <span>Data Karyawan</span>
+            <span>Data User</span>
         </a>
         <a href="#" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
@@ -297,7 +323,7 @@
     <div class="main-content">
         <div class="header">
             <div>
-                <h2>Tambah Karyawan</h2>
+                <h2>Tambah User</h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -312,7 +338,7 @@
         </div>
 
         <div class="title-section">
-            <h1 class="page-title">Tambah Karyawan Baru</h1>
+            <h1 class="page-title">Tambah User Baru</h1>
             <a href="{{ route('karyawan.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
@@ -320,7 +346,8 @@
 
         @if ($errors->any())
             <div class="alert alert-danger">
-                <ul style="margin: 0; padding-left: 20px;">
+                <strong>Terdapat kesalahan pada form:</strong>
+                <ul style="margin: 10px 0 0 0; padding-left: 20px;">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -329,39 +356,41 @@
         @endif
 
         <div class="content-section">
-            <form action="{{ route('karyawan.store') }}" method="POST">
+            <form action="{{ route('karyawan.store') }}" method="POST" id="tambahKaryawanForm" novalidate>
                 @csrf
 
                 <div class="form-group">
-                    <label for="display_id">ID Karyawan</label>
+                    <label for="display_id">ID User</label>
                     <input type="text" class="form-control" id="display_id" value="{{ $formattedId ?? '1001' }}"
                         readonly disabled>
                     <!-- Ini hanya untuk tampilan, tidak dikirim ke server -->
                 </div>
 
-
                 <div class="form-group">
-                    <label for="name">Nama Karyawan</label>
+                    <label for="name">Nama User</label>
                     <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
-                        name="name" value="{{ old('name') }}" required>
+                        name="name" value="{{ old('name') }}" autocomplete="off">
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    <div class="invalid-feedback" id="name-error" style="display: none;"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="alamat">Alamat</label>
-                    <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat" required>{{ old('alamat') }}</textarea>
+                    <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat">{{ old('alamat') }}</textarea>
                     @error('alamat')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    <div class="invalid-feedback" id="alamat-error" style="display: none;"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="jabatan">Jabatan</label>
-                    <select class="form-control @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan"
-                        required>
-                        <option value="">Pilih Jabatan</option>
+                    <select class="form-control @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan">
+                        <option value="">-- Pilih Jabatan --</option>
+                        <option value="Kepala Toko" {{ old('jabatan') == 'Kepala Toko' ? 'selected' : '' }}>
+                            Kepala Toko</option>
                         <option value="Kepala Teknisi" {{ old('jabatan') == 'Kepala Teknisi' ? 'selected' : '' }}>
                             Kepala Teknisi</option>
                         <option value="Teknisi" {{ old('jabatan') == 'Teknisi' ? 'selected' : '' }}>Teknisi</option>
@@ -370,27 +399,30 @@
                     @error('jabatan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    <div class="invalid-feedback" id="jabatan-error" style="display: none;"></div>
                 </div>
-
-                <!-- Email dan Password untuk login -->
 
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
-                        name="email" autocomplete="off" required>
-
+                        name="email" value="{{ old('email') }}" autocomplete="new-email" autocorrect="off" autocapitalize="off" spellcheck="false">
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    <div class="invalid-feedback" id="email-error" style="display: none;"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" class="form-control @error('password') is-invalid @enderror" id="password"
-                        name="password" autocomplete="off" required>
+                        name="password" autocomplete="new-password">
+                    <div class="password-requirements">
+                        Password minimal 6 karakter
+                    </div>
                     @error('password')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    <div class="invalid-feedback" id="password-error" style="display: none;"></div>
                 </div>
 
                 <div style="text-align: right;">
@@ -401,6 +433,161 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('tambahKaryawanForm');
+
+            // Error elements
+            const errorElements = {
+                'name': document.getElementById('name-error'),
+                'alamat': document.getElementById('alamat-error'),
+                'jabatan': document.getElementById('jabatan-error'),
+                'email': document.getElementById('email-error'),
+                'password': document.getElementById('password-error')
+            };
+
+            // Prevent autofill on form load
+            setTimeout(function() {
+                const emailInput = document.getElementById('email');
+                const passwordInput = document.getElementById('password');
+
+                if (emailInput && emailInput.value && !{{ old('email') ? 'true' : 'false' }}) {
+                    emailInput.value = '';
+                }
+                if (passwordInput && passwordInput.value) {
+                    passwordInput.value = '';
+                }
+            }, 100);
+
+            // Fungsi untuk menampilkan error
+            function showError(fieldName, message) {
+                const field = document.getElementById(fieldName);
+                const errorDiv = errorElements[fieldName];
+
+                if (field) {
+                    field.classList.add('is-invalid');
+                    field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    field.focus();
+                }
+
+                if (errorDiv) {
+                    errorDiv.textContent = message;
+                    errorDiv.style.display = 'block';
+                }
+            }
+
+            // Fungsi untuk menghilangkan error
+            function hideError(fieldName) {
+                const field = document.getElementById(fieldName);
+                const errorDiv = errorElements[fieldName];
+
+                if (field) {
+                    field.classList.remove('is-invalid');
+                }
+
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            }
+
+            // Add input event listeners to hide errors when typing/selecting
+            ['name', 'alamat', 'jabatan', 'email', 'password'].forEach(fieldName => {
+                const field = document.getElementById(fieldName);
+                if (field) {
+                    field.addEventListener('input', function() {
+                        if (this.value.trim()) {
+                            hideError(fieldName);
+                        }
+                    });
+
+                    // For select elements, also listen to change event
+                    if (field.tagName === 'SELECT') {
+                        field.addEventListener('change', function() {
+                            if (this.value.trim()) {
+                                hideError(fieldName);
+                            }
+                        });
+                    }
+                }
+            });
+
+            // Email validation helper
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            // Form submit handler
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Always prevent default
+
+                let isValid = true;
+                let firstErrorField = null;
+
+                // Reset all errors
+                Object.keys(errorElements).forEach(fieldName => {
+                    hideError(fieldName);
+                });
+
+                // Validate required fields
+                const requiredFields = [
+                    { name: 'name', message: 'Nama user wajib diisi.' },
+                    { name: 'alamat', message: 'Alamat wajib diisi.' },
+                    { name: 'jabatan', message: 'Jabatan wajib dipilih.' },
+                    { name: 'email', message: 'Email wajib diisi.' },
+                    { name: 'password', message: 'Password wajib diisi.' }
+                ];
+
+                requiredFields.forEach(field => {
+                    const input = document.getElementById(field.name);
+                    if (input && !input.value.trim()) {
+                        isValid = false;
+                        showError(field.name, field.message);
+                        if (!firstErrorField) firstErrorField = input;
+                    }
+                });
+
+                // Validate email format
+                const emailInput = document.getElementById('email');
+                if (emailInput && emailInput.value.trim()) {
+                    if (!isValidEmail(emailInput.value.trim())) {
+                        isValid = false;
+                        showError('email', 'Format email tidak valid.');
+                        if (!firstErrorField) firstErrorField = emailInput;
+                    }
+                }
+
+                // Validate password length
+                const passwordInput = document.getElementById('password');
+                if (passwordInput && passwordInput.value.trim()) {
+                    if (passwordInput.value.length < 6) {
+                        isValid = false;
+                        showError('password', 'Password minimal 6 karakter.');
+                        if (!firstErrorField) firstErrorField = passwordInput;
+                    }
+                }
+
+                // If validation passes, submit form
+                if (isValid) {
+                    form.submit();
+                } else {
+                    if (firstErrorField) {
+                        firstErrorField.focus();
+                    }
+                }
+            });
+
+            // Prevent browser autofill
+            document.getElementById('email').addEventListener('focus', function() {
+                this.setAttribute('autocomplete', 'new-email');
+            });
+
+            document.getElementById('password').addEventListener('focus', function() {
+                this.setAttribute('autocomplete', 'new-password');
+            });
+        });
+    </script>
 </body>
 
 </html>

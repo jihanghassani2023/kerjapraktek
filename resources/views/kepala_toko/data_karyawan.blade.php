@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Karyawan - MG TECH</title>
+    <title>Data User - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Keep the same styles */
@@ -201,33 +201,32 @@
             cursor: pointer;
         }
         .action-buttons {
-    display: flex;
-    gap: 5px;
-    justify-content: center; /* Changed from flex-end to center */
-}
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
 
-/* Add these new styles */
-table th:last-child,
-table td:last-child {
-    text-align: center;
-}
+        table th:last-child,
+        table td:last-child {
+            text-align: center;
+        }
 
-.action-btn {
-    padding: 6px 10px;
-    border-radius: 4px;
-    background-color: #e9ecef;
-    color: #495057;
-    text-decoration: none;
-    font-size: 0.9em;
-    transition: background-color 0.2s;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-}
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            color: #495057;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
         .action-btn:hover {
             background-color: #dee2e6;
         }
@@ -249,6 +248,109 @@ table td:last-child {
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        /* Custom Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 10px;
+            padding: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .modal-header {
+            background-color: #dc3545;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+
+        .modal-header h4 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .modal-body p {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .user-name-highlight {
+            font-weight: bold;
+            color: #8c3a3a;
+        }
+
+        .modal-buttons {
+            padding: 0 20px 20px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 8px 20px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        .modal-btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #5a6268;
+        }
+
+        .modal-btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .modal-btn-delete:hover {
+            background-color: #c82333;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -261,6 +363,10 @@ table td:last-child {
             }
             .main-content {
                 margin-left: 70px;
+            }
+            .modal-container {
+                width: 95%;
+                margin: 20px;
             }
         }
     </style>
@@ -276,7 +382,7 @@ table td:last-child {
         </a>
         <a href="{{ route('karyawan.index') }}" class="menu-item active">
             <i class="fas fa-users"></i>
-            <span>Data Karyawan</span>
+            <span>Data User</span>
         </a>
         <a href="{{ route('transaksi.index') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
@@ -294,7 +400,7 @@ table td:last-child {
     <div class="main-content">
         <div class="header">
             <div>
-                <h2>Data Karyawan</h2>
+                <h2>Data User</h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -310,7 +416,7 @@ table td:last-child {
         <div class="title-section">
             <h1 class="page-title"></h1>
             <a href="{{ route('karyawan.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Tambah Karyawan
+                <i class="fas fa-plus"></i> Tambah User
             </a>
         </div>
 
@@ -323,45 +429,112 @@ table td:last-child {
         <div class="content-section">
             <div class="table-responsive">
                 <table>
-             <!-- Update the table header and cell for AKSI -->
-<thead>
-    <tr>
-        <th>ID</th>
-        <th>NAMA KARYAWAN</th>
-        <th>ALAMAT</th>
-        <th>JABATAN</th>
-        <th style="text-align: center;">AKSI</th> <!-- Added text-align: center -->
-    </tr>
-</thead>
-<tbody>
-    @forelse($karyawan as $index => $k)
-          <tr onclick="window.location='{{ route('karyawan.show', $k->id) }}';" style="cursor: pointer;">
-            <td>{{ $k->id }}</td>
-            <td>{{ $k->name }}</td>
-            <td>{{ $k->alamat }}</td>
-            <td>{{ $k->jabatan }}</td>
-            <td class="action-buttons" onclick="event.stopPropagation();" style="text-align: center;"> <!-- Added text-align: center -->
-                <a href="{{ route('karyawan.edit', $k->id) }}" class="action-btn" title="Edit">
-                    <i class="fas fa-edit"></i>
-                </a>
-                <form action="{{ route('karyawan.destroy', $k->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="action-btn" title="Hapus" onclick="return confirm('Apakah Anda yakin ingin menghapus karyawan ini?')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </form>
-            </td>
-        </tr>
-    @empty
-        <tr>
-            <td colspan="6" style="text-align: center;">Tidak ada data karyawan</td>
-        </tr>
-    @endforelse
-</tbody>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>NAMA USER</th>
+                            <th>ALAMAT</th>
+                            <th>JABATAN</th>
+                            <th style="text-align: center;">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($karyawan as $index => $k)
+                            <tr onclick="window.location='{{ route('karyawan.show', $k->id) }}';" style="cursor: pointer;">
+                                <td>{{ $k->id }}</td>
+                                <td>{{ $k->name }}</td>
+                                <td>{{ $k->alamat }}</td>
+                                <td>{{ $k->jabatan }}</td>
+                                <td class="action-buttons" onclick="event.stopPropagation();" style="text-align: center;">
+                                    <a href="{{ route('karyawan.edit', $k->id) }}" class="action-btn" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="action-btn" title="Hapus" onclick="showDeleteModal('{{ $k->id }}', '{{ $k->name }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" style="text-align: center;">Tidak ada data user</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <!-- Custom Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h4>Konfirmasi Hapus</h4>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus user</p>
+                <p class="user-name-highlight" id="userNameDisplay"></p>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="hideDeleteModal()">
+                    Batal
+                </button>
+                <button type="button" class="modal-btn modal-btn-delete" onclick="confirmDelete()">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden form for deletion -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <script>
+        let currentUserId = null;
+        let currentUserName = null;
+
+        function showDeleteModal(userId, userName) {
+            currentUserId = userId;
+            currentUserName = userName;
+
+            document.getElementById('userNameDisplay').textContent = userName;
+            document.getElementById('deleteModal').style.display = 'block';
+
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentUserId = null;
+            currentUserName = null;
+        }
+
+        function confirmDelete() {
+            if (currentUserId) {
+                const form = document.getElementById('deleteForm');
+                form.action = `/karyawan/${currentUserId}`;
+                form.submit();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideDeleteModal();
+            }
+        });
+    </script>
 </body>
 </html>

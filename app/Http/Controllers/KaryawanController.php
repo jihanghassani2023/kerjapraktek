@@ -14,7 +14,7 @@ class KaryawanController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $karyawan = User::whereIn('role', ['admin', 'teknisi', 'kepala teknisi'])->get();
+        $karyawan = User::whereIn('role', ['admin', 'teknisi', 'kepala teknisi', 'kepala_toko'])->get();
         return view('kepala_toko.data_karyawan', compact('karyawan', 'user'));
     }
 
@@ -27,13 +27,13 @@ class KaryawanController extends Controller
         $formattedId = $nextId;
         return view('kepala_toko.tambah_karyawan', compact('user', 'formattedId'));
     }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-
             'name' => 'required|string|max:50',
             'alamat' => 'required|string',
-            'jabatan' => 'required|string|max:50|in:Kepala Teknisi,Teknisi,Admin',
+            'jabatan' => 'required|string|max:50|in:Kepala Toko,Kepala Teknisi,Teknisi,Admin',
             'email' => 'required|email|max:100|unique:users,email',
             'password' => 'required|min:6|max:100'
         ]);
@@ -44,9 +44,12 @@ class KaryawanController extends Controller
                 ->withInput();
         }
 
+        // Determine user role based on jabatan
         $userRole = 'user';
         if ($request->jabatan == 'Admin') {
             $userRole = 'admin';
+        } elseif ($request->jabatan == 'Kepala Toko') {
+            $userRole = 'kepala_toko';
         } elseif ($request->jabatan == 'Teknisi' || $request->jabatan == 'Kepala Teknisi') {
             $userRole = 'teknisi';
         }
@@ -93,7 +96,7 @@ class KaryawanController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'alamat' => 'required|string',
-            'jabatan' => 'required|string|in:Kepala Teknisi,Teknisi,Admin',
+            'jabatan' => 'required|string|in:Kepala Toko,Kepala Teknisi,Teknisi,Admin',
         ]);
 
         if ($validator->fails()) {
@@ -102,9 +105,12 @@ class KaryawanController extends Controller
                 ->withInput();
         }
 
+        // Determine user role based on jabatan
         $userRole = 'user';
         if ($request->jabatan == 'Admin') {
             $userRole = 'admin';
+        } elseif ($request->jabatan == 'Kepala Toko') {
+            $userRole = 'kepala_toko';
         } elseif ($request->jabatan == 'Teknisi' || $request->jabatan == 'Kepala Teknisi') {
             $userRole = 'teknisi';
         }

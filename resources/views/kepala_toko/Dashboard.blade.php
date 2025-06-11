@@ -301,7 +301,7 @@
         </a>
         <a href="{{ route('karyawan.index') }}" class="menu-item">
             <i class="fas fa-users"></i>
-            <span>Data Karyawan</span>
+            <span>Data User</span>
         </a>
         <a href="{{ route('transaksi.index') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>

@@ -179,6 +179,11 @@
         .action-buttons {
             display: flex;
             gap: 5px;
+            justify-content: center;
+        }
+        table th:last-child,
+        table td:last-child {
+            text-align: center;
         }
         .action-btn {
             padding: 6px 10px;
@@ -190,6 +195,11 @@
             transition: background-color 0.2s;
             border: none;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
         }
         .action-btn:hover {
             background-color: #dee2e6;
@@ -212,6 +222,109 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        /* Custom Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 10px;
+            padding: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .modal-header {
+            background-color: #dc3545;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+
+        .modal-header h4 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .modal-body p {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .pelanggan-name-highlight {
+            font-weight: bold;
+            color: #8c3a3a;
+        }
+
+        .modal-buttons {
+            padding: 0 20px 20px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 8px 20px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        .modal-btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #5a6268;
+        }
+
+        .modal-btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .modal-btn-delete:hover {
+            background-color: #c82333;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -225,6 +338,10 @@
             .main-content {
                 margin-left: 70px;
             }
+            .modal-container {
+                width: 95%;
+                margin: 20px;
+            }
         }
     </style>
 </head>
@@ -232,7 +349,6 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
-
         </div>
         <a href="{{ route('admin.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -303,7 +419,7 @@
                             <th>NAMA PELANGGAN</th>
                             <th>NOMOR TELEPON</th>
                             <th>EMAIL</th>
-                            <th>AKSI</th>
+                            <th style="text-align: center;">AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -318,13 +434,9 @@
                                         <a href="{{ route('admin.pelanggan.edit', $p->id) }}" class="action-btn" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('admin.pelanggan.destroy', $p->id) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="action-btn" title="Hapus" onclick="return confirm('Apakah Anda yakin ingin menghapus pelanggan ini?')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="action-btn" title="Hapus" onclick="showDeleteModal('{{ $p->id }}', '{{ $p->nama_pelanggan }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -338,5 +450,77 @@
             </div>
         </div>
     </div>
+
+    <!-- Custom Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h4>Konfirmasi Hapus</h4>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus pelanggan:</p>
+                <p class="pelanggan-name-highlight" id="pelangganNameDisplay"></p>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="hideDeleteModal()">
+                    Batal
+                </button>
+                <button type="button" class="modal-btn modal-btn-delete" onclick="confirmDelete()">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden form for deletion -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <script>
+        let currentPelangganId = null;
+        let currentPelangganName = null;
+
+        function showDeleteModal(pelangganId, pelangganName) {
+            currentPelangganId = pelangganId;
+            currentPelangganName = pelangganName;
+
+            document.getElementById('pelangganNameDisplay').textContent = pelangganName;
+            document.getElementById('deleteModal').style.display = 'block';
+
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentPelangganId = null;
+            currentPelangganName = null;
+        }
+
+        function confirmDelete() {
+            if (currentPelangganId) {
+                const form = document.getElementById('deleteForm');
+                form.action = `/admin/pelanggan/${currentPelangganId}`;
+                form.submit();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideDeleteModal();
+            }
+        });
+    </script>
 </body>
 </html>
