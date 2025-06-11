@@ -273,7 +273,7 @@
             margin: 20px 0;
             display: flex;
             max-width: 1600px;
-            position: relative; /* For suggestions dropdown */
+            position: relative;
         }
         .search-input {
             flex: 1;
@@ -365,6 +365,86 @@
             background-color: #e7f9e7;
             color: #28a745;
         }
+        /* Enhanced styles for improved transaction section */
+        .transaction-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+            color: #333;
+            font-size: 14px;
+            min-width: 130px;
+            cursor: pointer;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .filter-select:focus {
+            outline: none;
+            border-color: #8c3a3a;
+            box-shadow: 0 0 0 2px rgba(140, 58, 58, 0.1);
+        }
+        .filter-select:hover {
+            border-color: #999;
+        }
+        .table-wrapper {
+            position: relative;
+            overflow-x: auto;
+        }
+        .transaction-row {
+            transition: none;
+        }
+        .transaction-row:hover {
+            background-color: #f8f9fa;
+        }
+        .status-menunggu {
+            color: #dc3545;
+        }
+        .status-proses {
+            color: #fd7e14;
+        }
+        .status-selesai {
+            color: #28a745;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        .no-results p {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .no-results small {
+            color: #999;
+        }
+        table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+        }
+        table td {
+            border-bottom: 1px solid #f1f3f4;
+        }
+        table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .transaction-row.filtered-out {
+            display: none;
+        }
+        .transaction-row.filtered-in {
+            display: table-row;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -387,6 +467,20 @@
             .search-container {
                 max-width: 100%;
             }
+            .transaction-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-select {
+                min-width: auto;
+                margin-bottom: 5px;
+            }
+            .table-wrapper {
+                overflow-x: scroll;
+            }
+            table {
+                min-width: 700px;
+            }
         }
     </style>
 </head>
@@ -394,7 +488,6 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
-
         </div>
         <a href="{{ route('admin.dashboard') }}" class="menu-item active">
             <i class="fas fa-home"></i>
@@ -438,13 +531,11 @@
         <!-- Search box with autocomplete suggestions -->
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input" placeholder="Cari berdasarkan kode, nama pelanggan, atau barang...">
-            <button type="button" class="search-button">
+            <button type="button" id="searchButton" class="search-button">
                 <i class="fas fa-search"></i>
             </button>
             <div id="searchSuggestions" class="search-suggestions"></div>
         </div>
-
-
 
         <div style="margin-top: 30px;"></div>
 
@@ -480,345 +571,237 @@
             </div>
         </div>
 
-       <!-- Improved Transaksi Terbaru Section - Replace existing content-section -->
-<div class="content-section">
-    <div class="section-header">
-        <h3 class="section-title">Transaksi Terbaru</h3>
-        <div class="transaction-controls">
-            <select id="statusFilter" class="filter-select">
-                <option value="all">Semua Status</option>
-                <option value="Menunggu">Menunggu</option>
-                <option value="Proses">Proses</option>
-                <option value="Selesai">Selesai</option>
-            </select>
-            <select id="periodFilter" class="filter-select">
-                <option value="today">Hari Ini</option>
-                <option value="week">7 Hari Terakhir</option>
-                <option value="month">Bulan Ini</option>
-                <option value="all">Semua</option>
-            </select>
-            <a href="{{ route('admin.transaksi') }}" class="section-action">Lihat Semua</a>
+        <div class="content-section">
+            <div class="section-header">
+                <h3 class="section-title">Transaksi Terbaru</h3>
+                <div class="transaction-controls">
+                    <select id="statusFilter" class="filter-select">
+                        <option value="all">Semua Status</option>
+                        <option value="Menunggu">Menunggu</option>
+                        <option value="Proses">Proses</option>
+                        <option value="Selesai">Selesai</option>
+                    </select>
+                    <select id="periodFilter" class="filter-select">
+                        <option value="today">Hari Ini</option>
+                        <option value="week">7 Hari Terakhir</option>
+                        <option value="month">Bulan Ini</option>
+                        <option value="all">Semua</option>
+                    </select>
+                    <a href="{{ route('admin.transaksi') }}" class="section-action">Lihat Semua</a>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Tanggal</th>
+                            <th>Pelanggan</th>
+                            <th>Barang</th>
+                            <th>Teknisi</th>
+                            <th>Status</th>
+                            <th>Harga</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+                        @php
+                            $latestTransaksi = $latestTransaksi ?? \App\Models\Perbaikan::with(['user', 'pelanggan'])->orderBy('created_at', 'desc')->take(10)->get();
+                        @endphp
+
+                        @forelse($latestTransaksi as $t)
+                        <tr onclick="window.location='{{ route('admin.transaksi.show', $t->id) }}';"
+                            style="cursor: pointer;"
+                            class="transaction-row"
+                            data-status="{{ $t->status }}"
+                            data-date="{{ $t->tanggal_perbaikan }}">
+                            <td>{{ $t->id }}</td>
+                            <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}</td>
+                            <td>{{ $t->pelanggan->nama_pelanggan ?? '-' }}</td>
+                            <td>{{ $t->nama_device }}</td>
+                            <td>{{ $t->user->name ?? '-' }}</td>
+                            <td>
+                                <span class="status-{{ strtolower($t->status) }}">
+                                    {{ $t->status }}
+                                </span>
+                            </td>
+                            <td>Rp. {{ number_format($t->harga, 0, ',', '.') }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px;">
+                                <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 15px; display: block;"></i>
+                                Tidak ada data transaksi
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+
+                <div id="noResultsMessage" class="no-results" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <p>Tidak ada transaksi yang sesuai dengan filter</p>
+                    <small>Coba ubah filter untuk melihat data lainnya</small>
+                </div>
+            </div>
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const searchSuggestions = document.getElementById('searchSuggestions');
+            const statusFilter = document.getElementById('statusFilter');
+            const periodFilter = document.getElementById('periodFilter');
+            const tableBody = document.getElementById('transactionTableBody');
+            const noResultsMessage = document.getElementById('noResultsMessage');
 
+            // Store original rows for filtering
+            const allRows = Array.from(tableBody.querySelectorAll('.transaction-row'));
+            let searchTimeout;
 
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>Kode</th>
-                    <th>Tanggal</th>
-                    <th>Pelanggan</th>
-                    <th>Barang</th>
-                    <th>Teknisi</th>
-                    <th>Status</th>
-                    <th>Harga</th>
-                </tr>
-            </thead>
-            <tbody id="transactionTableBody">
-                @php
-                    $latestTransaksi = $latestTransaksi ?? \App\Models\Perbaikan::with(['user', 'pelanggan'])->orderBy('created_at', 'desc')->get();
-                @endphp
-
-                @forelse($latestTransaksi as $t)
-                <tr onclick="window.location='{{ route('admin.transaksi.show', $t->id) }}';"
-                    style="cursor: pointer;"
-                    class="transaction-row"
-                    data-status="{{ $t->status }}"
-                    data-date="{{ $t->tanggal_perbaikan }}">
-                    <td>{{ $t->id }}</td>
-                    <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}</td>
-                    <td>{{ $t->pelanggan->nama_pelanggan ?? '-' }}</td>
-                    <td>{{ $t->nama_device }}</td>
-                    <td>{{ $t->user->name ?? '-' }}</td>
-                    <td>
-                        <span class="status-{{ strtolower($t->status) }}">
-                            {{ $t->status }}
-                        </span>
-                    </td>
-                    <td>Rp. {{ number_format($t->harga, 0, ',', '.') }}</td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px;">
-                        <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 15px; display: block;"></i>
-                        Tidak ada data transaksi
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-
-        <div id="noResultsMessage" class="no-results" style="display: none;">
-            <i class="fas fa-search"></i>
-            <p>Tidak ada transaksi yang sesuai dengan filter</p>
-            <small>Coba ubah filter untuk melihat data lainnya</small>
-        </div>
-    </div>
-</div>
-
-<style>
-/* Enhanced styles for improved transaction section */
-.transaction-controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.filter-select {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: white;
-    color: #333;
-    font-size: 14px;
-    min-width: 130px;
-    cursor: pointer;
-    transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #8c3a3a;
-    box-shadow: 0 0 0 2px rgba(140, 58, 58, 0.1);
-}
-
-.filter-select:hover {
-    border-color: #999;
-}
-
-/* Summary Stats */
-.summary-stats {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-    padding: 15px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 8px;
-    border-left: 4px solid #8c3a3a;
-    flex-wrap: wrap;
-}
-
-.summary-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 80px;
-    padding: 5px;
-}
-
-.summary-label {
-    font-size: 0.85em;
-    color: #666;
-    margin-bottom: 4px;
-    font-weight: 500;
-}
-
-.summary-value {
-    font-size: 1.4em;
-    font-weight: bold;
-    color: #333;
-}
-
-.menunggu-summary .summary-value {
-    color: #dc3545;
-}
-
-.proses-summary .summary-value {
-    color: #fd7e14;
-}
-
-.selesai-summary .summary-value {
-    color: #28a745;
-}
-
-/* Enhanced Table */
-.table-wrapper {
-    position: relative;
-    overflow-x: auto;
-}
-
-.transaction-row {
-    transition: none;
-}
-
-.transaction-row:hover {
-    background-color: #f8f9fa;
-}
-
-/* Simple Status Colors */
-.status-menunggu {
-    color: #dc3545;
-}
-
-.status-proses {
-    color: #fd7e14;
-}
-
-.status-selesai {
-    color: #28a745;
-}
-
-/* No Results Message */
-.no-results {
-    text-align: center;
-    padding: 40px 20px;
-    color: #666;
-}
-
-.no-results i {
-    font-size: 48px;
-    margin-bottom: 15px;
-    opacity: 0.5;
-}
-
-.no-results p {
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-.no-results small {
-    color: #999;
-}
-
-/* Table improvements */
-table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #495057;
-    border-bottom: 2px solid #dee2e6;
-}
-
-table td {
-    border-bottom: 1px solid #f1f3f4;
-}
-
-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .transaction-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .filter-select {
-        min-width: auto;
-        margin-bottom: 5px;
-    }
-
-    .summary-stats {
-        justify-content: space-around;
-        gap: 10px;
-    }
-
-    .summary-item {
-        min-width: 70px;
-    }
-
-    .table-wrapper {
-        overflow-x: scroll;
-    }
-
-    table {
-        min-width: 700px;
-    }
-}
-
-/* Loading animation for smooth transitions */
-.transaction-row.filtered-out {
-    display: none;
-}
-
-.transaction-row.filtered-in {
-    display: table-row;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const statusFilter = document.getElementById('statusFilter');
-    const periodFilter = document.getElementById('periodFilter');
-    const tableBody = document.getElementById('transactionTableBody');
-    const noResultsMessage = document.getElementById('noResultsMessage');
-
-    // Store original rows for filtering
-    const allRows = Array.from(tableBody.querySelectorAll('.transaction-row'));
-
-    // Event listeners for filters
-    statusFilter.addEventListener('change', applyFilters);
-    periodFilter.addEventListener('change', applyFilters);
-
-    function applyFilters() {
-        const selectedStatus = statusFilter.value;
-        const selectedPeriod = periodFilter.value;
-
-        let visibleRows = allRows.filter(row => {
-            const rowStatus = row.dataset.status;
-            const rowDate = new Date(row.dataset.date);
-            const today = new Date();
-
-            // Status filter
-            const statusMatch = selectedStatus === 'all' || rowStatus === selectedStatus;
-
-            // Period filter
-            let periodMatch = true;
-            if (selectedPeriod === 'today') {
-                periodMatch = rowDate.toDateString() === today.toDateString();
-            } else if (selectedPeriod === 'week') {
-                const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-                periodMatch = rowDate >= weekAgo;
-            } else if (selectedPeriod === 'month') {
-                periodMatch = rowDate.getMonth() === today.getMonth() &&
-                            rowDate.getFullYear() === today.getFullYear();
+            // Search functionality
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm.length >= 1) {
+                    // Redirect to search page with query parameter
+                    window.location.href = `{{ route('admin.search') }}?search=${encodeURIComponent(searchTerm)}`;
+                }
             }
 
-            return statusMatch && periodMatch;
-        });
+            // Search button click
+            searchButton.addEventListener('click', performSearch);
 
-        // Show/hide rows instantly
-        allRows.forEach(row => {
-            if (visibleRows.includes(row)) {
-                row.style.display = '';
-                row.classList.remove('filtered-out');
-                row.classList.add('filtered-in');
-            } else {
-                row.classList.remove('filtered-in');
-                row.classList.add('filtered-out');
-                row.style.display = 'none';
+            // Search on Enter key
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+
+            // Search suggestions (autocomplete)
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length >= 2) {
+                    searchTimeout = setTimeout(() => {
+                        fetchSearchSuggestions(query);
+                    }, 300);
+                } else {
+                    searchSuggestions.style.display = 'none';
+                }
+            });
+
+            // Fetch search suggestions
+            function fetchSearchSuggestions(query) {
+                fetch(`{{ route('search.suggestions') }}?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySearchSuggestions(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching suggestions:', error);
+                        searchSuggestions.style.display = 'none';
+                    });
+            }
+
+            // Display search suggestions
+            function displaySearchSuggestions(suggestions) {
+                if (suggestions.length === 0) {
+                    searchSuggestions.style.display = 'none';
+                    return;
+                }
+
+                const suggestionsList = suggestions.map(item => `
+                    <div class="search-suggestion-item" onclick="selectSuggestion('${item.url}')">
+                        <div class="suggestion-title">${item.kode_perbaikan} - ${item.nama_device}</div>
+                        <div class="suggestion-details">
+                            <span class="suggestion-detail">
+                                <i class="fas fa-user"></i>
+                                ${item.nama_pelanggan}
+                            </span>
+                            <span class="suggestion-detail">
+                                <i class="fas fa-calendar"></i>
+                                ${item.tanggal}
+                            </span>
+                            <span class="suggestion-status suggestion-status-${item.status.toLowerCase()}">
+                                ${item.status}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+
+                searchSuggestions.innerHTML = suggestionsList;
+                searchSuggestions.style.display = 'block';
+            }
+
+            // Select suggestion
+            window.selectSuggestion = function(url) {
+                window.location.href = url;
+            };
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
+                    searchSuggestions.style.display = 'none';
+                }
+            });
+
+            // Filter functionality for transaction table
+            statusFilter.addEventListener('change', applyFilters);
+            periodFilter.addEventListener('change', applyFilters);
+
+            function applyFilters() {
+                const selectedStatus = statusFilter.value;
+                const selectedPeriod = periodFilter.value;
+
+                let visibleRows = allRows.filter(row => {
+                    const rowStatus = row.dataset.status;
+                    const rowDate = new Date(row.dataset.date);
+                    const today = new Date();
+
+                    // Status filter
+                    const statusMatch = selectedStatus === 'all' || rowStatus === selectedStatus;
+
+                    // Period filter
+                    let periodMatch = true;
+                    if (selectedPeriod === 'today') {
+                        periodMatch = rowDate.toDateString() === today.toDateString();
+                    } else if (selectedPeriod === 'week') {
+                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        periodMatch = rowDate >= weekAgo;
+                    } else if (selectedPeriod === 'month') {
+                        periodMatch = rowDate.getMonth() === today.getMonth() &&
+                                    rowDate.getFullYear() === today.getFullYear();
+                    }
+
+                    return statusMatch && periodMatch;
+                });
+
+                // Show/hide rows
+                allRows.forEach(row => {
+                    if (visibleRows.includes(row)) {
+                        row.style.display = '';
+                        row.classList.remove('filtered-out');
+                        row.classList.add('filtered-in');
+                    } else {
+                        row.classList.remove('filtered-in');
+                        row.classList.add('filtered-out');
+                        row.style.display = 'none';
+                    }
+                });
+
+                // Show/hide no results message
+                if (visibleRows.length === 0) {
+                    noResultsMessage.style.display = 'block';
+                } else {
+                    noResultsMessage.style.display = 'none';
+                }
             }
         });
-
-        // Update summary stats
-        // updateSummaryStats(visibleRows);
-
-        // Show/hide no results message
-        if (visibleRows.length === 0) {
-            noResultsMessage.style.display = 'block';
-        } else {
-            noResultsMessage.style.display = 'none';
-        }
-    }
-
-    // function updateSummaryStats(visibleRows) {
-    //     const stats = {
-    //         total: visibleRows.length,
-    //         menunggu: visibleRows.filter(row => row.dataset.status === 'Menunggu').length,
-    //         proses: visibleRows.filter(row => row.dataset.status === 'Proses').length,
-    //         selesai: visibleRows.filter(row => row.dataset.status === 'Selesai').length
-    //     };
-
-    //     document.getElementById('displayedCount').textContent = stats.total;
-    //     document.getElementById('menungguCount').textContent = stats.menunggu;
-    //     document.getElementById('prosesCount').textContent = stats.proses;
-    //     document.getElementById('selesaiCount').textContent = stats.selesai;
-    // }
-
-    // Initialize with current data
-    // updateSummaryStats(allRows);
-});
-</script>
+    </script>
+</body>
+</html>

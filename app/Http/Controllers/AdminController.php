@@ -63,7 +63,7 @@ class AdminController extends Controller
         $query = Perbaikan::with(['user', 'pelanggan']);
 
         $query->where(function ($q) use ($search) {
-            $q->where('kode_perbaikan', 'like', "%{$search}%")
+            $q->where('id', 'like', "%{$search}%")
                 ->orWhere('nama_device', 'like', "%{$search}%")
                 ->orWhereHas('pelanggan', function ($subq) use ($search) {
                     $subq->where('nama_pelanggan', 'like', "%{$search}%")
