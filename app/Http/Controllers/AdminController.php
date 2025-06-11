@@ -16,7 +16,6 @@ class AdminController extends Controller
     {
         $user = Auth::user();
 
-
         $totalTeknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->count();
         $totalTransaksiHariIni = Perbaikan::whereDate('tanggal_perbaikan', date('Y-m-d'))->sum('harga');
         $totalTransaksiBulanIni = Perbaikan::whereMonth('tanggal_perbaikan', date('m'))->whereYear('tanggal_perbaikan', date('Y'))->sum('harga');
@@ -29,7 +28,7 @@ class AdminController extends Controller
         // Mendapatkan transaksi terbaru
         $latestTransaksi = Perbaikan::with(['user', 'pelanggan'])
             ->orderBy('created_at', 'desc')
-            ->take(5)
+            ->take(30)
             ->get()
             ->map(function ($item) {
                 $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
@@ -80,15 +79,22 @@ class AdminController extends Controller
     {
         $user = Auth::user();
 
-        $month = $request->input('month', date('m'));
-        $year = $request->input('year', date('Y'));
+        // Ambil parameter filter dari request (biarkan kosong jika tidak ada)
+        $month = $request->input('month');
+        $year = $request->input('year');
 
+        // Query transaksi dengan filter kondisional
         $query = Perbaikan::query();
 
         if ($month && $year) {
             $query->whereMonth('tanggal_perbaikan', $month)
-                ->whereYear('tanggal_perbaikan', $year);
+                  ->whereYear('tanggal_perbaikan', $year);
+        } elseif ($month) {
+            $query->whereMonth('tanggal_perbaikan', $month);
+        } elseif ($year) {
+            $query->whereYear('tanggal_perbaikan', $year);
         }
+        // Jika keduanya kosong, tampilkan semua data
 
         $transaksi = $query->with(['user', 'pelanggan'])
             ->orderBy('tanggal_perbaikan', 'desc')
@@ -108,37 +114,58 @@ class AdminController extends Controller
             ->whereYear('tanggal_perbaikan', date('Y'))
             ->sum('harga');
 
-        // Get technicians with their repair count
-        $teknisi = User::where('role', 'teknisi')->get();
+        // DIPERBAIKI: Get technicians AND kepala teknisi with their repair count
+        $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
         $teknisiStats = [];
 
         foreach ($teknisi as $t) {
-            // Get count of completed repairs
-            $repairCount = Perbaikan::where('user_id', $t->id)
-                ->where('status', 'Selesai')
-                ->whereMonth('tanggal_perbaikan', $month)
-                ->whereYear('tanggal_perbaikan', $year)
-                ->count();
+            // Base query untuk setiap teknisi/kepala teknisi
+            $querySelesai = Perbaikan::where('user_id', $t->id)->where('status', 'Selesai');
+            $queryPending = Perbaikan::where('user_id', $t->id)->whereIn('status', ['Menunggu', 'Proses']);
+            $queryIncome = Perbaikan::where('user_id', $t->id);
 
-            // Get count of pending/in-process repairs
-            $pendingCount = Perbaikan::where('user_id', $t->id)
-                ->whereIn('status', ['Menunggu', 'Proses'])
-                ->whereMonth('tanggal_perbaikan', $month)
-                ->whereYear('tanggal_perbaikan', $year)
-                ->count();
+            // Terapkan filter HANYA jika ada nilai (bukan kosong atau null)
+            if ($month) {
+                $querySelesai->whereMonth('tanggal_perbaikan', $month);
+                $queryPending->whereMonth('tanggal_perbaikan', $month);
+                $queryIncome->whereMonth('tanggal_perbaikan', $month);
+            }
 
-            // Calculate income from all repairs
-            $income = Perbaikan::where('user_id', $t->id)
-                ->whereMonth('tanggal_perbaikan', $month)
-                ->whereYear('tanggal_perbaikan', $year)
-                ->sum('harga');
+            if ($year) {
+                $querySelesai->whereYear('tanggal_perbaikan', $year);
+                $queryPending->whereYear('tanggal_perbaikan', $year);
+                $queryIncome->whereYear('tanggal_perbaikan', $year);
+            }
+
+            $repairCount = $querySelesai->count();
+            $pendingCount = $queryPending->count();
+            $income = $queryIncome->sum('harga');
 
             $teknisiStats[] = [
                 'name' => $t->name,
+                'role' => $t->role, // Tambahkan role untuk identifikasi
+                'jabatan' => $t->jabatan ?? $t->role, // Tambahkan jabatan
                 'repair_count' => $repairCount,
                 'pending_count' => $pendingCount,
                 'income' => $income
             ];
+        }
+
+        // Urutkan teknisi stats: Kepala Teknisi di atas, kemudian Teknisi
+        $teknisiStats = collect($teknisiStats)->sortBy(function ($teknisi) {
+            // Kepala teknisi akan muncul di atas (nilai 0), teknisi di bawah (nilai 1)
+            if ($teknisi['role'] === 'kepala teknisi' ||
+                (isset($teknisi['jabatan']) && strtolower($teknisi['jabatan']) === 'kepala teknisi')) {
+                return 0;
+            }
+            return 1;
+        })->values()->toArray();
+
+        // Generate year options dinamis (5 tahun ke belakang sampai 2 tahun ke depan)
+        $currentYear = date('Y'); // Akan berubah otomatis setiap tahun
+        $yearOptions = [];
+        for ($year = $currentYear - 5; $year <= $currentYear + 2; $year++) {
+            $yearOptions[] = $year;
         }
 
         return view('admin.transaksi', compact(
@@ -149,7 +176,8 @@ class AdminController extends Controller
             'totalTransaksiBulanIni',
             'teknisiStats',
             'month',
-            'year'
+            'year',
+            'yearOptions' // Tambahkan yearOptions ke view
         ));
     }
 
@@ -160,6 +188,7 @@ class AdminController extends Controller
 
         return view('admin.detail_transaksi', compact('user', 'transaksi'));
     }
+
     public function updateStatus(Request $request, $id)
     {
         $perbaikan = Perbaikan::findOrFail($id);
@@ -232,6 +261,7 @@ class AdminController extends Controller
         return redirect()->route('admin.transaksi.show', $id)
             ->with('success', 'Status berhasil diperbarui');
     }
+
     // Tambahan method untuk pengelolaan pelanggan
     public function pelanggan()
     {
@@ -292,6 +322,7 @@ class AdminController extends Controller
 
         return view('admin.edit_pelanggan', compact('user', 'pelanggan'));
     }
+
     public function editPerbaikan($id)
     {
         $user = Auth::user();
@@ -337,6 +368,7 @@ class AdminController extends Controller
         return redirect()->route('admin.transaksi.show', $id)
             ->with('success', 'Data perbaikan berhasil diperbarui');
     }
+
     public function addProcessStep(Request $request, $id)
     {
         $perbaikan = Perbaikan::findOrFail($id);
@@ -359,6 +391,7 @@ class AdminController extends Controller
         return redirect()->route('admin.transaksi.show', $id)
             ->with('success', 'Langkah proses pengerjaan berhasil ditambahkan.');
     }
+
     public function updatePelanggan(Request $request, $id)
     {
         $pelanggan = Pelanggan::findOrFail($id);
@@ -409,6 +442,7 @@ class AdminController extends Controller
         $customers = Pelanggan::select('id', 'nama_pelanggan', 'nomor_telp', 'email')->get();
         return response()->json($customers);
     }
+
     public function destroyPelanggan($id)
     {
         $pelanggan = Pelanggan::findOrFail($id);
