@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dashboard Teknisi - MG TECH</title>
+    <title>Dashboard {{ ucfirst($user->jabatan) }} - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -188,7 +188,7 @@
             transition: background-color 0.3s;
         }
         tbody tr:hover {
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
         }
         .status {
             padding: 5px 10px;
@@ -236,10 +236,7 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('teknisi.progress') }}" class="menu-item">
-            <i class="fas fa-tools"></i>
-            <span>Progres</span>
-        </a>
+
         <a href="{{ route('teknisi.laporan') }}" class="menu-item">
             <i class="fas fa-clipboard-list"></i>
             <span>Laporan</span>
@@ -255,11 +252,11 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">Dashboard <span>TEKNISI</span></h1>
+            <h1 class="page-title">Dashboard <span>{{ strtoupper($user->jabatan) }}</span></h1>
             <div class="user-info">
                 <div class="user-name">
                     <div>{{ $user->name }}</div>
-                    <div class="user-role">{{ $user->role }}</div>
+                    <div class="user-role">{{ $user->jabatan }}</div>
                 </div>
                 <div class="user-avatar">
                     <img src="{{ asset('img/user.png') }}" alt="User" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%23f5f5f5\'/><text x=\'50%\' y=\'50%\' font-size=\'20\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>{{ substr($user->name, 0, 1) }}</text></svg>'">
@@ -308,7 +305,26 @@
             </div>
         </div>
 
-        <h2 style="margin-top: 30px;">Daftar Perbaikan Yang Ditugaskan</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 20px;">
+            <h2 style="margin: 0;">Daftar Perbaikan Yang Ditugaskan</h2>
+
+            <!-- Filter Section -->
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <select id="statusFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background: white;">
+                    <option value="">Semua Status</option>
+                    <option value="menunggu">Menunggu</option>
+                    <option value="proses">Proses</option>
+                    <option value="selesai">Selesai</option>
+                </select>
+
+                <select id="sortBy" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background: white;">
+                    <option value="terbaru">Terbaru</option>
+                    <option value="terlama">Terlama</option>
+                    <option value="device">Nama Device A-Z</option>
+                    <option value="pelanggan">Nama Pelanggan A-Z</option>
+                </select>
+            </div>
+        </div>
 
         <table>
             <thead>
@@ -316,6 +332,7 @@
                     <th>NO</th>
                     <th>KODE PERBAIKAN</th>
                     <th>NAMA DEVICE</th>
+                    <th>PELANGGAN</th>
                     <th>TANGGAL PERBAIKAN</th>
                     <th>MASALAH</th>
                     <th>STATUS</th>
@@ -327,6 +344,7 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $p->id }}</td>
                     <td>{{ $p->nama_device }}</td>
+                    <td>{{ $p->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                     <td>{{ $p->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($p->tanggal_perbaikan) }}</td>
                     <td>{{ $p->masalah }}</td>
                     <td>
@@ -335,11 +353,90 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align: center;">Tidak ada perbaikan yang ditugaskan kepada Anda</td>
+                    <td colspan="7" style="text-align: center;">Tidak ada perbaikan yang ditugaskan kepada Anda</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+
+    <script>
+        // Filter functionality
+        let originalRows = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store original rows
+            const tbody = document.querySelector('tbody');
+            originalRows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+
+            // Status filter
+            document.getElementById('statusFilter').addEventListener('change', function() {
+                filterTable();
+            });
+
+            // Sort filter
+            document.getElementById('sortBy').addEventListener('change', function() {
+                filterTable();
+            });
+        });
+
+        function filterTable() {
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            const sortBy = document.getElementById('sortBy').value;
+            const tbody = document.querySelector('tbody');
+
+            let filteredRows = [...originalRows];
+
+            // Apply status filter
+            if (statusFilter) {
+                filteredRows = filteredRows.filter(row => {
+                    const statusCell = row.querySelector('.status');
+                    if (statusCell) {
+                        return statusCell.textContent.toLowerCase().includes(statusFilter);
+                    }
+                    return false;
+                });
+            }
+
+            // Apply sorting
+            switch(sortBy) {
+                case 'terlama':
+                    filteredRows.reverse();
+                    break;
+                case 'device':
+                    filteredRows.sort((a, b) => {
+                        const deviceA = a.cells[2].textContent.toLowerCase();
+                        const deviceB = b.cells[2].textContent.toLowerCase();
+                        return deviceA.localeCompare(deviceB);
+                    });
+                    break;
+                case 'pelanggan':
+                    filteredRows.sort((a, b) => {
+                        const pelangganA = a.cells[3].textContent.toLowerCase();
+                        const pelangganB = b.cells[3].textContent.toLowerCase();
+                        return pelangganA.localeCompare(pelangganB);
+                    });
+                    break;
+                // 'terbaru' is default, no sorting needed
+            }
+
+            // Clear tbody and add filtered rows
+            tbody.innerHTML = '';
+
+            if (filteredRows.length > 0) {
+                filteredRows.forEach((row, index) => {
+                    // Update row number
+                    row.cells[0].textContent = index + 1;
+                    tbody.appendChild(row);
+                });
+            } else {
+                // Add empty row
+                const emptyRow = document.createElement('tr');
+                emptyRow.className = 'empty-row';
+                emptyRow.innerHTML = '<td colspan="7" style="text-align: center; color: #999; padding: 40px;">Tidak ada data yang sesuai dengan filter</td>';
+                tbody.appendChild(emptyRow);
+            }
+        }
+    </script>
 </body>
 </html>

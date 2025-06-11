@@ -91,8 +91,7 @@ Route::middleware(['auth'])->group(function () {
         // Dashboard
         Route::get('/dashboard', [PerbaikanController::class, 'index'])->name('teknisi.dashboard');
 
-        // Progress page
-        Route::get('/progress', [PerbaikanController::class, 'progress'])->name('teknisi.progress');
+
         Route::post('/perbaikan/{id}/add-process', [PerbaikanController::class, 'addProcessStep'])->name('perbaikan.add-process');
         // Laporan page
         Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('teknisi.laporan');

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Progress Perbaikan - MG TECH</title>
+    <title>Progress {{ ucfirst($user->jabatan) }} - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -144,6 +144,28 @@
         th {
             color: #666;
             font-weight: bold;
+        }
+        th {
+            color: #666;
+            font-weight: bold;
+        }
+        .filter-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 150px;
         }
         .status {
             display: inline-block;
@@ -310,11 +332,11 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">Progres <span>TEKNISI</span></h1>
+            <h1 class="page-title">Progres <span>{{ strtoupper($user->jabatan) }}</span></h1>
             <div class="user-info">
                 <div class="user-name">
                     <div>{{ $user->name }}</div>
-                    <div class="user-role">{{ $user->role }}</div>
+                    <div class="user-role">{{ $user->jabatan }}</div>
                 </div>
                 <div class="user-avatar">
                     <img src="{{ asset('img/user.png') }}" alt="User" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%23f5f5f5\'/><text x=\'50%\' y=\'50%\' font-size=\'20\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>{{ substr($user->name, 0, 1) }}</text></svg>'">
@@ -335,6 +357,17 @@
                 {{ session('error') }}
             </div>
         @endif
+
+        <div class="filter-container">
+            <div class="filter-group">
+                <select id="statusFilter" class="filter-select">
+                    <option value="">Semua Status</option>
+                    <option value="menunggu">Menunggu</option>
+                    <option value="proses">Proses</option>
+                    <option value="selesai">Selesai</option>
+                </select>
+            </div>
+        </div>
 
         <div class="table-container">
             <table>
@@ -359,10 +392,8 @@
                        <!-- Update the status buttons in the table rows -->
                         <td>
                             @if($p->status == 'Menunggu')
-                                <span class="status status-menunggu">{{ $p->status }}</span>
                                 <button class="btn-action btn-process" data-id="{{ $p->id }}" data-status="Proses">Proses</button>
                             @elseif($p->status == 'Proses')
-                                <span class="status status-proses">{{ $p->status }}</span>
                                 <button class="btn-action btn-complete" data-id="{{ $p->id }}" data-status="Selesai">Selesai</button>
                             @else
                                 <span class="status status-selesai">{{ $p->status }}</span>
@@ -390,6 +421,8 @@
     </div>
 
     <script>
+        let originalRows = [];
+
         document.addEventListener('DOMContentLoaded', function() {
             const statusButtons = document.querySelectorAll('.btn-action');
             const confirmModal = document.getElementById('confirmModal');
@@ -399,6 +432,56 @@
             let currentButton = null;
             let currentId = null;
             let currentStatus = null;
+
+            // Store original rows for filtering
+            const tbody = document.querySelector('tbody');
+            originalRows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+
+            // Status filter
+            document.getElementById('statusFilter').addEventListener('change', function() {
+                filterTable();
+            });
+
+            function filterTable() {
+                const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+                const tbody = document.querySelector('tbody');
+
+                let filteredRows = [...originalRows];
+
+                // Apply status filter
+                if (statusFilter) {
+                    filteredRows = filteredRows.filter(row => {
+                        const statusCell = row.querySelector('.status');
+                        const actionBtn = row.querySelector('.btn-action');
+
+                        if (statusFilter === 'selesai' && statusCell) {
+                            return statusCell.textContent.toLowerCase().includes(statusFilter);
+                        } else if (statusFilter === 'menunggu' && actionBtn) {
+                            return actionBtn.textContent.toLowerCase().includes('proses');
+                        } else if (statusFilter === 'proses' && actionBtn) {
+                            return actionBtn.textContent.toLowerCase().includes('selesai');
+                        }
+                        return false;
+                    });
+                }
+
+                // Clear tbody and add filtered rows
+                tbody.innerHTML = '';
+
+                if (filteredRows.length > 0) {
+                    filteredRows.forEach((row, index) => {
+                        // Update row number
+                        row.cells[0].textContent = index + 1;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    // Add empty row
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.className = 'empty-row';
+                    emptyRow.innerHTML = '<td colspan="6" style="text-align: center; color: #999; padding: 40px;">Tidak ada data yang sesuai dengan filter</td>';
+                    tbody.appendChild(emptyRow);
+                }
+            }
 
             // Fungsi untuk menampilkan notifikasi
             function showNotification(type, message) {
@@ -444,7 +527,13 @@
 
             // Confirm button (Yes)
             confirmYes.addEventListener('click', function() {
-                if (currentId && currentStatus) {
+                if (currentId && currentStatus && currentButton) {
+                    // Disable button immediately to prevent double submission
+                    currentButton.disabled = true;
+                    currentButton.style.opacity = '0.6';
+                    currentButton.style.cursor = 'not-allowed';
+                    currentButton.textContent = 'Memproses...';
+
                     updateStatus(currentId, currentStatus);
                 }
                 confirmModal.style.display = 'none';
@@ -467,12 +556,10 @@
                 // Get CSRF token
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                // For Proses and Selesai status, we need to include these required fields
-                // Default values that will be updated properly in the edit form later
                 const data = {
                     status: status,
-                    tindakan_perbaikan: "Akan diupdate", // Default value
-                    harga: 0 // Default value
+                    tindakan_perbaikan: "Akan diupdate",
+                    harga: 0
                 };
 
                 // Send AJAX request
@@ -484,23 +571,14 @@
                     },
                     body: JSON.stringify(data)
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        // Reload page to show updated status and process timeline
-                        window.location.reload();
-                    } else {
-                        alert('Gagal mengubah status. Silakan coba lagi.');
-                    }
+                    // Always reload regardless of success or error
+                    window.location.reload();
                 })
                 .catch(error => {
-                    console.error('Error updating status:', error);
-                    alert('Terjadi kesalahan. Silakan coba lagi.');
+                    // Silent error handling - just reload
+                    window.location.reload();
                 });
             }
         });

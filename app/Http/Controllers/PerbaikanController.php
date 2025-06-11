@@ -130,7 +130,7 @@ class PerbaikanController extends Controller
         // Add a new process step if provided
 
 
-        return redirect()->route('teknisi.progress')->with('success', 'Data perbaikan berhasil diperbarui');
+        return redirect()->route('teknisi.dashboard')->with('success', 'Data perbaikan berhasil diperbarui');
     }
 
     /**
@@ -263,22 +263,7 @@ class PerbaikanController extends Controller
     /**
      * Show the progress view.
      */
-    public function progress()
-    {
-        $user = Auth::user();
 
-        // Get all repairs for this user
-        $perbaikan = Perbaikan::where('user_id', $user->id)
-            ->with('pelanggan')
-            ->orderBy('tanggal_perbaikan', 'desc')
-            ->get()
-            ->map(function ($item) {
-                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
-                return $item;
-            });
-
-        return view('teknisi.progress', compact('user', 'perbaikan'));
-    }
 
     /**
      * Show the laporan view.
@@ -304,16 +289,5 @@ class PerbaikanController extends Controller
     /**
      * Confirm status change dialog.
      */
-    public function confirmStatus($id, $status)
-    {
-        $user = Auth::user();
-        $perbaikan = Perbaikan::findOrFail($id);
 
-        // Make sure the repair belongs to the logged-in user
-        if ($perbaikan->user_id != $user->id && $user->role !== 'admin') {
-            return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
-        }
-
-        return view('teknisi.confirm_status', compact('user', 'perbaikan', 'status'));
-    }
 }

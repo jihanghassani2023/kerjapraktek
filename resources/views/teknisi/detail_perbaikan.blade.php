@@ -708,16 +708,13 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('teknisi.progress') }}" class="menu-item active">
-            <i class="fas fa-tools"></i>
-            <span>Progres</span>
-        </a>
+
         <a href="{{ route('teknisi.laporan') }}" class="menu-item">
             <i class="fas fa-clipboard-list"></i>
             <span>Laporan</span>
         </a>
 
-        <a href="{{ route('teknisi.progress') }}" class="back-btn">
+        <a href="{{ route('teknisi.dashboard') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali</span>
         </a>

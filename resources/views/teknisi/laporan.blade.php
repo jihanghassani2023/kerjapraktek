@@ -231,10 +231,6 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('teknisi.progress') }}" class="menu-item">
-            <i class="fas fa-tools"></i>
-            <span>Progres</span>
-        </a>
         <a href="{{ route('teknisi.laporan') }}" class="menu-item active">
             <i class="fas fa-clipboard-list"></i>
             <span>Laporan</span>
@@ -250,11 +246,11 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">Laporan <span>TEKNISI</span></h1>
+            <h1 class="page-title">Laporan <span>{{ strtoupper($user->jabatan) }}</span></h1>
             <div class="user-info">
                 <div class="user-name">
                     <div>{{ $user->name }}</div>
-                    <div class="user-role">{{ $user->role }}</div>
+                    <div class="user-role">{{ $user->jabatan }}</div>
                 </div>
                 <div class="user-avatar">
                     <img src="{{ asset('img/user.png') }}" alt="User" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><circle cx=\'20\' cy=\'20\' r=\'20\' fill=\'%23f5f5f5\'/><text x=\'50%\' y=\'50%\' font-size=\'20\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>{{ substr($user->name, 0, 1) }}</text></svg>'">
