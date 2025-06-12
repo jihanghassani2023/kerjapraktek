@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MG Tech Palembang</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -102,7 +103,21 @@
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Validation styles */
+        .form-group input.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
         }
     </style>
 </head>
@@ -116,23 +131,27 @@
         <div class="right-panel">
             <div class="login-form">
                 <h2>LOGIN</h2>
-                <form method="POST" action="{{ route('login.submit') }}">
+                <form method="POST" action="{{ route('login.submit') }}" id="loginForm" novalidate>
                     @csrf
                     <div class="form-group">
                         <label for="email">EMAIL</label>
-                        <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Email">
+                        <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Email" class="{{ $errors->has('email') ? 'is-invalid' : '' }}">
                         @error('email')
-                            <div class="error-message">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @else
+                            <div class="invalid-feedback" id="email-error" style="display: none;"></div>
                         @enderror
                     </div>
                     <div class="form-group">
                         <label for="password">PASSWORD</label>
                         <div class="password-container">
-                            <input type="password" id="password" name="password" required placeholder="Password">
-                            <span class="eye-icon" id="eye-icon" onclick="togglePassword()">👁️</span>
+                            <input type="password" id="password" name="password" required placeholder="Password" class="{{ $errors->has('password') ? 'is-invalid' : '' }}">
+                            <i class="fas fa-eye-slash eye-icon" id="eye-icon" onclick="togglePassword()"></i>
                         </div>
                         @error('password')
-                            <div class="error-message">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @else
+                            <div class="invalid-feedback" id="password-error" style="display: none;"></div>
                         @enderror
                     </div>
                     <div class="form-group">
@@ -150,11 +169,63 @@
 
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
-                eyeIcon.textContent = "🙈";
+                eyeIcon.classList.remove("fa-eye-slash");
+                eyeIcon.classList.add("fa-eye");
             } else {
                 passwordInput.type = "password";
-                eyeIcon.textContent = "👁️";
+                eyeIcon.classList.remove("fa-eye");
+                eyeIcon.classList.add("fa-eye-slash");
             }
+        }
+
+        // Client-side validation
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // Email validation
+            const emailInput = document.getElementById('email');
+            const emailError = document.getElementById('email-error');
+
+            if (!emailInput.value.trim()) {
+                emailInput.classList.add('is-invalid');
+                emailError.textContent = 'Email wajib diisi.';
+                emailError.style.display = 'block';
+                isValid = false;
+            } else if (!isValidEmail(emailInput.value)) {
+                emailInput.classList.add('is-invalid');
+                emailError.textContent = 'Format email tidak valid.';
+                emailError.style.display = 'block';
+                isValid = false;
+            } else {
+                emailInput.classList.remove('is-invalid');
+                emailError.style.display = 'none';
+            }
+
+            // Password validation
+            const passwordInput = document.getElementById('password');
+            const passwordError = document.getElementById('password-error');
+
+            if (!passwordInput.value.trim()) {
+                passwordInput.classList.add('is-invalid');
+                passwordError.textContent = 'Password wajib diisi.';
+                passwordError.style.display = 'block';
+                isValid = false;
+            } else {
+                passwordInput.classList.remove('is-invalid');
+                passwordError.style.display = 'none';
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+
+
+        // Email validation helper function
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
         }
     </script>
 </body>
