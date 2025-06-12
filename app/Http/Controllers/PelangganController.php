@@ -65,11 +65,13 @@ class PelangganController extends Controller
         $pelanggan = Pelanggan::findOrFail($id);
         $perbaikan = Perbaikan::where('pelanggan_id', $pelanggan->id)
             ->where('user_id', $user->id)
+            ->with('detail')
             ->orderBy('tanggal_perbaikan', 'desc')
             ->get();
 
         return view('teknisi.detail_pelanggan', compact('user', 'pelanggan', 'perbaikan'));
     }
+
     public function edit($id)
     {
         $user = Auth::user();
@@ -123,4 +125,5 @@ class PelangganController extends Controller
 
         return redirect()->route('pelanggan.index')
             ->with('success', 'Data pelanggan berhasil diperbarui');
-    }}
+    }
+}

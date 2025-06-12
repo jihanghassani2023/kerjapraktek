@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data User - MG TECH</title>
+    <title>User - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Keep the same styles */
@@ -382,7 +382,7 @@
         </a>
         <a href="{{ route('karyawan.index') }}" class="menu-item active">
             <i class="fas fa-users"></i>
-            <span>Data User</span>
+            <span>User</span>
         </a>
         <a href="{{ route('transaksi.index') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
@@ -400,7 +400,7 @@
     <div class="main-content">
         <div class="header">
             <div>
-                <h2>Data User</h2>
+                <h2>User</h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -456,7 +456,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" style="text-align: center;">Tidak ada data user</td>
+                                <td colspan="5" style="text-align: center;">Tidak ada user</td>
                             </tr>
                         @endforelse
                     </tbody>

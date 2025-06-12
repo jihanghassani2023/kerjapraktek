@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\DateHelper;
 use App\Models\Perbaikan;
+use App\Models\DetailPerbaikan;
 use App\Models\User;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
@@ -33,7 +34,7 @@ class TransaksiController extends Controller
             $query->whereYear('tanggal_perbaikan', $year);
         }
 
-        $transaksi = $query->with('user')
+        $transaksi = $query->with(['user', 'pelanggan', 'detail'])
             ->orderBy('tanggal_perbaikan', 'desc')
             ->get()
             ->map(function ($item) {
@@ -60,10 +61,10 @@ class TransaksiController extends Controller
             $sheet->setCellValue('A' . $row, $index + 1);
             $sheet->setCellValue('B' . $row, $t->id);
             $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
-            $sheet->setCellValue('D' . $row, $t->nama_device);
+            $sheet->setCellValue('D' . $row, $t->detail ? $t->detail->nama_device : 'N/A');
             $sheet->setCellValue('E' . $row, $t->pelanggan ? $t->pelanggan->nama_pelanggan : 'N/A');
             $sheet->setCellValue('F' . $row, $t->user ? $t->user->name : 'N/A');
-            $sheet->setCellValue('G' . $row, $t->harga);
+            $sheet->setCellValue('G' . $row, $t->detail ? $t->detail->harga : 0);
             $sheet->setCellValue('H' . $row, $t->status);
             $row++;
         }
@@ -101,19 +102,25 @@ class TransaksiController extends Controller
         }
         // Jika keduanya kosong, tampilkan semua data
 
-        $transaksi = $query->with('user')
+        $transaksi = $query->with(['user', 'pelanggan', 'detail'])
             ->orderBy('tanggal_perbaikan', 'desc')
             ->get();
 
         // Calculate summary statistics
-        $totalTransaksi = $transaksi->sum('harga');
-        $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
-            ->whereDate('tanggal_perbaikan', date('Y-m-d'))
-            ->sum('harga');
-        $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
-            ->whereMonth('tanggal_perbaikan', date('m'))
-            ->whereYear('tanggal_perbaikan', date('Y'))
-            ->sum('harga');
+        $totalTransaksi = $transaksi->sum(function($item) {
+            return $item->detail ? $item->detail->harga : 0;
+        });
+
+        $totalTransaksiHariIni = DetailPerbaikan::whereHas('perbaikan', function($query) {
+            $query->where('status', 'Selesai')
+                  ->whereDate('tanggal_perbaikan', date('Y-m-d'));
+        })->sum('harga');
+
+        $totalTransaksiBulanIni = DetailPerbaikan::whereHas('perbaikan', function($query) {
+            $query->where('status', 'Selesai')
+                  ->whereMonth('tanggal_perbaikan', date('m'))
+                  ->whereYear('tanggal_perbaikan', date('Y'));
+        })->sum('harga');
 
         // DIPERBAIKI: Get technicians AND kepala teknisi with their repair count
         $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
@@ -123,24 +130,32 @@ class TransaksiController extends Controller
             // Base query untuk setiap teknisi/kepala teknisi
             $querySelesai = Perbaikan::where('user_id', $t->id)->where('status', 'Selesai');
             $queryPending = Perbaikan::where('user_id', $t->id)->whereIn('status', ['Menunggu', 'Proses']);
-            $queryIncome = Perbaikan::where('user_id', $t->id);
+
+            // For income calculation, join with detail table
+            $incomeQuery = DetailPerbaikan::whereHas('perbaikan', function($query) use ($t) {
+                $query->where('user_id', $t->id);
+            });
 
             // Terapkan filter HANYA jika ada nilai (bukan kosong atau null)
             if ($month) {
                 $querySelesai->whereMonth('tanggal_perbaikan', $month);
                 $queryPending->whereMonth('tanggal_perbaikan', $month);
-                $queryIncome->whereMonth('tanggal_perbaikan', $month);
+                $incomeQuery->whereHas('perbaikan', function($query) use ($month) {
+                    $query->whereMonth('tanggal_perbaikan', $month);
+                });
             }
 
             if ($year) {
                 $querySelesai->whereYear('tanggal_perbaikan', $year);
                 $queryPending->whereYear('tanggal_perbaikan', $year);
-                $queryIncome->whereYear('tanggal_perbaikan', $year);
+                $incomeQuery->whereHas('perbaikan', function($query) use ($year) {
+                    $query->whereYear('tanggal_perbaikan', $year);
+                });
             }
 
             $repairCount = $querySelesai->count();
             $pendingCount = $queryPending->count();
-            $income = $queryIncome->sum('harga');
+            $income = $incomeQuery->sum('harga');
 
             $teknisiStats[] = [
                 'name' => $t->name,
@@ -177,7 +192,7 @@ class TransaksiController extends Controller
     {
         $user = Auth::user();
         // Always get fresh data with findOrFail
-        $transaksi = Perbaikan::with(['user', 'pelanggan'])->findOrFail($id);
+        $transaksi = Perbaikan::with(['user', 'pelanggan', 'detail'])->findOrFail($id);
 
         return view('kepala_toko.detail_transaksi', compact('user', 'transaksi'));
     }
@@ -262,7 +277,7 @@ class TransaksiController extends Controller
 
         // Get latest transactions based on filter
         if ($selectedMonth === 'all') {
-            $latestTransaksi = Perbaikan::with('user')
+            $latestTransaksi = Perbaikan::with(['user', 'detail'])
                 ->where('status', 'Selesai')
                 ->whereYear('tanggal_perbaikan', $selectedYear)
                 ->orderBy('tanggal_perbaikan', 'desc')
@@ -274,9 +289,10 @@ class TransaksiController extends Controller
                 });
 
             // Calculate transactions for selected year
-            $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
-                ->whereYear('tanggal_perbaikan', $selectedYear)
-                ->sum('harga');
+            $totalTransaksiBulanIni = DetailPerbaikan::whereHas('perbaikan', function($query) use ($selectedYear) {
+                $query->where('status', 'Selesai')
+                      ->whereYear('tanggal_perbaikan', $selectedYear);
+            })->sum('harga');
 
             $repairsByTeknisi = Perbaikan::selectRaw('user_id, count(*) as count')
                 ->where('status', 'Selesai')
@@ -284,7 +300,7 @@ class TransaksiController extends Controller
                 ->groupBy('user_id')
                 ->get();
         } else {
-            $latestTransaksi = Perbaikan::with('user')
+            $latestTransaksi = Perbaikan::with(['user', 'detail'])
                 ->where('status', 'Selesai')
                 ->whereMonth('tanggal_perbaikan', $selectedMonth)
                 ->whereYear('tanggal_perbaikan', $selectedYear)
@@ -297,10 +313,11 @@ class TransaksiController extends Controller
                 });
 
             // Calculate transactions for selected month and year
-            $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
-                ->whereMonth('tanggal_perbaikan', $selectedMonth)
-                ->whereYear('tanggal_perbaikan', $selectedYear)
-                ->sum('harga');
+            $totalTransaksiBulanIni = DetailPerbaikan::whereHas('perbaikan', function($query) use ($selectedMonth, $selectedYear) {
+                $query->where('status', 'Selesai')
+                      ->whereMonth('tanggal_perbaikan', $selectedMonth)
+                      ->whereYear('tanggal_perbaikan', $selectedYear);
+            })->sum('harga');
 
             $repairsByTeknisi = Perbaikan::selectRaw('user_id, count(*) as count')
                 ->where('status', 'Selesai')
@@ -318,9 +335,10 @@ class TransaksiController extends Controller
         }
 
         // Calculate transactions for today (always current date)
-        $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
-            ->whereDate('tanggal_perbaikan', date('Y-m-d'))
-            ->sum('harga');
+        $totalTransaksiHariIni = DetailPerbaikan::whereHas('perbaikan', function($query) {
+            $query->where('status', 'Selesai')
+                  ->whereDate('tanggal_perbaikan', date('Y-m-d'));
+        })->sum('harga');
 
         // Generate month options
         $monthOptions = [

@@ -255,7 +255,7 @@
         </a>
         <a href="{{ route('karyawan.index') }}" class="menu-item active">
             <i class="fas fa-users"></i>
-            <span>Data User</span>
+            <span>User</span>
         </a>
         <a href="{{ route('transaksi.index') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
@@ -287,7 +287,7 @@
         </div>
 
         <div class="title-section">
-            <h1 class="page-title">Edit Data User</h1>
+            <h1 class="page-title">Edit User</h1>
             <a href="{{ route('karyawan.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>

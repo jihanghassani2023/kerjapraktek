@@ -22,54 +22,54 @@ class TrackingController extends Controller
      * Memeriksa nomor telepon pelanggan dan menampilkan hasilnya
      */
     public function check(Request $request)
-{
-    $request->validate([
-        'key' => 'required|string',
-    ]);
+    {
+        $request->validate([
+            'key' => 'required|string',
+        ]);
 
-    // Cari data pelanggan berdasarkan nomor telepon
-    $pelanggan = Pelanggan::where('nomor_telp', $request->key)->first();
+        // Cari data pelanggan berdasarkan nomor telepon
+        $pelanggan = Pelanggan::where('nomor_telp', $request->key)->first();
 
-    if (!$pelanggan) {
-        return redirect()->route('tracking.index')
-            ->with('error', 'Nomor telepon tidak ditemukan. Mohon periksa kembali nomor telepon Anda.');
-    }
+        if (!$pelanggan) {
+            return redirect()->route('tracking.index')
+                ->with('error', 'Nomor telepon tidak ditemukan. Mohon periksa kembali nomor telepon Anda.');
+        }
 
-    // Ambil semua perbaikan untuk pelanggan ini
-    $allPerbaikan = Perbaikan::where('pelanggan_id', $pelanggan->id)
-                        ->with(['user', 'pelanggan'])
-                        ->orderBy('tanggal_perbaikan', 'desc')
-                        ->get()
-                        ->map(function($item) {
-                            $item->tanggal_formatted = \App\Helpers\DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
-                            return $item;
-                        });
+        // Ambil semua perbaikan untuk pelanggan ini
+        $allPerbaikan = Perbaikan::where('pelanggan_id', $pelanggan->id)
+                            ->with(['user', 'pelanggan', 'detail'])
+                            ->orderBy('tanggal_perbaikan', 'desc')
+                            ->get()
+                            ->map(function($item) {
+                                $item->tanggal_formatted = \App\Helpers\DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                                return $item;
+                            });
 
-    if ($allPerbaikan->isEmpty()) {
-        return redirect()->route('tracking.index')
-            ->with('error', 'Tidak ada perbaikan yang ditemukan untuk nomor telepon ini.');
-    }
+        if ($allPerbaikan->isEmpty()) {
+            return redirect()->route('tracking.index')
+                ->with('error', 'Tidak ada perbaikan yang ditemukan untuk nomor telepon ini.');
+        }
 
-    // Filter perbaikan yang akan ditampilkan
-    $perbaikanAktif = collect();
+        // Filter perbaikan yang akan ditampilkan
+        $perbaikanAktif = collect();
 
-    foreach ($allPerbaikan as $perbaikan) {
-        // Jika status selesai, cek apakah masih dalam rentang 7 hari
-        if ($perbaikan->status === 'Selesai') {
-            $tanggalSelesai = Carbon::parse($perbaikan->updated_at);
-            $hariIni = Carbon::now();
-            $selisihHari = $tanggalSelesai->diffInDays($hariIni);
+        foreach ($allPerbaikan as $perbaikan) {
+            // Jika status selesai, cek apakah masih dalam rentang 7 hari
+            if ($perbaikan->status === 'Selesai') {
+                $tanggalSelesai = Carbon::parse($perbaikan->updated_at);
+                $hariIni = Carbon::now();
+                $selisihHari = $tanggalSelesai->diffInDays($hariIni);
 
-            // Tampilkan hanya jika masih dalam 7 hari
-            if ($selisihHari <= 7) {
+                // Tampilkan hanya jika masih dalam 7 hari
+                if ($selisihHari <= 7) {
+                    $perbaikanAktif->push($perbaikan);
+                }
+            } else {
+                // Perbaikan yang belum selesai tetap ditampilkan
                 $perbaikanAktif->push($perbaikan);
             }
-        } else {
-            // Perbaikan yang belum selesai tetap ditampilkan
-            $perbaikanAktif->push($perbaikan);
         }
-    }
 
-    return view('tracking.index', compact('perbaikanAktif', 'pelanggan'));
-}
+        return view('tracking.index', compact('perbaikanAktif', 'pelanggan'));
+    }
 }

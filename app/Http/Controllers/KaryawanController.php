@@ -74,6 +74,7 @@ class KaryawanController extends Controller
 
         if ($karyawan->jabatan == 'Teknisi' || $karyawan->jabatan == 'Kepala Teknisi') {
             $perbaikanList = Perbaikan::where('user_id', $karyawan->id)
+                ->with('detail')
                 ->orderBy('tanggal_perbaikan', 'desc')
                 ->get();
         }

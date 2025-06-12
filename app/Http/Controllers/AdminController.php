@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Perbaikan;
+use App\Models\DetailPerbaikan;
 use App\Models\User;
 use App\Models\Pelanggan;
 use Illuminate\Http\Request;
@@ -17,8 +18,15 @@ class AdminController extends Controller
         $user = Auth::user();
 
         $totalTeknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->count();
-        $totalTransaksiHariIni = Perbaikan::whereDate('tanggal_perbaikan', date('Y-m-d'))->sum('harga');
-        $totalTransaksiBulanIni = Perbaikan::whereMonth('tanggal_perbaikan', date('m'))->whereYear('tanggal_perbaikan', date('Y'))->sum('harga');
+
+        $totalTransaksiHariIni = DetailPerbaikan::whereHas('perbaikan', function($query) {
+            $query->whereDate('tanggal_perbaikan', date('Y-m-d'));
+        })->sum('harga');
+
+        $totalTransaksiBulanIni = DetailPerbaikan::whereHas('perbaikan', function($query) {
+            $query->whereMonth('tanggal_perbaikan', date('m'))
+                  ->whereYear('tanggal_perbaikan', date('Y'));
+        })->sum('harga');
 
         // If search is submitted via the search form, redirect to search results page
         if ($request->has('search') && $request->search) {
@@ -26,7 +34,7 @@ class AdminController extends Controller
         }
 
         // Mendapatkan transaksi terbaru
-        $latestTransaksi = Perbaikan::with(['user', 'pelanggan'])
+        $latestTransaksi = Perbaikan::with(['user', 'pelanggan', 'detail'])
             ->orderBy('created_at', 'desc')
             ->take(30)
             ->get()
@@ -59,11 +67,13 @@ class AdminController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $query = Perbaikan::with(['user', 'pelanggan']);
+        $query = Perbaikan::with(['user', 'pelanggan', 'detail']);
 
         $query->where(function ($q) use ($search) {
             $q->where('id', 'like', "%{$search}%")
-                ->orWhere('nama_device', 'like', "%{$search}%")
+                ->orWhereHas('detail', function ($subq) use ($search) {
+                    $subq->where('nama_device', 'like', "%{$search}%");
+                })
                 ->orWhereHas('pelanggan', function ($subq) use ($search) {
                     $subq->where('nama_pelanggan', 'like', "%{$search}%")
                         ->orWhere('nomor_telp', 'like', "%{$search}%");
@@ -96,7 +106,7 @@ class AdminController extends Controller
         }
         // Jika keduanya kosong, tampilkan semua data
 
-        $transaksi = $query->with(['user', 'pelanggan'])
+        $transaksi = $query->with(['user', 'pelanggan', 'detail'])
             ->orderBy('tanggal_perbaikan', 'desc')
             ->get()
             ->map(function ($item) {
@@ -105,14 +115,20 @@ class AdminController extends Controller
             });
 
         // Calculate summary statistics
-        $totalTransaksi = $transaksi->sum('harga');
-        $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
-            ->whereDate('tanggal_perbaikan', date('Y-m-d'))
-            ->sum('harga');
-        $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
-            ->whereMonth('tanggal_perbaikan', date('m'))
-            ->whereYear('tanggal_perbaikan', date('Y'))
-            ->sum('harga');
+        $totalTransaksi = $transaksi->sum(function($item) {
+            return $item->detail ? $item->detail->harga : 0;
+        });
+
+        $totalTransaksiHariIni = DetailPerbaikan::whereHas('perbaikan', function($query) {
+            $query->where('status', 'Selesai')
+                  ->whereDate('tanggal_perbaikan', date('Y-m-d'));
+        })->sum('harga');
+
+        $totalTransaksiBulanIni = DetailPerbaikan::whereHas('perbaikan', function($query) {
+            $query->where('status', 'Selesai')
+                  ->whereMonth('tanggal_perbaikan', date('m'))
+                  ->whereYear('tanggal_perbaikan', date('Y'));
+        })->sum('harga');
 
         // DIPERBAIKI: Get technicians AND kepala teknisi with their repair count
         $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
@@ -122,24 +138,32 @@ class AdminController extends Controller
             // Base query untuk setiap teknisi/kepala teknisi
             $querySelesai = Perbaikan::where('user_id', $t->id)->where('status', 'Selesai');
             $queryPending = Perbaikan::where('user_id', $t->id)->whereIn('status', ['Menunggu', 'Proses']);
-            $queryIncome = Perbaikan::where('user_id', $t->id);
+
+            // For income calculation, join with detail table
+            $incomeQuery = DetailPerbaikan::whereHas('perbaikan', function($query) use ($t) {
+                $query->where('user_id', $t->id);
+            });
 
             // Terapkan filter HANYA jika ada nilai (bukan kosong atau null)
             if ($month) {
                 $querySelesai->whereMonth('tanggal_perbaikan', $month);
                 $queryPending->whereMonth('tanggal_perbaikan', $month);
-                $queryIncome->whereMonth('tanggal_perbaikan', $month);
+                $incomeQuery->whereHas('perbaikan', function($query) use ($month) {
+                    $query->whereMonth('tanggal_perbaikan', $month);
+                });
             }
 
             if ($year) {
                 $querySelesai->whereYear('tanggal_perbaikan', $year);
                 $queryPending->whereYear('tanggal_perbaikan', $year);
-                $queryIncome->whereYear('tanggal_perbaikan', $year);
+                $incomeQuery->whereHas('perbaikan', function($query) use ($year) {
+                    $query->whereYear('tanggal_perbaikan', $year);
+                });
             }
 
             $repairCount = $querySelesai->count();
             $pendingCount = $queryPending->count();
-            $income = $queryIncome->sum('harga');
+            $income = $incomeQuery->sum('harga');
 
             $teknisiStats[] = [
                 'name' => $t->name,
@@ -184,14 +208,14 @@ class AdminController extends Controller
     public function showTransaksi($id)
     {
         $user = Auth::user();
-        $transaksi = Perbaikan::with(['user', 'pelanggan'])->findOrFail($id);
+        $transaksi = Perbaikan::with(['user', 'pelanggan', 'detail'])->findOrFail($id);
 
         return view('admin.detail_transaksi', compact('user', 'transaksi'));
     }
 
     public function updateStatus(Request $request, $id)
     {
-        $perbaikan = Perbaikan::findOrFail($id);
+        $perbaikan = Perbaikan::with('detail')->findOrFail($id);
         $currentStatus = $perbaikan->status;
         $newStatus = $request->status;
 
@@ -224,14 +248,15 @@ class AdminController extends Controller
 
         // Update status
         $perbaikan->status = $newStatus;
+        $perbaikan->save();
 
         // Update tindakan_perbaikan if provided
-        if ($request->has('tindakan_perbaikan')) {
-            $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
+        if ($request->has('tindakan_perbaikan') && $perbaikan->detail) {
+            $perbaikan->detail->update(['tindakan_perbaikan' => $request->tindakan_perbaikan]);
         }
 
         // Add status change to proses_pengerjaan
-        $currentProcess = $perbaikan->proses_pengerjaan ?? [];
+        $currentProcess = $perbaikan->detail->proses_pengerjaan ?? [];
 
         // Add status change entry
         $statusMessage = "";
@@ -247,8 +272,8 @@ class AdminController extends Controller
             'step' => $statusMessage,
             'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
         ];
-        $perbaikan->proses_pengerjaan = $currentProcess;
-        $perbaikan->save();
+
+        $perbaikan->detail->update(['proses_pengerjaan' => $currentProcess]);
 
         if ($request->ajax()) {
             return response()->json([
@@ -326,14 +351,14 @@ class AdminController extends Controller
     public function editPerbaikan($id)
     {
         $user = Auth::user();
-        $perbaikan = Perbaikan::with('pelanggan')->findOrFail($id);
+        $perbaikan = Perbaikan::with(['pelanggan', 'detail'])->findOrFail($id);
 
         return view('admin.edit_perbaikan', compact('user', 'perbaikan'));
     }
 
     public function updatePerbaikan(Request $request, $id)
     {
-        $perbaikan = Perbaikan::findOrFail($id);
+        $perbaikan = Perbaikan::with('detail')->findOrFail($id);
 
         $validator = Validator::make($request->all(), [
             'masalah' => 'required|string',
@@ -350,15 +375,14 @@ class AdminController extends Controller
                 ->withInput();
         }
 
-        $updateData = [
+        // Update detail perbaikan
+        $perbaikan->detail->update([
             'masalah' => $request->masalah,
             'tindakan_perbaikan' => $request->tindakan_perbaikan,
             'kategori_device' => $request->kategori_device,
             'harga' => $request->harga,
             'garansi' => $request->garansi,
-        ];
-
-        $perbaikan->update($updateData);
+        ]);
 
         // Add a new process step if provided
         if ($request->filled('proses_step')) {
@@ -371,7 +395,7 @@ class AdminController extends Controller
 
     public function addProcessStep(Request $request, $id)
     {
-        $perbaikan = Perbaikan::findOrFail($id);
+        $perbaikan = Perbaikan::with('detail')->findOrFail($id);
 
         // Validasi input
         $request->validate([
@@ -379,14 +403,13 @@ class AdminController extends Controller
         ]);
 
         // Tambahkan langkah proses baru
-        $currentProcess = $perbaikan->proses_pengerjaan ?? [];
+        $currentProcess = $perbaikan->detail->proses_pengerjaan ?? [];
         $currentProcess[] = [
             'step' => $request->proses_step,
             'timestamp' => now()->format('Y-m-d H:i:s')
         ];
 
-        $perbaikan->proses_pengerjaan = $currentProcess;
-        $perbaikan->save();
+        $perbaikan->detail->update(['proses_pengerjaan' => $currentProcess]);
 
         return redirect()->route('admin.transaksi.show', $id)
             ->with('success', 'Langkah proses pengerjaan berhasil ditambahkan.');
@@ -484,7 +507,7 @@ class AdminController extends Controller
             'tindakan_perbaikan' => 'required|string',
             'harga' => 'required|numeric',
             'garansi' => 'required|string|max:50',
-            'proses_step' => 'nullable|string',
+            'kategori_device' => 'required|string|max:50',
         ], [
             'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
             'user_id.required' => 'Teknisi wajib dipilih.',
@@ -503,22 +526,29 @@ class AdminController extends Controller
                 ->withInput();
         }
 
+        // Create perbaikan header
         $perbaikan = new Perbaikan();
         $perbaikan->pelanggan_id = $request->pelanggan_id;
         $perbaikan->user_id = $request->user_id;
-        $perbaikan->nama_device = $request->nama_device;
-        $perbaikan->kategori_device = $request->kategori_device;
-        $perbaikan->masalah = $request->masalah;
-        $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
-        $perbaikan->harga = $request->harga;
-        $perbaikan->garansi = $request->garansi;
         $perbaikan->tanggal_perbaikan = date('Y-m-d');
         $perbaikan->status = 'Menunggu';
-        $perbaikan->proses_pengerjaan = [[
-            'step' => 'Menunggu Antrian Perbaikan',
-            'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
-        ]];
         $perbaikan->save();
+
+        // Create perbaikan detail
+        DetailPerbaikan::create([
+            'perbaikan_id' => $perbaikan->id,
+            'nama_device' => $request->nama_device,
+            'kategori_device' => $request->kategori_device,
+            'masalah' => $request->masalah,
+            'tindakan_perbaikan' => $request->tindakan_perbaikan,
+            'harga' => $request->harga,
+            'garansi' => $request->garansi,
+            'proses_pengerjaan' => [[
+                'step' => 'Menunggu Antrian Perbaikan',
+                'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
+            ]]
+        ]);
+
         return redirect()->route('admin.transaksi')
             ->with('success', 'Perbaikan berhasil disimpan');
     }
