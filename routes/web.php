@@ -95,7 +95,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/perbaikan/{id}/add-process', [PerbaikanController::class, 'addProcessStep'])->name('perbaikan.add-process');
         // Laporan page
         Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('teknisi.laporan');
-
+        Route::get('/laporan/export', [PerbaikanController::class, 'exportLaporan'])->name('laporan.export');
         // Perbaikan routes (hanya untuk view, edit, dan update status)
         Route::get('/perbaikan/{id}', [PerbaikanController::class, 'show'])->name('perbaikan.show');
         Route::get('/perbaikan/{id}/edit', [PerbaikanController::class, 'edit'])->name('perbaikan.edit');

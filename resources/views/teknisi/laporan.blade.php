@@ -203,9 +203,11 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            text-decoration: none;
         }
         .btn-export:hover {
             background-color: #218838;
+            color: white;
         }
         .empty-state {
             text-align: center;
@@ -219,6 +221,10 @@
         }
         .empty-state-text {
             font-size: 16px;
+        }
+        tbody tr:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -261,32 +267,34 @@
         <div class="filter-container">
             <div class="filter-group">
                 <div class="filter-label">Filter:</div>
-                <select class="filter-select" id="monthFilter">
-                    <option value="">Semua Bulan</option>
-                    <option value="1" {{ request('month') == '1' ? 'selected' : '' }}>Januari</option>
-                    <option value="2" {{ request('month') == '2' ? 'selected' : '' }}>Februari</option>
-                    <option value="3" {{ request('month') == '3' ? 'selected' : '' }}>Maret</option>
-                    <option value="4" {{ request('month') == '4' ? 'selected' : '' }}>April</option>
-                    <option value="5" {{ request('month') == '5' ? 'selected' : '' }}>Mei</option>
-                    <option value="6" {{ request('month') == '6' ? 'selected' : '' }}>Juni</option>
-                    <option value="7" {{ request('month') == '7' ? 'selected' : '' }}>Juli</option>
-                    <option value="8" {{ request('month') == '8' ? 'selected' : '' }}>Agustus</option>
-                    <option value="9" {{ request('month') == '9' ? 'selected' : '' }}>September</option>
-                    <option value="10" {{ request('month') == '10' ? 'selected' : '' }}>Oktober</option>
-                    <option value="11" {{ request('month') == '11' ? 'selected' : '' }}>November</option>
-                    <option value="12" {{ request('month') == '12' ? 'selected' : '' }}>Desember</option>
-                </select>
-                <select class="filter-select" id="yearFilter">
-                    <option value="">Semua Tahun</option>
-                    <option value="2023" {{ request('year') == '2023' ? 'selected' : '' }}>2023</option>
-                    <option value="2024" {{ request('year') == '2024' ? 'selected' : '' }}>2024</option>
-                    <option value="2025" {{ request('year') == '2025' ? 'selected' : '' }}>2025</option>
-                </select>
-                <button type="button" id="applyFilterBtn" class="btn-filter">Terapkan</button>
+                <form action="{{ route('teknisi.laporan') }}" method="GET" id="filterForm">
+                    <select name="month" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">Semua Bulan</option>
+                        <option value="1" {{ request('month') == '1' ? 'selected' : '' }}>Januari</option>
+                        <option value="2" {{ request('month') == '2' ? 'selected' : '' }}>Februari</option>
+                        <option value="3" {{ request('month') == '3' ? 'selected' : '' }}>Maret</option>
+                        <option value="4" {{ request('month') == '4' ? 'selected' : '' }}>April</option>
+                        <option value="5" {{ request('month') == '5' ? 'selected' : '' }}>Mei</option>
+                        <option value="6" {{ request('month') == '6' ? 'selected' : '' }}>Juni</option>
+                        <option value="7" {{ request('month') == '7' ? 'selected' : '' }}>Juli</option>
+                        <option value="8" {{ request('month') == '8' ? 'selected' : '' }}>Agustus</option>
+                        <option value="9" {{ request('month') == '9' ? 'selected' : '' }}>September</option>
+                        <option value="10" {{ request('month') == '10' ? 'selected' : '' }}>Oktober</option>
+                        <option value="11" {{ request('month') == '11' ? 'selected' : '' }}>November</option>
+                        <option value="12" {{ request('month') == '12' ? 'selected' : '' }}>Desember</option>
+                    </select>
+                    <select name="year" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">Semua Tahun</option>
+                        <option value="2023" {{ request('year') == '2023' ? 'selected' : '' }}>2023</option>
+                        <option value="2024" {{ request('year') == '2024' ? 'selected' : '' }}>2024</option>
+                        <option value="2025" {{ request('year') == '2025' ? 'selected' : '' }}>2025</option>
+                    </select>
+                </form>
             </div>
-            <button type="button" id="exportBtn" class="btn-export">
+            <!-- PERBAIKAN: Gunakan route name yang sesuai dengan yang ada di routes/web.php -->
+            <a href="{{ route('laporan.export') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="btn-export">
                 <i class="fas fa-file-export"></i> Export
-            </button>
+            </a>
         </div>
 
         @if($perbaikan->count() > 0)
@@ -308,7 +316,7 @@
                     <td>{{ $p->id }}</td>
                     <td>{{ $p->nama_device }}</td>
                     <td>{{ $p->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($p->tanggal_perbaikan) }}</td>
-                    <td>{{ $p->masalah }}</td>
+                    <td>{{ Str::limit($p->masalah, 50) }}</td>
                     <td><span class="status status-selesai">{{ $p->status }}</span></td>
                 </tr>
                 @endforeach
@@ -321,34 +329,5 @@
         </div>
         @endif
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const applyFilterBtn = document.getElementById('applyFilterBtn');
-            const monthFilter = document.getElementById('monthFilter');
-            const yearFilter = document.getElementById('yearFilter');
-
-            applyFilterBtn.addEventListener('click', function() {
-                const month = monthFilter.value;
-                const year = yearFilter.value;
-
-                // Build query string
-                let queryString = '';
-                if (month) queryString += `month=${month}`;
-                if (year) {
-                    queryString += queryString ? `&year=${year}` : `year=${year}`;
-                }
-
-                // Redirect with filters
-                window.location.href = `${window.location.pathname}${queryString ? '?' + queryString : ''}`;
-            });
-
-            // Export button
-            document.getElementById('exportBtn').addEventListener('click', function() {
-                // In a real application, this would trigger a download
-                alert('Export functionality would be implemented here in a production environment.');
-            });
-        });
-    </script>
 </body>
 </html>

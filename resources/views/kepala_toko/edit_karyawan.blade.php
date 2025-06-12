@@ -223,6 +223,11 @@
             border-color: #dc3545;
             color: #721c24;
         }
+        .name-requirements {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -252,7 +257,7 @@
             <i class="fas fa-users"></i>
             <span>Data User</span>
         </a>
-        <a href="#" class="menu-item">
+        <a href="{{ route('transaksi.index') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
@@ -355,6 +360,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('editUserForm');
+            const nameInput = document.getElementById('name');
 
             // Error elements
             const errorElements = {
@@ -362,6 +368,42 @@
                 'alamat': document.getElementById('alamat-error'),
                 'jabatan': document.getElementById('jabatan-error')
             };
+
+            // Validasi nama - hanya huruf dan spasi
+            nameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                // Hapus karakter yang bukan huruf, spasi, atau tanda baca umum dalam nama
+                let cleanedValue = value.replace(/[^a-zA-Z\s\.']/g, '');
+
+                if (value !== cleanedValue) {
+                    e.target.value = cleanedValue;
+                    showError('name', 'Nama hanya boleh berisi huruf dan spasi.');
+                } else if (cleanedValue.trim()) {
+                    hideError('name');
+                }
+            });
+
+            // Prevent paste dengan angka di nama
+            nameInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                let paste = (e.clipboardData || window.clipboardData).getData('text');
+                let cleanedPaste = paste.replace(/[^a-zA-Z\s\.']/g, '');
+
+                // Get current cursor position
+                let start = this.selectionStart;
+                let end = this.selectionEnd;
+                let currentValue = this.value;
+
+                // Insert cleaned paste at cursor position
+                this.value = currentValue.slice(0, start) + cleanedPaste + currentValue.slice(end);
+
+                // Set cursor position after pasted text
+                this.setSelectionRange(start + cleanedPaste.length, start + cleanedPaste.length);
+
+                if (paste !== cleanedPaste) {
+                    showError('name', 'Nama hanya boleh berisi huruf dan spasi.');
+                }
+            });
 
             // Fungsi untuk menampilkan error
             function showError(fieldName, message) {
@@ -371,7 +413,6 @@
                 if (field) {
                     field.classList.add('is-invalid');
                     field.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    field.focus();
                 }
 
                 if (errorDiv) {
@@ -394,10 +435,16 @@
                 }
             }
 
+            // Validasi nama - hanya huruf dan spasi
+            function isValidName(name) {
+                const nameRegex = /^[a-zA-Z\s\.\']+$/;
+                return nameRegex.test(name);
+            }
+
             // Add input event listeners to hide errors when typing/selecting
             ['name', 'alamat', 'jabatan'].forEach(fieldName => {
                 const field = document.getElementById(fieldName);
-                if (field) {
+                if (field && fieldName !== 'name') { // name sudah dihandle di atas
                     field.addEventListener('input', function() {
                         if (this.value.trim()) {
                             hideError(fieldName);
@@ -442,6 +489,16 @@
                         if (!firstErrorField) firstErrorField = input;
                     }
                 });
+
+                // Validate nama format
+                const nameInput = document.getElementById('name');
+                if (nameInput && nameInput.value.trim()) {
+                    if (!isValidName(nameInput.value.trim())) {
+                        isValid = false;
+                        showError('name', 'Nama hanya boleh berisi huruf dan spasi.');
+                        if (!firstErrorField) firstErrorField = nameInput;
+                    }
+                }
 
                 // If validation passes, submit form
                 if (isValid) {

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\DateHelper;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PerbaikanController extends Controller
 {
@@ -127,16 +129,12 @@ class PerbaikanController extends Controller
         $perbaikan->garansi = $request->garansi;
         $perbaikan->save();
 
-        // Add a new process step if provided
-
-
         return redirect()->route('teknisi.dashboard')->with('success', 'Data perbaikan berhasil diperbarui');
     }
 
     /**
      * Update the status of a repair.
      */
-
     public function updateStatus(Request $request, $id)
     {
         $perbaikan = Perbaikan::findOrFail($id);
@@ -231,8 +229,9 @@ class PerbaikanController extends Controller
             ]);
         }
 
-        return redirect()->route('teknisi.progress')->with('success', 'Status berhasil diperbarui');
+        return redirect()->route('teknisi.dashboard')->with('success', 'Status berhasil diperbarui');
     }
+
     public function addProcessStep(Request $request, $id)
     {
         $perbaikan = Perbaikan::findOrFail($id);
@@ -260,23 +259,32 @@ class PerbaikanController extends Controller
         return redirect()->route('perbaikan.show', $id)
             ->with('success', 'Langkah proses pengerjaan berhasil ditambahkan.');
     }
-    /**
-     * Show the progress view.
-     */
-
 
     /**
      * Show the laporan view.
      */
-    public function laporan()
+    public function laporan(Request $request)
     {
         $user = Auth::user();
 
-        // Get completed repairs for this user
-        $perbaikan = Perbaikan::where('user_id', $user->id)
+        // Get filter parameters
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        // Query untuk mendapatkan data perbaikan selesai milik teknisi yang login
+        $query = Perbaikan::where('user_id', $user->id)
             ->with('pelanggan')
-            ->where('status', 'Selesai')
-            ->orderBy('tanggal_perbaikan', 'desc')
+            ->where('status', 'Selesai');
+
+        // Apply filters if provided
+        if ($month) {
+            $query->whereMonth('tanggal_perbaikan', $month);
+        }
+        if ($year) {
+            $query->whereYear('tanggal_perbaikan', $year);
+        }
+
+        $perbaikan = $query->orderBy('tanggal_perbaikan', 'desc')
             ->get()
             ->map(function ($item) {
                 $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
@@ -287,7 +295,69 @@ class PerbaikanController extends Controller
     }
 
     /**
-     * Confirm status change dialog.
+     * Export laporan teknisi to Excel - SAMA SEPERTI TransaksiController::export()
      */
+    public function exportLaporan(Request $request)
+    {
+        $user = Auth::user();
 
+        // Get filter parameters
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        // Query data based on filters - sama seperti di laporan()
+        $query = Perbaikan::where('user_id', $user->id)
+            ->with(['pelanggan'])
+            ->where('status', 'Selesai');
+
+        if ($month) {
+            $query->whereMonth('tanggal_perbaikan', $month);
+        }
+        if ($year) {
+            $query->whereYear('tanggal_perbaikan', $year);
+        }
+
+        $perbaikan = $query->orderBy('tanggal_perbaikan', 'desc')->get();
+
+        // Create a new spreadsheet (sama seperti TransaksiController)
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Add headers
+        $sheet->setCellValue('A1', 'No.');
+        $sheet->setCellValue('B1', 'Kode Perbaikan');
+        $sheet->setCellValue('C1', 'Tanggal');
+        $sheet->setCellValue('D1', 'Device');
+        $sheet->setCellValue('E1', 'Pelanggan');
+        $sheet->setCellValue('F1', 'Masalah');
+        $sheet->setCellValue('G1', 'Tindakan');
+        $sheet->setCellValue('H1', 'Harga');
+        $sheet->setCellValue('I1', 'Status');
+
+        // Add data
+        $row = 2;
+        foreach ($perbaikan as $index => $p) {
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $p->id);
+            $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('d M Y'));
+            $sheet->setCellValue('D' . $row, $p->nama_device);
+            $sheet->setCellValue('E' . $row, $p->pelanggan ? $p->pelanggan->nama_pelanggan : 'N/A');
+            $sheet->setCellValue('F' . $row, $p->masalah);
+            $sheet->setCellValue('G' . $row, $p->tindakan_perbaikan);
+            $sheet->setCellValue('H' . $row, $p->harga);
+            $sheet->setCellValue('I' . $row, $p->status);
+            $row++;
+        }
+
+        // Create temporary file (sama seperti TransaksiController)
+        $fileName = 'laporan_teknisi_' . str_replace(' ', '_', $user->name) . '_' . date('YmdHis') . '.xlsx';
+        $filePath = storage_path('app/public/' . $fileName);
+
+        // Save the spreadsheet
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        // Download the file (sama seperti TransaksiController)
+        return response()->download($filePath)->deleteFileAfterSend(true);
+    }
 }

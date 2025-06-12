@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Karyawan - MG TECH</title>
+    <title>Detail User - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -335,7 +335,7 @@
         </a>
         <a href="{{ route('karyawan.index') }}" class="menu-item active">
             <i class="fas fa-users"></i>
-            <span>Data Karyawan</span>
+            <span>Data User</span>
         </a>
         <a href="#" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
@@ -358,7 +358,7 @@
 
     <div class="main-content">
         <div class="top-header">
-            <h1 class="page-title">Detail Karyawan</h1>
+            <h1 class="page-title">Detail User</h1>
             <div class="user-profile">
                 <div class="user-info">
                     <div class="user-name">{{ $user->name }}</div>
@@ -372,7 +372,7 @@
 
         <div class="content-wrapper">
             <div class="content-header">
-                <h2 class="content-title">Detail Data Karyawan</h2>
+                <h2 class="content-title">Detail Data User</h2>
                 <div class="action-buttons">
                     <a href="{{ route('karyawan.edit', $karyawan->id) }}" class="btn btn-edit">
                         <i class="fas fa-edit"></i> Edit
@@ -389,15 +389,15 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Informasi Karyawan</h3>
+                    <h3 class="card-title">Informasi User</h3>
                 </div>
                 <div class="card-body">
                     <div class="data-row">
-                        <div class="data-label">ID Karyawan</div>
+                        <div class="data-label">ID User</div>
                         <div class="data-value">{{ $karyawan->id }}</div>
                     </div>
                     <div class="data-row">
-                        <div class="data-label">Nama Karyawan</div>
+                        <div class="data-label">Nama User</div>
                         <div class="data-value">{{ $karyawan->name }}</div>
                     </div>
                     <div class="data-row">
@@ -454,7 +454,7 @@
                 <div class="info-box">
                     <i class="fas fa-info-circle"></i>
                     <div class="info-text">
-                        Karyawan dengan jabatan {{ $karyawan->jabatan }} tidak memiliki akses untuk melakukan perbaikan.
+                        User dengan jabatan {{ $karyawan->jabatan }} tidak memiliki akses untuk melakukan perbaikan.
                     </div>
                 </div>
             @endif

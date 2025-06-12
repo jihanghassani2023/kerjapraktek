@@ -204,8 +204,6 @@
             color: #333;
         }
 
-
-
         .form-control {
             width: 100%;
             padding: 10px 12px;
@@ -272,6 +270,12 @@
             margin-top: 5px;
         }
 
+        .name-requirements {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -306,7 +310,7 @@
             <i class="fas fa-users"></i>
             <span>Data User</span>
         </a>
-        <a href="#" class="menu-item">
+        <a href="{{ route('transaksi.index') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>
@@ -363,13 +367,13 @@
                     <label for="display_id">ID User</label>
                     <input type="text" class="form-control" id="display_id" value="{{ $formattedId ?? '1001' }}"
                         readonly disabled>
-                    <!-- Ini hanya untuk tampilan, tidak dikirim ke server -->
                 </div>
 
                 <div class="form-group">
                     <label for="name">Nama User</label>
                     <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
                         name="name" value="{{ old('name') }}" autocomplete="off">
+
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -437,6 +441,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('tambahKaryawanForm');
+            const nameInput = document.getElementById('name');
 
             // Error elements
             const errorElements = {
@@ -446,6 +451,32 @@
                 'email': document.getElementById('email-error'),
                 'password': document.getElementById('password-error')
             };
+
+            // Validasi nama - hanya huruf dan spasi
+            nameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                // Hapus karakter yang bukan huruf, spasi, atau tanda baca umum dalam nama
+                let cleanedValue = value.replace(/[^a-zA-Z\s\.']/g, '');
+
+                if (value !== cleanedValue) {
+                    e.target.value = cleanedValue;
+                    showError('name', 'Nama hanya boleh berisi huruf dan spasi.');
+                } else if (cleanedValue.trim()) {
+                    hideError('name');
+                }
+            });
+
+            // Prevent paste dengan angka di nama
+            nameInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                let paste = (e.clipboardData || window.clipboardData).getData('text');
+                let cleanedPaste = paste.replace(/[^a-zA-Z\s\.']/g, '');
+                this.value += cleanedPaste;
+
+                if (paste !== cleanedPaste) {
+                    showError('name', 'Nama hanya boleh berisi huruf dan spasi.');
+                }
+            });
 
             // Prevent autofill on form load
             setTimeout(function() {
@@ -468,7 +499,6 @@
                 if (field) {
                     field.classList.add('is-invalid');
                     field.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    field.focus();
                 }
 
                 if (errorDiv) {
@@ -491,10 +521,16 @@
                 }
             }
 
+            // Validasi nama - hanya huruf dan spasi
+            function isValidName(name) {
+                const nameRegex = /^[a-zA-Z\s\.\']+$/;
+                return nameRegex.test(name);
+            }
+
             // Add input event listeners to hide errors when typing/selecting
             ['name', 'alamat', 'jabatan', 'email', 'password'].forEach(fieldName => {
                 const field = document.getElementById(fieldName);
-                if (field) {
+                if (field && fieldName !== 'name') { // name sudah dihandle di atas
                     field.addEventListener('input', function() {
                         if (this.value.trim()) {
                             hideError(fieldName);
@@ -547,6 +583,16 @@
                         if (!firstErrorField) firstErrorField = input;
                     }
                 });
+
+                // Validate nama format
+                const nameInput = document.getElementById('name');
+                if (nameInput && nameInput.value.trim()) {
+                    if (!isValidName(nameInput.value.trim())) {
+                        isValid = false;
+                        showError('name', 'Nama hanya boleh berisi huruf dan spasi.');
+                        if (!firstErrorField) firstErrorField = nameInput;
+                    }
+                }
 
                 // Validate email format
                 const emailInput = document.getElementById('email');
