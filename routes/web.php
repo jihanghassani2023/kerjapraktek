@@ -39,7 +39,7 @@ Route::middleware(['auth'])->group(function () {
     // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-         Route::post('/transaksi/{id}/add-process', [AdminController::class, 'addProcessStep'])->name('transaksi.add-process');
+
         // Search functionality route
         Route::get('/search', [AdminController::class, 'search'])->name('search');
 
@@ -61,11 +61,12 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/pelanggan/{id}', [AdminController::class, 'updatePelanggan'])->name('pelanggan.update');
         Route::delete('/pelanggan/{id}', [AdminController::class, 'destroyPelanggan'])->name('pelanggan.destroy');
 
-        // Perbaikan management
+        // Perbaikan management - ADMIN HANYA BISA CREATE, TIDAK BISA EDIT
         Route::get('/perbaikan/create', [AdminController::class, 'createPerbaikan'])->name('perbaikan.create');
         Route::post('/perbaikan', [AdminController::class, 'storePerbaikan'])->name('perbaikan.store');
-        Route::get('/perbaikan/{id}/edit', [AdminController::class, 'editPerbaikan'])->name('perbaikan.edit');
-        Route::put('/perbaikan/{id}', [AdminController::class, 'updatePerbaikan'])->name('perbaikan.update');
+        // DIHAPUS: Route edit dan update perbaikan untuk admin
+        // Route::get('/perbaikan/{id}/edit', [AdminController::class, 'editPerbaikan'])->name('perbaikan.edit');
+        // Route::put('/perbaikan/{id}', [AdminController::class, 'updatePerbaikan'])->name('perbaikan.update');
     });
 
     // Search suggestions API route (outside of admin group)
@@ -91,11 +92,14 @@ Route::middleware(['auth'])->group(function () {
         // Dashboard
         Route::get('/dashboard', [PerbaikanController::class, 'index'])->name('teknisi.dashboard');
 
-
         Route::post('/perbaikan/{id}/add-process', [PerbaikanController::class, 'addProcessStep'])->name('perbaikan.add-process');
+
         // Laporan page
         Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('teknisi.laporan');
+
+        // Export laporan route - mengarah ke method yang benar
         Route::get('/laporan/export', [PerbaikanController::class, 'exportLaporan'])->name('laporan.export');
+
         // Perbaikan routes (hanya untuk view, edit, dan update status)
         Route::get('/perbaikan/{id}', [PerbaikanController::class, 'show'])->name('perbaikan.show');
         Route::get('/perbaikan/{id}/edit', [PerbaikanController::class, 'edit'])->name('perbaikan.edit');
@@ -104,6 +108,7 @@ Route::middleware(['auth'])->group(function () {
         // Confirm status change
         Route::get('/perbaikan/{id}/confirm-status/{status}', [PerbaikanController::class, 'confirmStatus'])->name('perbaikan.confirm-status');
     });
+
     // Add this to your routes/web.php
     Route::get('/admin/api/customers', [AdminController::class, 'getCustomers'])->name('admin.api.customers');
 

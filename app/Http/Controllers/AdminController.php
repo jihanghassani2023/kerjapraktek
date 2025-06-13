@@ -250,11 +250,6 @@ class AdminController extends Controller
         $perbaikan->status = $newStatus;
         $perbaikan->save();
 
-        // Update tindakan_perbaikan if provided
-        if ($request->has('tindakan_perbaikan') && $perbaikan->detail) {
-            $perbaikan->detail->update(['tindakan_perbaikan' => $request->tindakan_perbaikan]);
-        }
-
         // Add status change to proses_pengerjaan
         $currentProcess = $perbaikan->detail->proses_pengerjaan ?? [];
 
@@ -286,6 +281,9 @@ class AdminController extends Controller
         return redirect()->route('admin.transaksi.show', $id)
             ->with('success', 'Status berhasil diperbarui');
     }
+
+    // ADMIN TIDAK DAPAT MENAMBAH PROSES PENGERJAAN - DIHAPUS
+    // public function addProcessStep() - FUNCTION INI DIHAPUS
 
     // Tambahan method untuk pengelolaan pelanggan
     public function pelanggan()
@@ -348,72 +346,9 @@ class AdminController extends Controller
         return view('admin.edit_pelanggan', compact('user', 'pelanggan'));
     }
 
-    public function editPerbaikan($id)
-    {
-        $user = Auth::user();
-        $perbaikan = Perbaikan::with(['pelanggan', 'detail'])->findOrFail($id);
-
-        return view('admin.edit_perbaikan', compact('user', 'perbaikan'));
-    }
-
-    public function updatePerbaikan(Request $request, $id)
-    {
-        $perbaikan = Perbaikan::with('detail')->findOrFail($id);
-
-        $validator = Validator::make($request->all(), [
-            'masalah' => 'required|string',
-            'tindakan_perbaikan' => 'required|string',
-            'kategori_device' => 'required|string|max:50',
-            'harga' => 'required|numeric',
-            'garansi' => 'required|string',
-            'proses_step' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Update detail perbaikan
-        $perbaikan->detail->update([
-            'masalah' => $request->masalah,
-            'tindakan_perbaikan' => $request->tindakan_perbaikan,
-            'kategori_device' => $request->kategori_device,
-            'harga' => $request->harga,
-            'garansi' => $request->garansi,
-        ]);
-
-        // Add a new process step if provided
-        if ($request->filled('proses_step')) {
-            $perbaikan->addProsesStep($request->proses_step);
-        }
-
-        return redirect()->route('admin.transaksi.show', $id)
-            ->with('success', 'Data perbaikan berhasil diperbarui');
-    }
-
-    public function addProcessStep(Request $request, $id)
-    {
-        $perbaikan = Perbaikan::with('detail')->findOrFail($id);
-
-        // Validasi input
-        $request->validate([
-            'proses_step' => 'required|string|max:255',
-        ]);
-
-        // Tambahkan langkah proses baru
-        $currentProcess = $perbaikan->detail->proses_pengerjaan ?? [];
-        $currentProcess[] = [
-            'step' => $request->proses_step,
-            'timestamp' => now()->format('Y-m-d H:i:s')
-        ];
-
-        $perbaikan->detail->update(['proses_pengerjaan' => $currentProcess]);
-
-        return redirect()->route('admin.transaksi.show', $id)
-            ->with('success', 'Langkah proses pengerjaan berhasil ditambahkan.');
-    }
+    // ADMIN TIDAK DAPAT EDIT PERBAIKAN - FUNCTION INI DIHAPUS
+    // public function editPerbaikan() - DIHAPUS
+    // public function updatePerbaikan() - DIHAPUS
 
     public function updatePelanggan(Request $request, $id)
     {
@@ -484,7 +419,7 @@ class AdminController extends Controller
             ->with('success', 'Data pelanggan berhasil dihapus');
     }
 
-    // Tambahan method untuk pengelolaan perbaikan oleh admin
+    // Tambahan method untuk pengelolaan perbaikan oleh admin - HANYA BUAT BARU
     public function createPerbaikan()
     {
         $user = Auth::user();

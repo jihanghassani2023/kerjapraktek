@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="id">
 
@@ -559,6 +558,8 @@
             margin-top: 20px;
         }
 
+
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -761,13 +762,6 @@
                                     </button>
                                 @endif
                             </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="actions">
-                            <a href="{{ route('admin.perbaikan.edit', $transaksi->id) }}" class="btn btn-primary">
-                                <i class="fas fa-edit"></i> Edit Perbaikan
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -1194,8 +1188,11 @@
             document.querySelector('.main-content').style.marginLeft = '0';
             document.querySelector('.header').style.display = 'none';
             document.querySelector('.content-header .btn-print').style.display = 'none';
-            document.querySelector('.status-actions').style.display = 'none';
-            document.querySelector('.actions').style.display = 'none';
+
+            // Hide admin controls when printing
+            const statusActions = document.querySelector('.status-actions');
+            if (statusActions) statusActions.style.display = 'none';
+
             document.querySelector('.show-all-link').style.display = 'none';
 
             // Ensure full timeline is visible when printing
@@ -1214,10 +1211,10 @@
             // Only show status actions if status is not "Selesai"
             const currentStatus = document.getElementById('statusBadge').textContent.trim();
             if (currentStatus !== 'Selesai') {
-                document.querySelector('.status-actions').style.display = 'block';
+                const statusActions = document.querySelector('.status-actions');
+                if (statusActions) statusActions.style.display = 'block';
             }
 
-            document.querySelector('.actions').style.display = 'flex';
             document.querySelector('.show-all-link').style.display = 'block';
 
             // Restore timeline to previous state after printing
@@ -1226,6 +1223,7 @@
                 timelineContainer.style.display = 'none';
             }
         });
-    </script></body>
+    </script>
+</body>
 
 </html>

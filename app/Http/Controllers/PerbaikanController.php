@@ -137,7 +137,6 @@ class PerbaikanController extends Controller
     /**
      * Update the status of a repair.
      */
-
     public function updateStatus(Request $request, $id)
     {
         $perbaikan = Perbaikan::with('detail')->findOrFail($id);
