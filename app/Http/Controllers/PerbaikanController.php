@@ -89,51 +89,73 @@ class PerbaikanController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-    {
-        $perbaikan = Perbaikan::with('detail')->findOrFail($id);
+{
+    $perbaikan = Perbaikan::with('detail')->findOrFail($id);
 
-        // Make sure the repair belongs to the logged-in user
-        if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
-            return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
-        }
-
-        // Validate form input
-        $validator = Validator::make($request->all(), [
-            'masalah' => 'required|string',
-            'tindakan_perbaikan' => 'required|string',
-            'kategori_device' => 'required|string|max:50',
-            'harga' => 'required|numeric',
-            'garansi' => 'required|string',
-
-        ], [
-            'masalah.required' => 'Masalah wajib diisi.',
-            'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
-            'kategori_device.required' => 'Kategori device wajib diisi.',
-            'status.required' => 'Status wajib diisi.',
-            'status.in' => 'Status tidak valid.',
-            'harga.required' => 'Harga wajib diisi.',
-            'harga.numeric' => 'Harga harus berupa angka.',
-            'garansi.required' => 'Garansi wajib diisi.',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Update detail perbaikan
-        $perbaikan->detail->update([
-            'masalah' => $request->masalah,
-            'tindakan_perbaikan' => $request->tindakan_perbaikan,
-            'kategori_device' => $request->kategori_device,
-            'harga' => $request->harga,
-            'garansi' => $request->garansi,
-        ]);
-
-        return redirect()->route('teknisi.dashboard')->with('success', 'Data perbaikan berhasil diperbarui');
+    // Make sure the repair belongs to the logged-in user
+    if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
+        return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
     }
 
+    // Validate form input
+    $validator = Validator::make($request->all(), [
+        'masalah' => 'required|string',
+        'tindakan_perbaikan' => 'required|string',
+        'kategori_device' => 'required|string|max:50',
+        'harga' => 'required|numeric',
+        'garansi' => 'required|string',
+        'garansi_items' => 'required|array|min:1',
+        'garansi_items.*.sparepart' => 'required|string|max:100',
+        'garansi_items.*.periode' => 'required|string|in:Tidak ada garansi,1 Bulan,12 Bulan',
+    ], [
+        'masalah.required' => 'Masalah wajib diisi.',
+        'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
+        'kategori_device.required' => 'Kategori device wajib diisi.',
+        'harga.required' => 'Harga wajib diisi.',
+        'harga.numeric' => 'Harga harus berupa angka.',
+        'garansi.required' => 'Garansi wajib diisi.',
+        'garansi_items.required' => 'Minimal satu item garansi harus diisi.',
+        'garansi_items.min' => 'Minimal satu item garansi harus diisi.',
+        'garansi_items.*.sparepart.required' => 'Nama sparepart/komponen wajib diisi.',
+        'garansi_items.*.periode.required' => 'Periode garansi wajib dipilih.',
+        'garansi_items.*.periode.in' => 'Periode garansi tidak valid.',
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    // Process garansi data - construct the garansi string from items
+    $garansiString = '';
+    if ($request->has('garansi_items') && is_array($request->garansi_items)) {
+        $garansiParts = [];
+        foreach ($request->garansi_items as $item) {
+            if (!empty($item['sparepart']) && !empty($item['periode'])) {
+                $garansiParts[] = trim($item['sparepart']) . ': ' . trim($item['periode']);
+            }
+        }
+        $garansiString = implode('; ', $garansiParts);
+    }
+
+    // Fallback to the hidden garansi field if no items processed
+    if (empty($garansiString) && $request->has('garansi')) {
+        $garansiString = $request->garansi;
+    }
+
+    // Update detail perbaikan
+    $perbaikan->detail->update([
+        'masalah' => $request->masalah,
+        'tindakan_perbaikan' => $request->tindakan_perbaikan,
+        'kategori_device' => $request->kategori_device,
+        'harga' => $request->harga,
+        'garansi' => $garansiString,
+    ]);
+
+    return redirect()->route('teknisi.dashboard')
+        ->with('success', 'Data perbaikan berhasil diperbarui dengan garansi: ' . $garansiString);
+}
     /**
      * Update the status of a repair.
      */

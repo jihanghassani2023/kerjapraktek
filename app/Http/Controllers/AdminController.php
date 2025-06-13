@@ -433,58 +433,82 @@ class AdminController extends Controller
     }
 
     public function storePerbaikan(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'pelanggan_id' => 'required|exists:pelanggan,id',
-            'user_id' => 'required|exists:users,id',
-            'nama_device' => 'required|string|max:100',
-            'masalah' => 'required|string|max:200',
-            'tindakan_perbaikan' => 'required|string',
-            'harga' => 'required|numeric',
-            'garansi' => 'required|string|max:50',
-            'kategori_device' => 'required|string|max:50',
-        ], [
-            'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
-            'user_id.required' => 'Teknisi wajib dipilih.',
-            'nama_device.required' => 'Nama barang wajib diisi.',
-            'kategori_device.required' => 'Kategori device wajib diisi.',
-            'masalah.required' => 'Masalah wajib diisi.',
-            'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
-            'harga.required' => 'Harga wajib diisi.',
-            'harga.numeric' => 'Harga harus berupa angka.',
-            'garansi.required' => 'Garansi wajib diisi.',
-        ]);
+{
+    $validator = Validator::make($request->all(), [
+        'pelanggan_id' => 'required|exists:pelanggan,id',
+        'user_id' => 'required|exists:users,id',
+        'nama_device' => 'required|string|max:100',
+        'masalah' => 'required|string|max:200',
+        'tindakan_perbaikan' => 'required|string',
+        'harga' => 'required|numeric',
+        'garansi' => 'required|string',
+        'kategori_device' => 'required|string|max:50',
+        'garansi_items' => 'required|array|min:1',
+        'garansi_items.*.sparepart' => 'required|string|max:100',
+        'garansi_items.*.periode' => 'required|string|in:Tidak ada garansi,1 Bulan,12 Bulan',
+    ], [
+        'pelanggan_id.required' => 'Pelanggan wajib dipilih.',
+        'user_id.required' => 'Teknisi wajib dipilih.',
+        'nama_device.required' => 'Nama barang wajib diisi.',
+        'kategori_device.required' => 'Kategori device wajib diisi.',
+        'masalah.required' => 'Masalah wajib diisi.',
+        'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
+        'harga.required' => 'Harga wajib diisi.',
+        'harga.numeric' => 'Harga harus berupa angka.',
+        'garansi.required' => 'Garansi wajib diisi.',
+        'garansi_items.required' => 'Minimal satu item garansi harus diisi.',
+        'garansi_items.min' => 'Minimal satu item garansi harus diisi.',
+        'garansi_items.*.sparepart.required' => 'Nama sparepart/komponen wajib diisi.',
+        'garansi_items.*.periode.required' => 'Periode garansi wajib dipilih.',
+        'garansi_items.*.periode.in' => 'Periode garansi tidak valid.',
+    ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Create perbaikan header
-        $perbaikan = new Perbaikan();
-        $perbaikan->pelanggan_id = $request->pelanggan_id;
-        $perbaikan->user_id = $request->user_id;
-        $perbaikan->tanggal_perbaikan = date('Y-m-d');
-        $perbaikan->status = 'Menunggu';
-        $perbaikan->save();
-
-        // Create perbaikan detail
-        DetailPerbaikan::create([
-            'perbaikan_id' => $perbaikan->id,
-            'nama_device' => $request->nama_device,
-            'kategori_device' => $request->kategori_device,
-            'masalah' => $request->masalah,
-            'tindakan_perbaikan' => $request->tindakan_perbaikan,
-            'harga' => $request->harga,
-            'garansi' => $request->garansi,
-            'proses_pengerjaan' => [[
-                'step' => 'Menunggu Antrian Perbaikan',
-                'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
-            ]]
-        ]);
-
-        return redirect()->route('admin.transaksi')
-            ->with('success', 'Perbaikan berhasil disimpan');
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
     }
-}
+
+    // Process garansi data - construct the garansi string from items
+    $garansiString = '';
+    if ($request->has('garansi_items') && is_array($request->garansi_items)) {
+        $garansiParts = [];
+        foreach ($request->garansi_items as $item) {
+            if (!empty($item['sparepart']) && !empty($item['periode'])) {
+                $garansiParts[] = trim($item['sparepart']) . ': ' . trim($item['periode']);
+            }
+        }
+        $garansiString = implode('; ', $garansiParts);
+    }
+
+    // Fallback to the hidden garansi field if no items processed
+    if (empty($garansiString) && $request->has('garansi')) {
+        $garansiString = $request->garansi;
+    }
+
+    // Create perbaikan header
+    $perbaikan = new Perbaikan();
+    $perbaikan->pelanggan_id = $request->pelanggan_id;
+    $perbaikan->user_id = $request->user_id;
+    $perbaikan->tanggal_perbaikan = date('Y-m-d');
+    $perbaikan->status = 'Menunggu';
+    $perbaikan->save();
+
+    // Create perbaikan detail
+    DetailPerbaikan::create([
+        'perbaikan_id' => $perbaikan->id,
+        'nama_device' => $request->nama_device,
+        'kategori_device' => $request->kategori_device,
+        'masalah' => $request->masalah,
+        'tindakan_perbaikan' => $request->tindakan_perbaikan,
+        'harga' => $request->harga,
+        'garansi' => $garansiString,
+        'proses_pengerjaan' => [[
+            'step' => 'Menunggu Antrian Perbaikan',
+            'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
+        ]]
+    ]);
+
+    return redirect()->route('admin.transaksi')
+        ->with('success', 'Perbaikan berhasil disimpan dengan garansi: ' . $garansiString);
+}}

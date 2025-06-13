@@ -337,7 +337,7 @@
             <i class="fas fa-users"></i>
             <span>Data User</span>
         </a>
-        <a href="#" class="menu-item">
+        <a href="{{ route('transaksi.index') }}" class="menu-item">
             <i class="fas fa-exchange-alt"></i>
             <span>Transaksi</span>
         </a>

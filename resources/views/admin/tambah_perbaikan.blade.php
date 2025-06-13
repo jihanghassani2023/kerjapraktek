@@ -185,6 +185,29 @@
             background-color: #5a6268;
         }
 
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.875em;
+        }
+
         .content-section {
             background-color: white;
             border-radius: 8px;
@@ -262,23 +285,6 @@
             color: #8c3a3a;
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
-
-            .sidebar-logo span,
-            .menu-item span,
-            .logout span {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: 70px;
-            }
-        }
-
         /* Autocomplete styling */
         .autocomplete-container {
             position: relative;
@@ -314,6 +320,86 @@
 
         .autocomplete-item.selected {
             background-color: #e9ecef;
+        }
+
+        /* Garansi Container */
+        .garansi-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .garansi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .garansi-title {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .garansi-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: start;
+        }
+
+        .garansi-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .garansi-sparepart {
+            flex: 1;
+        }
+
+        .garansi-periode {
+            flex: 1;
+        }
+
+        .garansi-actions {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .garansi-item input {
+            margin-bottom: 0;
+        }
+
+        .garansi-item label {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+
+            .sidebar-logo span,
+            .menu-item span,
+            .logout span {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+
+            .garansi-item {
+                flex-direction: column;
+            }
+
+            .garansi-actions {
+                align-self: flex-end;
+            }
         }
     </style>
 </head>
@@ -483,15 +569,38 @@
 
                 <div class="form-group">
                     <label for="garansi">Garansi</label>
-                    <select id="garansi" name="garansi" class="form-control @error('garansi') is-invalid @enderror">
-                        <option value="">-- Pilih Garansi --</option>
-                        <option value="1 Bulan" {{ old('garansi') == '1 Bulan' ? 'selected' : '' }}>
-                            1 Bulan
-                        </option>
-                        <option value="12 Bulan" {{ old('garansi') == '12 Bulan' ? 'selected' : '' }}>
-                            12 Bulan
-                        </option>
-                    </select>
+                    <div class="garansi-container">
+                        <div class="garansi-header">
+                            <span class="garansi-title">Detail Garansi</span>
+                            <button type="button" id="addGaransiBtn" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Tambah Garansi
+                            </button>
+                        </div>
+                        <div id="garansiContainer">
+                            <div class="garansi-item" data-index="0">
+                                <div class="garansi-sparepart">
+                                    <label>Sparepart</label>
+                                    <input type="text" name="garansi_items[0][sparepart]" class="form-control"
+                                           placeholder="Contoh: Baterai, LCD, Mesin, dll">
+                                </div>
+                                <div class="garansi-periode">
+                                    <label>Garansi</label>
+                                    <select name="garansi_items[0][periode]" class="form-control">
+                                        <option value="">-- Pilih Garansi --</option>
+                                        <option value="Tidak ada garansi">Tidak ada garansi</option>
+                                        <option value="1 Bulan">1 Bulan</option>
+                                        <option value="12 Bulan">12 Bulan</option>
+                                    </select>
+                                </div>
+                                <div class="garansi-actions">
+                                    <button type="button" class="btn btn-danger btn-sm remove-garansi" style="display: none;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="garansi" id="garansi" value="{{ old('garansi') }}">
                     @error('garansi')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -516,12 +625,16 @@
             const nomorTelpInput = document.getElementById('nomor_telp');
             const emailInput = document.getElementById('email');
             const autocompleteResults = document.getElementById('autocompleteResults');
+            const addGaransiBtn = document.getElementById('addGaransiBtn');
+            const garansiContainer = document.getElementById('garansiContainer');
+            const garansiHiddenInput = document.getElementById('garansi');
 
             // CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             // Store all customers from database
             let allCustomers = [];
+            let garansiIndex = 1;
 
             // Error elements
             const errorElements = {
@@ -685,7 +798,7 @@
             });
 
             // Add input event listeners to hide errors when typing
-            ['user_id', 'nama_device', 'kategori_device', 'masalah', 'harga', 'garansi'].forEach(fieldName => {
+            ['user_id', 'nama_device', 'kategori_device', 'masalah', 'harga'].forEach(fieldName => {
                 const field = document.getElementById(fieldName);
                 if (field) {
                     field.addEventListener('input', function() {
@@ -695,6 +808,113 @@
                     });
                 }
             });
+
+            // Garansi Management Functions
+            function updateRemoveButtons() {
+                const garansiItems = garansiContainer.querySelectorAll('.garansi-item');
+                garansiItems.forEach((item, index) => {
+                    const removeBtn = item.querySelector('.remove-garansi');
+                    if (garansiItems.length > 1) {
+                        removeBtn.style.display = 'inline-flex';
+                    } else {
+                        removeBtn.style.display = 'none';
+                    }
+                });
+            }
+
+            function addGaransiItem() {
+                const newItem = document.createElement('div');
+                newItem.className = 'garansi-item';
+                newItem.setAttribute('data-index', garansiIndex);
+
+                newItem.innerHTML = `
+                    <div class="garansi-sparepart">
+                        <label>Sparepart/Komponen</label>
+                        <input type="text" name="garansi_items[${garansiIndex}][sparepart]" class="form-control"
+                               placeholder="Contoh: Baterai, LCD, Mesin, dll">
+                    </div>
+                    <div class="garansi-periode">
+                        <label>Periode Garansi</label>
+                        <select name="garansi_items[${garansiIndex}][periode]" class="form-control">
+                            <option value="">-- Pilih Garansi --</option>
+                            <option value="Tidak ada garansi">Tidak ada garansi</option>
+                            <option value="1 Bulan">1 Bulan</option>
+                            <option value="12 Bulan">12 Bulan</option>
+                        </select>
+                    </div>
+                    <div class="garansi-actions">
+                        <button type="button" class="btn btn-danger btn-sm remove-garansi">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+
+                garansiContainer.appendChild(newItem);
+                garansiIndex++;
+                updateRemoveButtons();
+                updateGaransiHiddenField();
+
+                // Add event listener for remove button
+                const removeBtn = newItem.querySelector('.remove-garansi');
+                removeBtn.addEventListener('click', function() {
+                    removeGaransiItem(newItem);
+                });
+
+                // Add event listeners for inputs to update hidden field
+                const inputs = newItem.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    input.addEventListener('input', updateGaransiHiddenField);
+                    input.addEventListener('change', updateGaransiHiddenField);
+                });
+            }
+
+            function removeGaransiItem(item) {
+                item.remove();
+                updateRemoveButtons();
+                updateGaransiHiddenField();
+            }
+
+            function updateGaransiHiddenField() {
+                const garansiItems = garansiContainer.querySelectorAll('.garansi-item');
+                const garansiData = [];
+
+                garansiItems.forEach(item => {
+                    const sparepart = item.querySelector('input[name*="[sparepart]"]').value.trim();
+                    const periode = item.querySelector('select[name*="[periode]"]').value;
+
+                    if (sparepart && periode) {
+                        garansiData.push(`${sparepart}: ${periode}`);
+                    }
+                });
+
+                garansiHiddenInput.value = garansiData.join('; ');
+
+                // Hide garansi error when there's valid data
+                if (garansiData.length > 0) {
+                    hideError('garansi');
+                }
+            }
+
+            // Add garansi button event listener
+            addGaransiBtn.addEventListener('click', addGaransiItem);
+
+            // Initial setup for first garansi item
+            const initialInputs = garansiContainer.querySelectorAll('input, select');
+            initialInputs.forEach(input => {
+                input.addEventListener('input', updateGaransiHiddenField);
+                input.addEventListener('change', updateGaransiHiddenField);
+            });
+
+            // Initial remove button setup
+            const initialRemoveBtn = garansiContainer.querySelector('.remove-garansi');
+            if (initialRemoveBtn) {
+                initialRemoveBtn.addEventListener('click', function() {
+                    const item = this.closest('.garansi-item');
+                    removeGaransiItem(item);
+                });
+            }
+
+            updateRemoveButtons();
 
             // Form submit handler
             form.addEventListener('submit', function(event) {
@@ -707,6 +927,9 @@
                 Object.keys(errorElements).forEach(fieldName => {
                     hideError(fieldName);
                 });
+
+                // Update garansi hidden field before validation
+                updateGaransiHiddenField();
 
                 // Validate customer selection
                 if (!pelangganIdInput.value || !namaPelangganInput.value.trim()) {
@@ -721,8 +944,7 @@
                     { name: 'nama_device', message: 'Nama device wajib diisi.' },
                     { name: 'kategori_device', message: 'Kategori device wajib dipilih.' },
                     { name: 'masalah', message: 'Masalah wajib diisi.' },
-                    { name: 'harga', message: 'Harga wajib diisi.' },
-                    { name: 'garansi', message: 'Garansi wajib dipilih.' }
+                    { name: 'harga', message: 'Harga wajib diisi.' }
                 ];
 
                 requiredFields.forEach(field => {
@@ -742,6 +964,16 @@
                         isValid = false;
                         showError('harga', 'Harga harus berupa angka yang valid dan lebih dari 0.');
                         if (!firstErrorField) firstErrorField = hargaInput;
+                    }
+                }
+
+                // Validate garansi
+                if (!garansiHiddenInput.value.trim()) {
+                    isValid = false;
+                    showError('garansi', 'Minimal satu item garansi harus diisi dengan lengkap.');
+                    if (!firstErrorField) {
+                        const firstGaransiInput = garansiContainer.querySelector('input, select');
+                        if (firstGaransiInput) firstErrorField = firstGaransiInput;
                     }
                 }
 
