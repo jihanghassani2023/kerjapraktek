@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\DateHelper;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PerbaikanController extends Controller
 {
@@ -263,15 +265,29 @@ class PerbaikanController extends Controller
     /**
      * Show the laporan view.
      */
-    public function laporan()
+    public function laporan(Request $request)
     {
         $user = Auth::user();
 
-        // Get completed repairs for this user
-        $perbaikan = Perbaikan::where('user_id', $user->id)
+        // Get filter parameters
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        // Base query for completed repairs by this technician
+        $query = Perbaikan::where('user_id', $user->id)
             ->with(['pelanggan', 'detail'])
-            ->where('status', 'Selesai')
-            ->orderBy('tanggal_perbaikan', 'desc')
+            ->where('status', 'Selesai');
+
+        // Apply filters if provided
+        if ($month) {
+            $query->whereMonth('tanggal_perbaikan', $month);
+        }
+
+        if ($year) {
+            $query->whereYear('tanggal_perbaikan', $year);
+        }
+
+        $perbaikan = $query->orderBy('tanggal_perbaikan', 'desc')
             ->get()
             ->map(function ($item) {
                 $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
@@ -279,5 +295,159 @@ class PerbaikanController extends Controller
             });
 
         return view('teknisi.laporan', compact('user', 'perbaikan'));
+    }
+
+    /**
+     * Export laporan to Excel file.
+     */
+    public function exportLaporan(Request $request)
+    {
+        $user = Auth::user();
+
+        // Get filter parameters
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        // Base query for completed repairs by this technician
+        $query = Perbaikan::where('user_id', $user->id)
+            ->with(['pelanggan', 'detail'])
+            ->where('status', 'Selesai');
+
+        // Apply filters if provided
+        if ($month) {
+            $query->whereMonth('tanggal_perbaikan', $month);
+        }
+
+        if ($year) {
+            $query->whereYear('tanggal_perbaikan', $year);
+        }
+
+        $perbaikan = $query->orderBy('tanggal_perbaikan', 'desc')->get();
+
+        // Create a new spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set document properties
+        $spreadsheet->getProperties()
+            ->setCreator('MG Tech')
+            ->setTitle('Laporan Perbaikan - ' . $user->name)
+            ->setSubject('Laporan Perbaikan')
+            ->setDescription('Laporan data perbaikan yang telah selesai');
+
+        // Add headers
+        $sheet->setCellValue('A1', 'LAPORAN PERBAIKAN');
+        $sheet->setCellValue('A2', 'Teknisi: ' . $user->name);
+        $sheet->setCellValue('A3', 'Tanggal Export: ' . now()->format('d/m/Y H:i:s'));
+
+        // Filter info
+        $filterInfo = 'Filter: ';
+        if ($month && $year) {
+            $monthNames = [
+                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            ];
+            $filterInfo .= $monthNames[$month] . ' ' . $year;
+        } elseif ($month) {
+            $monthNames = [
+                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            ];
+            $filterInfo .= 'Bulan ' . $monthNames[$month];
+        } elseif ($year) {
+            $filterInfo .= 'Tahun ' . $year;
+        } else {
+            $filterInfo .= 'Semua Data';
+        }
+        $sheet->setCellValue('A4', $filterInfo);
+
+        // Add table headers
+        $sheet->setCellValue('A6', 'No.');
+        $sheet->setCellValue('B6', 'Kode Perbaikan');
+        $sheet->setCellValue('C6', 'Tanggal');
+        $sheet->setCellValue('D6', 'Device');
+        $sheet->setCellValue('E6', 'Kategori');
+        $sheet->setCellValue('F6', 'Pelanggan');
+        $sheet->setCellValue('G6', 'No. Telepon');
+        $sheet->setCellValue('H6', 'Masalah');
+        $sheet->setCellValue('I6', 'Tindakan');
+        $sheet->setCellValue('J6', 'Harga');
+        $sheet->setCellValue('K6', 'Garansi');
+        $sheet->setCellValue('L6', 'Status');
+
+        // Style the headers
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E2E8F0']
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+        ];
+        $sheet->getStyle('A6:L6')->applyFromArray($headerStyle);
+
+        // Add data
+        $row = 7;
+        foreach ($perbaikan as $index => $p) {
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $p->id);
+            $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($p->tanggal_perbaikan)->format('d/m/Y'));
+            $sheet->setCellValue('D' . $row, $p->detail ? $p->detail->nama_device : 'N/A');
+            $sheet->setCellValue('E' . $row, $p->detail ? $p->detail->kategori_device : 'N/A');
+            $sheet->setCellValue('F' . $row, $p->pelanggan ? $p->pelanggan->nama_pelanggan : 'N/A');
+            $sheet->setCellValue('G' . $row, $p->pelanggan ? $p->pelanggan->nomor_telp : 'N/A');
+            $sheet->setCellValue('H' . $row, $p->detail ? $p->detail->masalah : 'N/A');
+            $sheet->setCellValue('I' . $row, $p->detail ? $p->detail->tindakan_perbaikan : 'N/A');
+            $sheet->setCellValue('J' . $row, $p->detail ? 'Rp ' . number_format($p->detail->harga, 0, ',', '.') : 'Rp 0');
+            $sheet->setCellValue('K' . $row, $p->detail ? $p->detail->garansi : 'N/A');
+            $sheet->setCellValue('L' . $row, $p->status);
+            $row++;
+        }
+
+        // Style the data rows
+        if ($row > 7) {
+            $dataRange = 'A7:L' . ($row - 1);
+            $dataStyle = [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ],
+                ],
+            ];
+            $sheet->getStyle($dataRange)->applyFromArray($dataStyle);
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'L') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Add summary
+        $summaryRow = $row + 1;
+        $sheet->setCellValue('A' . $summaryRow, 'Total Perbaikan Selesai: ' . $perbaikan->count());
+        $totalHarga = $perbaikan->sum(function($item) {
+            return $item->detail ? $item->detail->harga : 0;
+        });
+        $sheet->setCellValue('A' . ($summaryRow + 1), 'Total Pendapatan: Rp ' . number_format($totalHarga, 0, ',', '.'));
+
+        // Generate filename
+        $filename = 'laporan_perbaikan_' . strtolower(str_replace(' ', '_', $user->name)) . '_' . date('YmdHis') . '.xlsx';
+
+        // Set headers for download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Create writer and output file
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+
+        exit;
     }
 }
