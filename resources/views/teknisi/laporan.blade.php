@@ -293,7 +293,7 @@
             </div>
             <!-- PERBAIKAN: Gunakan route name yang sesuai dengan yang ada di routes/web.php -->
             <a href="{{ route('laporan.export') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="btn-export">
-                <i class="fas fa-file-export"></i> Export
+                <i class="fas fa-file-export"></i> Export Data Perbaikan
             </a>
         </div>
 
