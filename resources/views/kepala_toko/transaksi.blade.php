@@ -392,7 +392,7 @@
         </div>
 
         <div class="title-section">
-            <h1 class="page-title">Data Transaksi Perbaikan</h1>
+            <h1 class="page-title">Data Laporan</h1>
             <a href="{{ route('transaksi.export') }}" class="btn btn-export">
                 <i class="fas fa-file-export"></i> Export Data Transaksi
             </a>
