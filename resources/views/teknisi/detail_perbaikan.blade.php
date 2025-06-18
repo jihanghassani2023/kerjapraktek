@@ -419,6 +419,16 @@
             padding-left: 20px;
         }
 
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 2px;
+            background-color: #e0e0e0;
+        }
+
         .timeline-item {
             position: relative;
             margin-bottom: 15px;
@@ -771,8 +781,9 @@
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Tanggal Perbaikan</div>
-                              <div class="info-value">
-    {{ \App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan) }}</div>
+                                <div class="info-value">
+                                    {{ \App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan) }}
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Nama Device</div>
@@ -796,7 +807,17 @@
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Garansi</div>
-                                <div class="info-value">{{ $perbaikan->garansi ?: 'Tidak ada' }}</div>
+                                <div class="info-value">
+                                    @if ($perbaikan->garansiItems->count() > 0)
+                                        @foreach ($perbaikan->garansiItems as $garansi)
+                                            <div style="margin-bottom: 5px;">
+                                                {{ $garansi->garansi_sparepart }}: {{ $garansi->garansi_periode }}
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        {{ $perbaikan->garansi ?: 'Tidak ada' }}
+                                    @endif
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Status</div>
@@ -835,48 +856,52 @@
                 <!-- Kolom Kanan -->
                 <div class="col-md-6">
                     <!-- Card Timeline Proses Pengerjaan -->
+                    <!-- Card Timeline Proses Pengerjaan -->
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Proses Pengerjaan</h3>
                         </div>
                         <div class="card-body">
-                            @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
-                                <?php
-                                $prosesArray = $perbaikan->proses_pengerjaan;
-                                $latestProcess = $prosesArray[count($prosesArray) - 1];
-                                ?>
+                            @php
+                                // FIXED: Gunakan method yang sudah difilter untuk menghindari duplikasi
+                                $distinctProses = $perbaikan->getDistinctProsesPengerjaan();
+                            @endphp
+
+                            @if ($distinctProses->count() > 0)
+                                @php
+                                    $latestProcess = $distinctProses->first();
+                                @endphp
                                 <!-- Latest Process -->
                                 <div class="latest-process">
                                     <div class="process-header">
-                                        <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir
-                                        </div>
+                                        <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
                                         <div class="process-date">
-                                            {{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}
+                                            {{ $latestProcess->created_at->format('d M Y H:i') }}
                                         </div>
                                     </div>
-                                    <div class="process-content">{{ $latestProcess['step'] }}</div>
+                                    <div class="process-content">{{ $latestProcess->process_step }}</div>
                                     <div class="show-all-link" onclick="toggleTimeline()">
-                                        Lihat semua progress <i class="fas fa-chevron-down"
-                                            id="timeline-toggle-icon"></i>
+                                        Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
                                     </div>
                                 </div>
 
                                 <!-- Timeline Container (Initially Hidden) -->
                                 <div id="timeline-container" class="timeline-container">
                                     <div class="timeline">
-                                        @foreach (array_reverse($perbaikan->proses_pengerjaan) as $proses)
+                                        {{-- FIXED: Gunakan $distinctProses yang sudah difilter --}}
+                                        @foreach ($distinctProses as $proses)
                                             @php
                                                 $isStatusChange =
-                                                    $proses['step'] == 'Menunggu Antrian Perbaikan' ||
-                                                    $proses['step'] == 'Device Anda Sedang diproses' ||
-                                                    $proses['step'] == 'Device Anda Telah Selesai';
+                                                    $proses->process_step == 'Menunggu Antrian Perbaikan' ||
+                                                    $proses->process_step == 'Device Anda Sedang diproses' ||
+                                                    $proses->process_step == 'Device Anda Telah Selesai';
                                                 $statusClass = '';
                                                 if ($isStatusChange) {
-                                                    if ($proses['step'] == 'Menunggu Antrian Perbaikan') {
+                                                    if ($proses->process_step == 'Menunggu Antrian Perbaikan') {
                                                         $statusClass = 'status-menunggu';
-                                                    } elseif ($proses['step'] == 'Device Anda Sedang diproses') {
+                                                    } elseif ($proses->process_step == 'Device Anda Sedang diproses') {
                                                         $statusClass = 'status-proses';
-                                                    } elseif ($proses['step'] == 'Device Anda Telah Selesai') {
+                                                    } elseif ($proses->process_step == 'Device Anda Telah Selesai') {
                                                         $statusClass = 'status-selesai';
                                                     }
                                                 }
@@ -884,13 +909,12 @@
                                             <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}"
                                                 style="background-color: transparent !important;">
                                                 <div class="timeline-marker">
-                                                    <i
-                                                        class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
+                                                    <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
                                                 </div>
                                                 <div class="timeline-content">
-                                                    <div class="timeline-title">{{ $proses['step'] }}</div>
+                                                    <div class="timeline-title">{{ $proses->process_step }}</div>
                                                     <div class="timeline-date">
-                                                        {{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}
+                                                        {{ $proses->created_at->format('d M Y H:i:s') }}
                                                     </div>
                                                 </div>
                                             </div>
@@ -898,8 +922,7 @@
                                     </div>
                                 </div>
                             @else
-                                <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan
-                                    yang direkam.</p>
+                                <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
                             @endif
 
                             <!-- Form Tambah Proses - HANYA TAMPIL JIKA STATUS PROSES -->
@@ -971,7 +994,8 @@
             </div>
         </div>
     </div>
-<script>
+
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('confirmationModal');
             const confirmText = document.getElementById('confirmationText');
@@ -1396,6 +1420,7 @@
 
             document.querySelector('.actions').style.display = 'flex';
         });
-    </script>    </body>
+    </script>
+</body>
 
 </html>

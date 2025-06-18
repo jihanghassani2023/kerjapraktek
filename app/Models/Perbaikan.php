@@ -1,9 +1,11 @@
 <?php
+// app/Models/Perbaikan.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Perbaikan extends Model
 {
@@ -33,91 +35,308 @@ class Perbaikan extends Model
         });
     }
 
+    /**
+     * GENERATE KODE PERBAIKAN - METHOD UTAMA
+     * Format: MG50001, MG50002, dst.
+     */
     public static function generateKodePerbaikan()
     {
-        $lastPerbaikan = self::where('id', 'LIKE', 'MG%')
-            ->orderBy('id', 'desc')
-            ->first();
+        try {
+            // Gunakan DB transaction untuk menghindari duplicate ID
+            return \Illuminate\Support\Facades\DB::transaction(function () {
+                $lastPerbaikan = self::where('id', 'LIKE', 'MG%')
+                    ->orderBy('id', 'desc')
+                    ->lockForUpdate() // Lock untuk mencegah race condition
+                    ->first();
 
-        if ($lastPerbaikan) {
-            $lastNumber = (int) substr($lastPerbaikan->id, 2);
-            $nextNumber = $lastNumber + 1;
-        } else {
-            $nextNumber = 50001; // Mulai dari 50001
+                if ($lastPerbaikan) {
+                    // Ambil angka dari ID terakhir (contoh: MG50001 -> 50001)
+                    $lastNumber = (int) substr($lastPerbaikan->id, 2);
+                    $nextNumber = $lastNumber + 1;
+                } else {
+                    // Jika belum ada data, mulai dari 50001
+                    $nextNumber = 50001;
+                }
+
+                $newId = 'MG' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+                // Double check untuk memastikan ID belum ada
+                $exists = self::where('id', $newId)->exists();
+                if ($exists) {
+                    // Jika masih ada, increment lagi
+                    $nextNumber++;
+                    $newId = 'MG' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+                }
+
+                return $newId;
+            });
+        } catch (\Exception $e) {
+            // Fallback dengan timestamp jika ada error
+            $timestamp = now()->format('His'); // HourMinuteSecond
+            return 'MG' . $timestamp;
         }
-
-        return 'MG' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
 
     public $timestamps = true;
 
-    // Relasi ke User (teknisi)
+    // ============ RELATIONSHIPS ============
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Pelanggan
     public function pelanggan()
     {
         return $this->belongsTo(Pelanggan::class);
     }
 
-    // Relasi ke Detail Perbaikan (One-to-One)
-    public function detail()
+    public function details()
     {
-        return $this->hasOne(DetailPerbaikan::class, 'perbaikan_id', 'id');
+        return $this->hasMany(DetailPerbaikan::class, 'perbaikan_id', 'id');
     }
 
-    // Accessor untuk data detail (untuk backward compatibility)
+    // DEPRECATED: Use getCurrentDetail() instead
+    public function detail()
+    {
+        return $this->hasOne(DetailPerbaikan::class, 'perbaikan_id', 'id')->latest();
+    }
+
+    public function prosesPengerjaan()
+    {
+        return $this->hasMany(DetailPerbaikan::class, 'perbaikan_id', 'id')
+            ->select(['perbaikan_id', 'process_step', 'created_at'])
+            ->whereNotNull('process_step')
+            ->where('process_step', '!=', 'Data perbaikan diperbarui') // HANYA filter ini saja
+            ->orderBy('created_at', 'desc');
+    }
+
+    // DEPRECATED: Use getCurrentGaransiItems() instead
+    public function garansiItems()
+    {
+        $latestGaransiTimestamp = $this->getLatestGaransiTimestamp();
+
+        if (!$latestGaransiTimestamp) {
+            return $this->hasMany(DetailPerbaikan::class, 'perbaikan_id', 'id')
+                ->whereRaw('1 = 0');
+        }
+
+        return $this->hasMany(DetailPerbaikan::class, 'perbaikan_id', 'id')
+            ->select(['perbaikan_id', 'garansi_sparepart', 'garansi_periode', 'created_at'])
+            ->whereNotNull('garansi_sparepart')
+            ->where('created_at', $latestGaransiTimestamp)
+            ->orderBy('garansi_sparepart', 'asc');
+    }
+
+    // ============ CURRENT DATA METHODS (FIXED) ============
+
+    /**
+     * Get CURRENT detail (latest record)
+     * FIXED: Return only current data, not historical
+     */
+    public function getCurrentDetail()
+    {
+        return DetailPerbaikan::getCurrentMainData($this->id);
+    }
+
+    /**
+     * Get CURRENT garansi items
+     * FIXED: Return only current garansi, hide deleted ones
+     */
+    public function getCurrentGaransiItems()
+    {
+        return DetailPerbaikan::getCurrentGaransiItems($this->id);
+    }
+
+    /**
+     * Check if garansi has changed compared to current state
+     * FIXED: Compare with current state only
+     */
+    public function hasGaransiChanged($newGaransiItems)
+    {
+        $currentGaransi = $this->getCurrentGaransiItems();
+
+        // Convert current to comparable format
+        $currentFormatted = $currentGaransi->map(function($item) {
+            return [
+                'sparepart' => $item->garansi_sparepart,
+                'periode' => $item->garansi_periode
+            ];
+        })->sortBy('sparepart')->values()->toArray();
+
+        // Convert new to comparable format and sort
+        $newFormatted = collect($newGaransiItems)
+            ->map(function($item) {
+                return [
+                    'sparepart' => trim($item['sparepart'] ?? ''),
+                    'periode' => trim($item['periode'] ?? '')
+                ];
+            })
+            ->filter(function($item) {
+                return !empty($item['sparepart']) && !empty($item['periode']);
+            })
+            ->sortBy('sparepart')
+            ->values()
+            ->toArray();
+
+        return $currentFormatted !== $newFormatted;
+    }
+
+    // ============ ACCESSOR ATTRIBUTES ============
+
+    /**
+     * Accessor untuk detail - ambil data terbaru
+     * FIXED: Use current detail instead of all history
+     */
+    public function getDetailAttribute()
+    {
+        return $this->getCurrentDetail();
+    }
+
+    /**
+     * Accessor untuk garansi items - ambil data terbaru
+     * FIXED: Use current garansi instead of all history
+     */
+    public function getGaransiItemsAttribute()
+    {
+        return $this->getCurrentGaransiItems();
+    }
+
     public function getNamaDeviceAttribute()
     {
-        return $this->detail ? $this->detail->nama_device : null;
+        $detail = $this->getCurrentDetail();
+        return $detail ? $detail->nama_device : null;
     }
 
     public function getKategoriDeviceAttribute()
     {
-        return $this->detail ? $this->detail->kategori_device : null;
+        $detail = $this->getCurrentDetail();
+        return $detail ? $detail->kategori_device : null;
     }
 
     public function getMasalahAttribute()
     {
-        return $this->detail ? $this->detail->masalah : null;
+        $detail = $this->getCurrentDetail();
+        return $detail ? $detail->masalah : null;
     }
 
     public function getTindakanPerbaikanAttribute()
     {
-        return $this->detail ? $this->detail->tindakan_perbaikan : null;
+        $detail = $this->getCurrentDetail();
+        return $detail ? $detail->tindakan_perbaikan : null;
     }
 
     public function getHargaAttribute()
     {
-        return $this->detail ? $this->detail->harga : 0;
+        $detail = $this->getCurrentDetail();
+        return $detail ? $detail->harga : 0;
     }
 
-    public function getGaransiAttribute()
+    // ============ LEGACY HELPER METHODS (Keep for backward compatibility) ============
+
+    public function getLatestGaransiTimestamp()
     {
-        return $this->detail ? $this->detail->garansi : null;
+        return $this->details()
+            ->whereNotNull('garansi_sparepart')
+            ->max('created_at');
     }
 
-    public function getProsesPengerjaanAttribute()
+    public function getLatestGaransiItems()
     {
-        return $this->detail ? $this->detail->proses_pengerjaan : [];
+        // REDIRECT to new method
+        return $this->getCurrentGaransiItems();
     }
 
-    // Method untuk menambah proses step
+    public function getDistinctProsesPengerjaan()
+    {
+        return $this->details()
+            ->select('process_step', 'created_at')
+            ->whereNotNull('process_step')
+            ->where('process_step', '!=', 'Data perbaikan diperbarui') // HANYA filter ini saja
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('process_step')
+            ->values();
+    }
+
+    // ============ UTILITY METHODS ============
+
     public function addProsesStep($step)
     {
-        if ($this->detail) {
-            $currentProcess = $this->detail->proses_pengerjaan ?? [];
-            $currentProcess[] = [
-                'step' => $step,
-                'timestamp' => now()->format('Y-m-d H:i:s')
-            ];
+        // HANYA tolak "Data perbaikan diperbarui", yang lain boleh
+        if ($step !== 'Data perbaikan diperbarui') {
+            DetailPerbaikan::updatePerbaikanRecords($this->id, [], $step);
+        }
+        return $this;
+    }
 
-            $this->detail->update(['proses_pengerjaan' => $currentProcess]);
+    public function getActiveGaransiCount()
+    {
+        return $this->getCurrentGaransiItems()->count();
+    }
+
+    public function getGaransiSummary()
+    {
+        $items = $this->getCurrentGaransiItems();
+
+        if ($items->count() === 0) {
+            return [
+                'count' => 0,
+                'text' => 'Tidak ada garansi',
+                'items' => []
+            ];
         }
 
-        return $this;
+        return [
+            'count' => $items->count(),
+            'text' => $items->map(function($item) {
+                return $item->garansi_sparepart . ': ' . $item->garansi_periode;
+            })->implode('; '),
+            'items' => $items->map(function ($item) {
+                return [
+                    'sparepart' => $item->garansi_sparepart,
+                    'periode' => $item->garansi_periode
+                ];
+            })->toArray()
+        ];
+    }
+
+    // ============ DEBUG METHODS ============
+
+    public function getAllGaransiHistory()
+    {
+        return $this->details()
+            ->select('garansi_sparepart', 'garansi_periode', 'created_at', 'process_step')
+            ->whereNotNull('garansi_sparepart')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('created_at')
+            ->map(function ($group, $timestamp) {
+                return [
+                    'timestamp' => $timestamp,
+                    'process_step' => $group->first()->process_step,
+                    'items' => $group->map(function ($item) {
+                        return $item->garansi_sparepart . ': ' . $item->garansi_periode;
+                    })->toArray()
+                ];
+            })->values();
+    }
+
+    public function debugGaransiLogic()
+    {
+        $allDetails = $this->details()->orderBy('created_at', 'desc')->get();
+        $latestOverall = $allDetails->first();
+        $latestGaransiTimestamp = $this->getLatestGaransiTimestamp();
+        $currentGaransiItems = $this->getCurrentGaransiItems();
+
+        return [
+            'total_records' => $allDetails->count(),
+            'latest_overall_timestamp' => $latestOverall ? $latestOverall->created_at : null,
+            'latest_garansi_timestamp' => $latestGaransiTimestamp,
+            'current_garansi_items' => $currentGaransiItems->map(function ($item) {
+                return $item->garansi_sparepart . ': ' . $item->garansi_periode;
+            })->toArray(),
+            'all_garansi_history' => $this->getAllGaransiHistory()
+        ];
     }
 }

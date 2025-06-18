@@ -519,7 +519,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
@@ -632,7 +631,17 @@
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Garansi</div>
-                                <div class="info-value">{{ $transaksi->garansi ?: 'Tidak ada' }}</div>
+                                <div class="info-value">
+                                    @if ($transaksi->garansiItems && $transaksi->garansiItems->count() > 0)
+                                        @foreach ($transaksi->garansiItems as $garansi)
+                                            <div style="margin-bottom: 5px;">
+                                                {{ $garansi->garansi_sparepart }}: {{ $garansi->garansi_periode }}
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        {{ $transaksi->garansi ?: 'Tidak ada' }}
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
@@ -671,24 +680,29 @@
                 </div>
 
                 <!-- Right Column: Process Timeline -->
+                <!-- Right Column: Process Timeline -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Proses Pengerjaan</h3>
                         <div class="real-time-clock" id="realTimeClock">00:00:00</div>
                     </div>
                     <div class="card-body">
-                        @if(!empty($transaksi->proses_pengerjaan) && count($transaksi->proses_pengerjaan) > 0)
-                            <?php
-                                $prosesArray = $transaksi->proses_pengerjaan;
-                                $latestProcess = $prosesArray[count($prosesArray) - 1];
-                            ?>
+                        @php
+                            // FIXED: Gunakan method yang sudah difilter untuk menghindari duplikasi
+                            $distinctProses = $transaksi->getDistinctProsesPengerjaan();
+                        @endphp
+
+                        @if($distinctProses && $distinctProses->count() > 0)
+                            @php
+                                $latestProcess = $distinctProses->first();
+                            @endphp
                             <!-- Latest Process -->
                             <div class="latest-process">
                                 <div class="process-header">
                                     <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
-                                    <div class="process-date">{{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</div>
+                                    <div class="process-date">{{ $latestProcess->created_at->format('d M Y H:i') }}</div>
                                 </div>
-                                <div class="process-content">{{ $latestProcess['step'] }}</div>
+                                <div class="process-content">{{ $latestProcess->process_step }}</div>
                                 <div class="show-all-link" onclick="toggleTimeline()">
                                     Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
                                 </div>
@@ -697,16 +711,20 @@
                             <!-- Full Timeline (hidden by default) -->
                             <div id="timeline-container" class="timeline-container">
                                 <div class="timeline">
-                                    @foreach(array_reverse($transaksi->proses_pengerjaan) as $proses)
+                                    {{-- FIXED: Gunakan $distinctProses yang sudah difilter --}}
+                                    @foreach($distinctProses as $proses)
                                         @php
-                                            $isStatusChange = strpos($proses['step'], 'Status diubah menjadi') === 0;
+                                            $isStatusChange =
+                                                $proses->process_step == 'Menunggu Antrian Perbaikan' ||
+                                                $proses->process_step == 'Device Anda Sedang diproses' ||
+                                                $proses->process_step == 'Device Anda Telah Selesai';
                                             $statusClass = '';
                                             if ($isStatusChange) {
-                                                if (strpos($proses['step'], 'Menunggu') !== false) {
+                                                if ($proses->process_step == 'Menunggu Antrian Perbaikan') {
                                                     $statusClass = 'status-menunggu';
-                                                } elseif (strpos($proses['step'], 'Proses') !== false) {
+                                                } elseif ($proses->process_step == 'Device Anda Sedang diproses') {
                                                     $statusClass = 'status-proses';
-                                                } elseif (strpos($proses['step'], 'Selesai') !== false) {
+                                                } elseif ($proses->process_step == 'Device Anda Telah Selesai') {
                                                     $statusClass = 'status-selesai';
                                                 }
                                             }
@@ -716,8 +734,8 @@
                                                 <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
                                             </div>
                                             <div class="timeline-content">
-                                                <div class="timeline-title">{{ $proses['step'] }}</div>
-                                                <div class="timeline-date">{{ \Carbon\Carbon::parse($proses['timestamp'])->format('d M Y H:i:s') }}</div>
+                                                <div class="timeline-title">{{ $proses->process_step }}</div>
+                                                <div class="timeline-date">{{ $proses->created_at->format('d M Y H:i:s') }}</div>
                                             </div>
                                         </div>
                                     @endforeach

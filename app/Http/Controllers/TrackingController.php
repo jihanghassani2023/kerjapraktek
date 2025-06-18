@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/TrackingController.php
 
 namespace App\Http\Controllers;
 
@@ -35,13 +36,13 @@ class TrackingController extends Controller
                 ->with('error', 'Nomor telepon tidak ditemukan. Mohon periksa kembali nomor telepon Anda.');
         }
 
-        // Ambil semua perbaikan untuk pelanggan ini
+        // Ambil semua perbaikan untuk pelanggan ini dengan relasi yang diperlukan
         $allPerbaikan = Perbaikan::where('pelanggan_id', $pelanggan->id)
-                            ->with(['user', 'pelanggan', 'detail'])
+                            ->with(['user', 'pelanggan', 'detail', 'prosesPengerjaan', 'garansiItems'])
                             ->orderBy('tanggal_perbaikan', 'desc')
                             ->get()
                             ->map(function($item) {
-                                $item->tanggal_formatted = \App\Helpers\DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
                                 return $item;
                             });
 

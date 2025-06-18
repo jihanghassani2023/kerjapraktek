@@ -15,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class PerbaikanController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource (Dashboard Teknisi).
      */
     public function index()
     {
@@ -41,15 +41,18 @@ class PerbaikanController extends Controller
             ->whereYear('tanggal_perbaikan', date('Y'))
             ->count();
 
-        // Get all repairs assigned to this technician
+        // FIXED: Get all repairs with current data only
         $perbaikan = Perbaikan::where('user_id', $user->id)
-            ->with(['pelanggan', 'detail'])
+            ->with(['pelanggan'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($item) {
                 $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                // Load current detail for each perbaikan
+                $item->current_detail = $item->getCurrentDetail();
                 return $item;
             });
+
         return view('teknisi.dashboard', compact('user', 'perbaikan', 'sedangMenunggu', 'sedangProses', 'perbaikanSelesaiHari', 'perbaikanSelesaiBulan'));
     }
 
@@ -59,14 +62,30 @@ class PerbaikanController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        $perbaikan = Perbaikan::with(['pelanggan', 'detail'])->findOrFail($id);
+        $perbaikan = Perbaikan::findOrFail($id);
 
-        // Make sure the repair belongs to the logged-in user
-        if ($perbaikan->user_id != $user->id && $user->role !== 'admin') {
+        // Make sure the repair belongs to the logged-in user or user is admin
+        if ($perbaikan->user_id != $user->id && !in_array($user->role, ['admin', 'kepala teknisi'])) {
             return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
         }
 
-        return view('teknisi.detail_perbaikan', compact('user', 'perbaikan'));
+        // FIXED: Load current data only
+        $perbaikan->load(['pelanggan']);
+
+        // Get current detail and garansi separately
+        $currentDetail = $perbaikan->getCurrentDetail();
+        $currentGaransiItems = $perbaikan->getCurrentGaransiItems();
+
+        // Get process history (untuk timeline)
+        $processHistory = DetailPerbaikan::getProcessHistory($id);
+
+        return view('teknisi.detail_perbaikan', compact(
+            'user',
+            'perbaikan',
+            'currentDetail',
+            'currentGaransiItems',
+            'processHistory'
+        ));
     }
 
     /**
@@ -75,98 +94,172 @@ class PerbaikanController extends Controller
     public function edit($id)
     {
         $user = Auth::user();
-        $perbaikan = Perbaikan::with(['pelanggan', 'detail'])->findOrFail($id);
+        $perbaikan = Perbaikan::findOrFail($id);
 
-        // Make sure the repair belongs to the logged-in user
-        if ($perbaikan->user_id != $user->id && $user->role !== 'admin') {
+        // Make sure the repair belongs to the logged-in user or user is admin
+        if ($perbaikan->user_id != $user->id && !in_array($user->role, ['admin', 'kepala teknisi'])) {
             return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
         }
 
-        return view('teknisi.edit_perbaikan', compact('user', 'perbaikan'));
+        // FIXED: Load current data only for editing
+        $perbaikan->load(['pelanggan']);
+
+        // Get current detail and garansi for editing
+        $currentDetail = $perbaikan->getCurrentDetail();
+        $currentGaransiItems = $perbaikan->getCurrentGaransiItems();
+
+        return view('teknisi.edit_perbaikan', compact(
+            'user',
+            'perbaikan',
+            'currentDetail',
+            'currentGaransiItems'
+        ));
     }
 
     /**
      * Update the specified resource in storage.
+     * FLEXIBLE: User can delete any amount of garansi (some, all, or add more)
      */
     public function update(Request $request, $id)
-{
-    $perbaikan = Perbaikan::with('detail')->findOrFail($id);
+    {
+        $perbaikan = Perbaikan::findOrFail($id);
 
-    // Make sure the repair belongs to the logged-in user
-    if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
-        return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
-    }
-
-    // Validate form input
-    $validator = Validator::make($request->all(), [
-        'masalah' => 'required|string',
-        'tindakan_perbaikan' => 'required|string',
-        'kategori_device' => 'required|string|max:50',
-        'harga' => 'required|numeric',
-        'garansi' => 'required|string',
-        'garansi_items' => 'required|array|min:1',
-        'garansi_items.*.sparepart' => 'required|string|max:100',
-        'garansi_items.*.periode' => 'required|string|in:Tidak ada garansi,1 Bulan,12 Bulan',
-    ], [
-        'masalah.required' => 'Masalah wajib diisi.',
-        'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
-        'kategori_device.required' => 'Kategori device wajib diisi.',
-        'harga.required' => 'Harga wajib diisi.',
-        'harga.numeric' => 'Harga harus berupa angka.',
-        'garansi.required' => 'Garansi wajib diisi.',
-        'garansi_items.required' => 'Minimal satu item garansi harus diisi.',
-        'garansi_items.min' => 'Minimal satu item garansi harus diisi.',
-        'garansi_items.*.sparepart.required' => 'Nama sparepart/komponen wajib diisi.',
-        'garansi_items.*.periode.required' => 'Periode garansi wajib dipilih.',
-        'garansi_items.*.periode.in' => 'Periode garansi tidak valid.',
-    ]);
-
-    if ($validator->fails()) {
-        return redirect()->back()
-            ->withErrors($validator)
-            ->withInput();
-    }
-
-    // Process garansi data - construct the garansi string from items
-    $garansiString = '';
-    if ($request->has('garansi_items') && is_array($request->garansi_items)) {
-        $garansiParts = [];
-        foreach ($request->garansi_items as $item) {
-            if (!empty($item['sparepart']) && !empty($item['periode'])) {
-                $garansiParts[] = trim($item['sparepart']) . ': ' . trim($item['periode']);
-            }
+        // Make sure the repair belongs to the logged-in user or user is admin
+        if ($perbaikan->user_id != Auth::id() && !in_array(Auth::user()->role, ['admin', 'kepala teknisi'])) {
+            return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
         }
-        $garansiString = implode('; ', $garansiParts);
+
+        // FLEXIBLE: Validasi yang sangat fleksibel
+        $validator = Validator::make($request->all(), [
+            'masalah' => 'required|string',
+            'tindakan_perbaikan' => 'required|string',
+            'kategori_device' => 'required|string|max:50',
+            'harga' => 'required|numeric',
+            'garansi_items' => 'nullable|array', // Bisa kosong, bisa ada
+            'garansi_items.*.sparepart' => 'nullable|string|max:100',
+            'garansi_items.*.periode' => 'nullable|string|in:Tidak ada garansi,1 Bulan,12 Bulan',
+        ], [
+            'masalah.required' => 'Masalah wajib diisi.',
+            'tindakan_perbaikan.required' => 'Tindakan perbaikan wajib diisi.',
+            'kategori_device.required' => 'Kategori device wajib diisi.',
+            'harga.required' => 'Harga wajib diisi.',
+            'harga.numeric' => 'Harga harus berupa angka.',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            // FLEXIBLE: Process garansi items - filter hanya yang valid
+            $newGaransiItems = [];
+
+            if (!empty($request->garansi_items) && is_array($request->garansi_items)) {
+                foreach ($request->garansi_items as $item) {
+                    // Hanya tambahkan jika kedua field diisi
+                    if (!empty(trim($item['sparepart'] ?? '')) && !empty(trim($item['periode'] ?? ''))) {
+                        $newGaransiItems[] = [
+                            'sparepart' => trim($item['sparepart']),
+                            'periode' => trim($item['periode'])
+                        ];
+                    }
+                }
+            }
+
+            // FIXED: Get current data using latest records method
+            $currentDetail = $perbaikan->getCurrentDetail();
+            $garansiChanged = $perbaikan->hasGaransiChanged($newGaransiItems);
+
+            // Prepare main data
+            $mainData = [
+                'nama_device' => $currentDetail->nama_device,
+                'kategori_device' => $request->kategori_device,
+                'masalah' => $request->masalah,
+                'tindakan_perbaikan' => $request->tindakan_perbaikan,
+                'harga' => $request->harga
+            ];
+
+            if ($garansiChanged) {
+                // FLEXIBLE: Handle berbagai skenario garansi
+                if (empty($newGaransiItems)) {
+                    // SKENARIO 1: User hapus SEMUA garansi
+                    // Buat 1 record dengan garansi kosong/null
+                    $defaultGaransiItem = [
+                        ['sparepart' => null, 'periode' => null]
+                    ];
+
+                    DetailPerbaikan::createPerbaikanRecordsFlexible(
+                        $perbaikan->id,
+                        $mainData,
+                        $defaultGaransiItem,
+                        null // Tidak ada process step message
+                    );
+
+                    $messageText = 'Data perbaikan berhasil diperbarui. Semua garansi dihapus.';
+                } else {
+                    // SKENARIO 2: User ubah/hapus sebagian/tambah garansi
+                    DetailPerbaikan::createPerbaikanRecordsFlexible(
+                        $perbaikan->id,
+                        $mainData,
+                        $newGaransiItems,
+                        null // Tidak ada process step message
+                    );
+
+                    $garansiText = collect($newGaransiItems)
+                        ->map(function ($item) {
+                            return $item['sparepart'] . ': ' . $item['periode'];
+                        })
+                        ->implode('; ');
+
+                    $messageText = 'Data perbaikan berhasil diperbarui dengan garansi: ' . $garansiText;
+                }
+            } else {
+                // SKENARIO 3: Garansi tidak berubah, update data lain saja
+                // FIXED: Update only latest records, not all records
+                $latestRecords = DetailPerbaikan::getLatestRecords($perbaikan->id);
+
+                foreach ($latestRecords as $record) {
+                    $record->update([
+                        'kategori_device' => $request->kategori_device,
+                        'masalah' => $request->masalah,
+                        'tindakan_perbaikan' => $request->tindakan_perbaikan,
+                        'harga' => $request->harga,
+                        'updated_at' => now()
+                    ]);
+                }
+
+                $messageText = 'Data perbaikan berhasil diperbarui.';
+            }
+
+            return redirect()->route('teknisi.dashboard')
+                ->with('success', $messageText);
+        } catch (\Exception $e) {
+            logger()->error('Error updating perbaikan: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withErrors(['error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
 
-    // Fallback to the hidden garansi field if no items processed
-    if (empty($garansiString) && $request->has('garansi')) {
-        $garansiString = $request->garansi;
-    }
-
-    // Update detail perbaikan
-    $perbaikan->detail->update([
-        'masalah' => $request->masalah,
-        'tindakan_perbaikan' => $request->tindakan_perbaikan,
-        'kategori_device' => $request->kategori_device,
-        'harga' => $request->harga,
-        'garansi' => $garansiString,
-    ]);
-
-    return redirect()->route('teknisi.dashboard')
-        ->with('success', 'Data perbaikan berhasil diperbarui dengan garansi: ' . $garansiString);
-}
     /**
      * Update the status of a repair.
+     * FIXED: Use latest records only
+     */
+    /**
+     * Update the status of a repair.
+     * FIXED: Always use current garansi state, never old garansi
      */
     public function updateStatus(Request $request, $id)
     {
-        $perbaikan = Perbaikan::with('detail')->findOrFail($id);
+        $perbaikan = Perbaikan::findOrFail($id);
         $currentStatus = $perbaikan->status;
         $newStatus = $request->status;
 
         // Make sure the repair belongs to the logged-in user or user is admin
-        if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
+        if ($perbaikan->user_id != Auth::id() && !in_array(Auth::user()->role, ['admin', 'kepala teknisi'])) {
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses'], 403);
             }
@@ -202,86 +295,215 @@ class PerbaikanController extends Controller
             return redirect()->back()->with('error', "Tidak dapat mengubah status dari {$currentStatus} menjadi {$newStatus}");
         }
 
-        // Update status
-        $perbaikan->status = $newStatus;
-        $perbaikan->save();
+        try {
+            // Update status
+            $perbaikan->status = $newStatus;
+            $perbaikan->save();
 
-        // Update tindakan_perbaikan if provided
-        if ($request->has('tindakan_perbaikan') && $perbaikan->detail) {
-            $perbaikan->detail->update(['tindakan_perbaikan' => $request->tindakan_perbaikan]);
+            // Prepare updates
+            $updates = [];
+            if ($request->has('tindakan_perbaikan') && !empty($request->tindakan_perbaikan)) {
+                $updates['tindakan_perbaikan'] = $request->tindakan_perbaikan;
+            }
+            if ($request->has('harga') && !is_null($request->harga)) {
+                $updates['harga'] = $request->harga;
+            }
+
+            // Add status change message HANYA untuk perubahan status yang signifikan
+            $statusMessage = null;
+            if ($currentStatus !== $newStatus) {
+                if ($newStatus == 'Menunggu') {
+                    $statusMessage = "Menunggu Antrian Perbaikan";
+                } elseif ($newStatus == 'Proses') {
+                    $statusMessage = "Device Anda Sedang diproses";
+                } elseif ($newStatus == 'Selesai') {
+                    $statusMessage = "Device Anda Telah Selesai";
+                }
+            }
+
+            // FIXED: Always use current state, never add old garansi back
+            if (!empty($updates) || $statusMessage) {
+                // Get current detail and current garansi
+                $currentDetail = $perbaikan->getCurrentDetail();
+                $currentGaransiItems = $perbaikan->getCurrentGaransiItems();
+
+                // Prepare main data
+                $mainData = [
+                    'nama_device' => $currentDetail->nama_device,
+                    'kategori_device' => $currentDetail->kategori_device,
+                    'masalah' => $updates['tindakan_perbaikan'] ?? $currentDetail->masalah,
+                    'tindakan_perbaikan' => $updates['tindakan_perbaikan'] ?? $currentDetail->tindakan_perbaikan,
+                    'harga' => $updates['harga'] ?? $currentDetail->harga
+                ];
+
+                // CRITICAL FIX: Use current garansi state
+                if ($currentGaransiItems->count() > 0) {
+                    // Ada garansi current, gunakan garansi current
+                    $garansiArray = $currentGaransiItems->map(function ($item) {
+                        return [
+                            'sparepart' => $item->garansi_sparepart,
+                            'periode' => $item->garansi_periode
+                        ];
+                    })->toArray();
+
+                    DetailPerbaikan::createPerbaikanRecordsFlexible(
+                        $perbaikan->id,
+                        $mainData,
+                        $garansiArray,
+                        $statusMessage
+                    );
+                } else {
+                    // Tidak ada garansi current, buat dengan garansi null
+                    DetailPerbaikan::createPerbaikanRecordsFlexible(
+                        $perbaikan->id,
+                        $mainData,
+                        [['sparepart' => null, 'periode' => null]],
+                        $statusMessage
+                    );
+                }
+            }
+
+            // Add custom process step if provided
+            if ($request->filled('proses_step')) {
+                // FIXED: Also use current garansi state for process step
+                $currentDetail = $perbaikan->getCurrentDetail();
+                $currentGaransiItems = $perbaikan->getCurrentGaransiItems();
+
+                $mainData = [
+                    'nama_device' => $currentDetail->nama_device,
+                    'kategori_device' => $currentDetail->kategori_device,
+                    'masalah' => $currentDetail->masalah,
+                    'tindakan_perbaikan' => $currentDetail->tindakan_perbaikan,
+                    'harga' => $currentDetail->harga
+                ];
+
+                if ($currentGaransiItems->count() > 0) {
+                    $garansiArray = $currentGaransiItems->map(function ($item) {
+                        return [
+                            'sparepart' => $item->garansi_sparepart,
+                            'periode' => $item->garansi_periode
+                        ];
+                    })->toArray();
+
+                    DetailPerbaikan::createPerbaikanRecordsFlexible(
+                        $perbaikan->id,
+                        $mainData,
+                        $garansiArray,
+                        $request->proses_step
+                    );
+                } else {
+                    DetailPerbaikan::createPerbaikanRecordsFlexible(
+                        $perbaikan->id,
+                        $mainData,
+                        [['sparepart' => null, 'periode' => null]],
+                        $request->proses_step
+                    );
+                }
+            }
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'status' => $perbaikan->status,
+                    'message' => "Status berhasil diperbarui dari {$currentStatus} menjadi {$perbaikan->status}",
+                    'id' => $perbaikan->id
+                ]);
+            }
+
+            return redirect()->route('teknisi.dashboard')->with('success', 'Status berhasil diperbarui');
+        } catch (\Exception $e) {
+            logger()->error('Error updating perbaikan status: ' . $e->getMessage());
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat mengubah status: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengubah status: ' . $e->getMessage());
         }
-
-        // Update harga if provided
-        if ($request->has('harga') && $perbaikan->detail) {
-            $perbaikan->detail->update(['harga' => $request->harga]);
-        }
-
-        // Add status change to proses_pengerjaan
-        $currentProcess = $perbaikan->detail->proses_pengerjaan ?? [];
-
-        // Add status change entry
-        $statusMessage = "";
-        if ($newStatus == 'Menunggu') {
-            $statusMessage = "Menunggu Antrian Perbaikan";
-        } elseif ($newStatus == 'Proses') {
-            $statusMessage = "Device Anda Sedang diproses";
-        } elseif ($newStatus == 'Selesai') {
-            $statusMessage = "Device Anda Telah Selesai";
-        }
-
-        $currentProcess[] = [
-            'step' => $statusMessage,
-            'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
-        ];
-
-        // Add custom process step if provided
-        if ($request->filled('proses_step')) {
-            $currentProcess[] = [
-                'step' => $request->proses_step,
-                'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
-            ];
-        }
-
-        $perbaikan->detail->update(['proses_pengerjaan' => $currentProcess]);
-
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'status' => $perbaikan->status,
-                'message' => "Status berhasil diperbarui dari {$currentStatus} menjadi {$perbaikan->status}",
-                'id' => $perbaikan->id
-            ]);
-        }
-
-        return redirect()->route('teknisi.progress')->with('success', 'Status berhasil diperbarui');
     }
 
-    public function addProcessStep(Request $request, $id)
-    {
-        $perbaikan = Perbaikan::with('detail')->findOrFail($id);
+    /**
+     * Add process step to repair workflow
+     * FIXED: Use current garansi state
+     */
+    /**
+ * Add process step to repair workflow
+ * FIXED: Always use current garansi state
+ */
+public function addProcessStep(Request $request, $id)
+{
+    $perbaikan = Perbaikan::findOrFail($id);
 
-        // Pastikan perbaikan milik teknisi yang login
-        if ($perbaikan->user_id != Auth::id() && Auth::user()->role !== 'admin') {
-            return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
-        }
+    // Pastikan perbaikan milik teknisi yang login atau admin
+    if ($perbaikan->user_id != Auth::id() && !in_array(Auth::user()->role, ['admin', 'kepala teknisi'])) {
+        return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
+    }
 
-        // Validasi input
-        $request->validate([
-            'proses_step' => 'required|string|max:255',
-        ]);
+    // Validasi input
+    $validator = Validator::make($request->all(), [
+        'proses_step' => 'required|string|max:255',
+    ], [
+        'proses_step.required' => 'Proses step wajib diisi.',
+        'proses_step.max' => 'Proses step maksimal 255 karakter.',
+    ]);
 
-        // Tambahkan langkah proses baru
-        $currentProcess = $perbaikan->detail->proses_pengerjaan ?? [];
-        $currentProcess[] = [
-            'step' => $request->proses_step,
-            'timestamp' => now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s')
+    if ($validator->fails()) {
+        return redirect()->back()->withErrors($validator)->withInput();
+    }
+
+    try {
+        // FIXED: Get current state and use it
+        $currentDetail = $perbaikan->getCurrentDetail();
+        $currentGaransiItems = $perbaikan->getCurrentGaransiItems();
+
+        // Prepare main data from current state
+        $mainData = [
+            'nama_device' => $currentDetail->nama_device,
+            'kategori_device' => $currentDetail->kategori_device,
+            'masalah' => $currentDetail->masalah,
+            'tindakan_perbaikan' => $currentDetail->tindakan_perbaikan,
+            'harga' => $currentDetail->harga
         ];
 
-        $perbaikan->detail->update(['proses_pengerjaan' => $currentProcess]);
+        // CRITICAL FIX: Use current garansi state only
+        if ($currentGaransiItems->count() > 0) {
+            // Ada garansi current, gunakan garansi current
+            $garansiArray = $currentGaransiItems->map(function($item) {
+                return [
+                    'sparepart' => $item->garansi_sparepart,
+                    'periode' => $item->garansi_periode
+                ];
+            })->toArray();
+
+            DetailPerbaikan::createPerbaikanRecordsFlexible(
+                $perbaikan->id,
+                $mainData,
+                $garansiArray,
+                $request->proses_step
+            );
+        } else {
+            // Tidak ada garansi current, buat dengan garansi null
+            DetailPerbaikan::createPerbaikanRecordsFlexible(
+                $perbaikan->id,
+                $mainData,
+                [['sparepart' => null, 'periode' => null]],
+                $request->proses_step
+            );
+        }
 
         return redirect()->route('perbaikan.show', $id)
             ->with('success', 'Langkah proses pengerjaan berhasil ditambahkan.');
+
+    } catch (\Exception $e) {
+        logger()->error('Error adding process step: ' . $e->getMessage());
+
+        return redirect()->back()
+            ->with('error', 'Terjadi kesalahan saat menambahkan proses: ' . $e->getMessage());
     }
+}
 
     /**
      * Show the laporan view.
@@ -365,16 +587,34 @@ class PerbaikanController extends Controller
         $filterInfo = 'Filter: ';
         if ($month && $year) {
             $monthNames = [
-                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember'
             ];
             $filterInfo .= $monthNames[$month] . ' ' . $year;
         } elseif ($month) {
             $monthNames = [
-                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember'
             ];
             $filterInfo .= 'Bulan ' . $monthNames[$month];
         } elseif ($year) {
@@ -426,7 +666,7 @@ class PerbaikanController extends Controller
             $sheet->setCellValue('H' . $row, $p->detail ? $p->detail->masalah : 'N/A');
             $sheet->setCellValue('I' . $row, $p->detail ? $p->detail->tindakan_perbaikan : 'N/A');
             $sheet->setCellValue('J' . $row, $p->detail ? 'Rp ' . number_format($p->detail->harga, 0, ',', '.') : 'Rp 0');
-            $sheet->setCellValue('K' . $row, $p->detail ? $p->detail->garansi : 'N/A');
+            $sheet->setCellValue('K' . $row, $p->garansi ?: 'N/A');
             $sheet->setCellValue('L' . $row, $p->status);
             $row++;
         }
@@ -452,7 +692,7 @@ class PerbaikanController extends Controller
         // Add summary
         $summaryRow = $row + 1;
         $sheet->setCellValue('A' . $summaryRow, 'Total Perbaikan Selesai: ' . $perbaikan->count());
-        $totalHarga = $perbaikan->sum(function($item) {
+        $totalHarga = $perbaikan->sum(function ($item) {
             return $item->detail ? $item->detail->harga : 0;
         });
         $sheet->setCellValue('A' . ($summaryRow + 1), 'Total Pendapatan: Rp ' . number_format($totalHarga, 0, ',', '.'));

@@ -581,7 +581,18 @@
                                     </div>
                                 @endif
 
-                                @if ($perbaikan->garansi)
+                                @if ($perbaikan->garansiItems && $perbaikan->garansiItems->count() > 0)
+                                    <div class="info-row">
+                                        <div class="info-label">Garansi</div>
+                                        <div class="info-value">
+                                            @foreach ($perbaikan->garansiItems as $garansi)
+                                                <div style="margin-bottom: 3px;">
+                                                    {{ $garansi->garansi_sparepart }}: {{ $garansi->garansi_periode }}
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @elseif ($perbaikan->garansi)
                                     <div class="info-row">
                                         <div class="info-label">Garansi</div>
                                         <div class="info-value">{{ $perbaikan->garansi }}</div>
@@ -595,45 +606,49 @@
                                 @endif
 
                                 <!-- Progress terakhir -->
-                                @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
-                                    <?php
-                                    $prosesArray = $perbaikan->proses_pengerjaan;
-                                    $latestProcess = $prosesArray[count($prosesArray) - 1];
-                                    ?>
-                                    <div class="latest-progress">
-                                        <div class="progress-header">
-                                            <span>Progress Terakhir:</span>
-                                            <span
-                                                class="progress-date">{{ \Carbon\Carbon::parse($latestProcess['timestamp'])->format('d M Y H:i') }}</span>
-                                        </div>
-                                        <div class="progress-content">{{ $latestProcess['step'] }}</div>
-                                        <div class="progress-link"
-                                            onclick="toggleProgress('progress-{{ $perbaikan->id }}')">
-                                            Lihat semua progress <i class="fas fa-chevron-down"></i>
-                                        </div>
-                                    </div>
-                                @endif
+@php
+    // FIXED: Gunakan method yang sudah difilter untuk menghindari duplikasi
+    $distinctProses = $perbaikan->getDistinctProsesPengerjaan();
+@endphp
+
+@if ($distinctProses && $distinctProses->count() > 0)
+    @php
+        $latestProcess = $distinctProses->first();
+    @endphp
+    <div class="latest-progress">
+        <div class="progress-header">
+            <span>Progress Terakhir:</span>
+            <span class="progress-date">{{ $latestProcess->created_at->format('d M Y H:i') }}</span>
+        </div>
+        <div class="progress-content">{{ $latestProcess->process_step }}</div>
+        <div class="progress-link"
+            onclick="toggleProgress('progress-{{ $perbaikan->id }}')">
+            Lihat semua progress <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+@endif
                             </div>
 
-                            <!-- Progress lengkap -->
-                            @if (!empty($perbaikan->proses_pengerjaan) && count($perbaikan->proses_pengerjaan) > 0)
-                                <div id="progress-{{ $perbaikan->id }}" class="full-progress" style="display: none;">
-                                    <div class="progress-title">Riwayat Proses Pengerjaan</div>
-                                    <div class="progress-timeline">
-                                        @foreach (array_reverse($perbaikan->proses_pengerjaan) as $process)
-                                            <div class="progress-item">
-                                                <div class="progress-dot"></div>
-                                                <div class="progress-content">
-                                                    <div class="progress-step">{{ $process['step'] }}</div>
-                                                    <div class="progress-time">
-                                                        {{ \Carbon\Carbon::parse($process['timestamp'])->format('d M Y H:i:s') }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
+                          <!-- Progress lengkap -->
+@if ($distinctProses && $distinctProses->count() > 0)
+    <div id="progress-{{ $perbaikan->id }}" class="full-progress" style="display: none;">
+        <div class="progress-title">Riwayat Proses Pengerjaan</div>
+        <div class="progress-timeline">
+            {{-- FIXED: Gunakan $distinctProses yang sudah difilter --}}
+            @foreach ($distinctProses as $process)
+                <div class="progress-item">
+                    <div class="progress-dot"></div>
+                    <div class="progress-content">
+                        <div class="progress-step">{{ $process->process_step }}</div>
+                        <div class="progress-time">
+                            {{ $process->created_at->format('d M Y H:i:s') }}
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+@endif
                         @endforeach
                     @else
                         <div class="no-data">
@@ -754,5 +769,4 @@
         });
     </script>
 </body>
-
 </html>
