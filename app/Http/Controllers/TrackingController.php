@@ -36,9 +36,9 @@ class TrackingController extends Controller
                 ->with('error', 'Nomor telepon tidak ditemukan. Mohon periksa kembali nomor telepon Anda.');
         }
 
-        // Ambil semua perbaikan untuk pelanggan ini dengan relasi yang diperlukan
+        // UPDATED: Ambil data langsung dari perbaikan table
         $allPerbaikan = Perbaikan::where('pelanggan_id', $pelanggan->id)
-                            ->with(['user', 'pelanggan', 'detail', 'prosesPengerjaan', 'garansiItems'])
+                            ->with(['user', 'pelanggan'])
                             ->orderBy('tanggal_perbaikan', 'desc')
                             ->get()
                             ->map(function($item) {

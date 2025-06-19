@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/SearchController.php
 
 namespace App\Http\Controllers;
 
@@ -23,13 +24,11 @@ class SearchController extends Controller
             return response()->json([]);
         }
 
-        // Search for repairs matching the query
-        $perbaikan = Perbaikan::with(['pelanggan', 'detail'])
+        // UPDATED: Search for repairs matching the query
+        $perbaikan = Perbaikan::with(['pelanggan'])
             ->where(function($q) use ($query) {
                 $q->where('id', 'like', "%{$query}%")
-                  ->orWhereHas('detail', function($subq) use ($query) {
-                      $subq->where('nama_device', 'like', "%{$query}%");
-                  })
+                  ->orWhere('nama_device', 'like', "%{$query}%") // UPDATED: langsung dari perbaikan
                   ->orWhereHas('pelanggan', function($subq) use ($query) {
                       $subq->where('nama_pelanggan', 'like', "%{$query}%")
                           ->orWhere('nomor_telp', 'like', "%{$query}%");
@@ -45,7 +44,7 @@ class SearchController extends Controller
             $suggestions[] = [
                 'id' => $item->id,
                 'kode_perbaikan' => $item->id,
-                'nama_device' => $item->detail ? $item->detail->nama_device : 'N/A',
+                'nama_device' => $item->nama_device, // UPDATED: langsung dari perbaikan
                 'nama_pelanggan' => $item->pelanggan->nama_pelanggan ?? 'N/A',
                 'tanggal' => DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan),
                 'status' => $item->status,

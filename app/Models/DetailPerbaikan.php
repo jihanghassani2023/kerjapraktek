@@ -15,12 +15,7 @@ class DetailPerbaikan extends Model
 
     protected $fillable = [
         'perbaikan_id',
-        'nama_device',
-        'kategori_device',
-        'masalah',
-        'tindakan_perbaikan',
         'harga',
-        'garansi',
         'process_step',
         'garansi_sparepart',
         'garansi_periode'
@@ -51,9 +46,10 @@ class DetailPerbaikan extends Model
 
     /**
      * Helper method untuk membuat records baru dengan semua garansi items
+     * UPDATED: Removed garansi field
      *
      * @param string $perbaikanId
-     * @param array $mainData
+     * @param array $mainData (now only contains harga)
      * @param array $garansiItems
      * @param string $processStep
      * @return array
@@ -65,12 +61,7 @@ class DetailPerbaikan extends Model
         foreach ($garansiItems as $garansi) {
             $records[] = self::create([
                 'perbaikan_id' => $perbaikanId,
-                'nama_device' => $mainData['nama_device'],
-                'kategori_device' => $mainData['kategori_device'],
-                'masalah' => $mainData['masalah'],
-                'tindakan_perbaikan' => $mainData['tindakan_perbaikan'],
-                'harga' => $mainData['harga'],
-                'garansi' => $garansi['sparepart'] . ': ' . $garansi['periode'], // Untuk backward compatibility
+                'harga' => $mainData['harga'] ?? 0,
                 'process_step' => $processStep,
                 'garansi_sparepart' => $garansi['sparepart'],
                 'garansi_periode' => $garansi['periode']
@@ -82,9 +73,10 @@ class DetailPerbaikan extends Model
 
     /**
      * Helper method untuk update dengan membuat records baru
+     * UPDATED: Removed garansi field
      *
      * @param string $perbaikanId
-     * @param array $updates
+     * @param array $updates (now only harga)
      * @param string|null $newProcessStep
      * @return array
      */
@@ -100,7 +92,7 @@ class DetailPerbaikan extends Model
             })
             ->take(self::getGaransiItemsCount($perbaikanId));
 
-        // Ambil data utama terbaru
+        // Ambil harga terbaru
         $latestMainData = self::where('perbaikan_id', $perbaikanId)
             ->latest()
             ->first();
@@ -114,12 +106,7 @@ class DetailPerbaikan extends Model
         foreach ($latestGaransiItems as $garansi) {
             $records[] = self::create([
                 'perbaikan_id' => $perbaikanId,
-                'nama_device' => $updates['nama_device'] ?? $latestMainData->nama_device,
-                'kategori_device' => $updates['kategori_device'] ?? $latestMainData->kategori_device,
-                'masalah' => $updates['masalah'] ?? $latestMainData->masalah,
-                'tindakan_perbaikan' => $updates['tindakan_perbaikan'] ?? $latestMainData->tindakan_perbaikan,
                 'harga' => $updates['harga'] ?? $latestMainData->harga,
-                'garansi' => $garansi->garansi_sparepart . ': ' . $garansi->garansi_periode,
                 'process_step' => $newProcessStep ?? $latestMainData->process_step,
                 'garansi_sparepart' => $garansi->garansi_sparepart,
                 'garansi_periode' => $garansi->garansi_periode
@@ -159,7 +146,7 @@ class DetailPerbaikan extends Model
         return collect([]);
     }
 
-    // FIXED: Ambil HANYA record dengan timestamp terbaru
+    // Ambil HANYA record dengan timestamp terbaru
     return self::where('perbaikan_id', $perbaikanId)
         ->where('created_at', $latestTimestamp)
         ->orderBy('id', 'desc')
@@ -168,7 +155,6 @@ class DetailPerbaikan extends Model
 
 /**
  * Get CURRENT garansi state - untuk display di UI
- * FIXED: Return current garansi items (termasuk yang kosong)
  *
  * @param string $perbaikanId
  * @return \Illuminate\Database\Eloquent\Collection
@@ -185,7 +171,7 @@ public static function getCurrentGaransiItems($perbaikanId)
 
 /**
  * Get CURRENT main data - untuk display di UI
- * FIXED: Return only latest main repair data
+ * UPDATED: Only return harga, other fields are in perbaikan table
  *
  * @param string $perbaikanId
  * @return DetailPerbaikan|null
@@ -197,7 +183,6 @@ public static function getCurrentMainData($perbaikanId)
 
 /**
  * Check if garansi exists in current state
- * FIXED: Check only current records
  *
  * @param string $perbaikanId
  * @return bool
@@ -247,16 +232,13 @@ public static function hasCurrentGaransi($perbaikanId)
         return 'Rp. ' . number_format($this->harga, 0, ',', '.');
     }
 
-    // Accessor untuk format garansi
+    // UPDATED: Accessor untuk format garansi (tidak lagi dari field garansi)
     public function getFormattedGaransiAttribute()
     {
-        return $this->garansi_sparepart . ': ' . $this->garansi_periode;
-    }
-
-    // Scope untuk filter berdasarkan kategori device
-    public function scopeByKategori($query, $kategori)
-    {
-        return $query->where('kategori_device', $kategori);
+        if ($this->garansi_sparepart && $this->garansi_periode) {
+            return $this->garansi_sparepart . ': ' . $this->garansi_periode;
+        }
+        return 'Tidak ada garansi';
     }
 
     // Scope untuk filter berdasarkan range harga
@@ -264,11 +246,13 @@ public static function hasCurrentGaransi($perbaikanId)
     {
         return $query->whereBetween('harga', [$min, $max]);
     }
+
     /**
      * FLEXIBLE: Create perbaikan records - handle empty garansi cases
+     * UPDATED: Removed garansi field
      *
      * @param string $perbaikanId
-     * @param array $mainData
+     * @param array $mainData (only harga)
      * @param array $garansiItems (bisa kosong atau berisi null values)
      * @param string|null $processStep
      * @return array
@@ -291,7 +275,7 @@ public static function hasCurrentGaransi($perbaikanId)
                 throw new \InvalidArgumentException('Perbaikan dengan ID ' . $perbaikanId . ' tidak ditemukan');
             }
 
-            // FLEXIBLE: Handle case garansi kosong
+            // Handle case garansi kosong
             if (empty($garansiItems)) {
                 $garansiItems = [['sparepart' => null, 'periode' => null]];
             }
@@ -307,24 +291,12 @@ public static function hasCurrentGaransi($perbaikanId)
                         'updated_at' => $timestamp,
                     ];
 
-                    // Set main data jika ada
-                    if (isset($mainData['nama_device']) && !empty($mainData['nama_device'])) {
-                        $recordData['nama_device'] = $mainData['nama_device'];
-                    }
-                    if (isset($mainData['kategori_device']) && !empty($mainData['kategori_device'])) {
-                        $recordData['kategori_device'] = $mainData['kategori_device'];
-                    }
-                    if (isset($mainData['masalah']) && !empty($mainData['masalah'])) {
-                        $recordData['masalah'] = $mainData['masalah'];
-                    }
-                    if (isset($mainData['tindakan_perbaikan']) && !empty($mainData['tindakan_perbaikan'])) {
-                        $recordData['tindakan_perbaikan'] = $mainData['tindakan_perbaikan'];
-                    }
+                    // Set harga
                     if (isset($mainData['harga']) && !is_null($mainData['harga'])) {
                         $recordData['harga'] = $mainData['harga'];
                     }
 
-                    // FLEXIBLE: Set garansi data (bisa null)
+                    // Set garansi data (bisa null)
                     if (isset($garansiItem['sparepart']) && !is_null($garansiItem['sparepart'])) {
                         $recordData['garansi_sparepart'] = trim($garansiItem['sparepart']);
                     } else {

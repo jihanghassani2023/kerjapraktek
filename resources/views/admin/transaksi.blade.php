@@ -477,6 +477,13 @@
         </div>
 
         <div style="margin-top: 2%"></div>
+        <!-- BARU: Tambah title section dengan tombol export -->
+<div class="title-section">
+    <h1 class="page-title">Data Laporan</h1>
+    <a href="{{ route('admin.transaksi.export') }}" class="btn btn-export">
+        <i class="fas fa-file-export"></i> Export Data Transaksi
+    </a>
+</div>
 
         @if (session('info'))
             <div class="alert alert-info">

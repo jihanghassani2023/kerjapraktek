@@ -21,7 +21,11 @@ class Perbaikan extends Model
         'tanggal_perbaikan',
         'status',
         'user_id',
-        'pelanggan_id'
+        'pelanggan_id',
+        'nama_device',
+        'kategori_device',
+        'masalah',
+        'tindakan_perbaikan'
     ];
 
     protected static function boot()
@@ -38,44 +42,58 @@ class Perbaikan extends Model
     /**
      * GENERATE KODE PERBAIKAN - METHOD UTAMA
      * Format: MG50001, MG50002, dst.
-     */
-    public static function generateKodePerbaikan()
-    {
-        try {
-            // Gunakan DB transaction untuk menghindari duplicate ID
-            return \Illuminate\Support\Facades\DB::transaction(function () {
-                $lastPerbaikan = self::where('id', 'LIKE', 'MG%')
-                    ->orderBy('id', 'desc')
-                    ->lockForUpdate() // Lock untuk mencegah race condition
-                    ->first();
+     */// GANTI method generateKodePerbaikan() di app/Models/Perbaikan.php
 
-                if ($lastPerbaikan) {
-                    // Ambil angka dari ID terakhir (contoh: MG50001 -> 50001)
-                    $lastNumber = (int) substr($lastPerbaikan->id, 2);
-                    $nextNumber = $lastNumber + 1;
-                } else {
-                    // Jika belum ada data, mulai dari 50001
-                    $nextNumber = 50001;
+public static function generateKodePerbaikan()
+{
+    try {
+        return \Illuminate\Support\Facades\DB::transaction(function () {
+            // Format tanggal: DDMMYY
+            $datePrefix = now()->format('dmy'); // 190625 untuk 19 Juni 2025
+
+            // Cari perbaikan terakhir untuk hari ini
+            $todayPrefix = 'MG' . $datePrefix;
+
+            $lastPerbaikan = self::where('id', 'LIKE', $todayPrefix . '%')
+                ->orderBy('id', 'desc')
+                ->lockForUpdate() // Lock untuk mencegah race condition
+                ->first();
+
+            if ($lastPerbaikan) {
+                // Ambil 3 digit terakhir dan increment
+                $lastNumber = (int) substr($lastPerbaikan->id, -3);
+                $nextNumber = $lastNumber + 1;
+
+                // Pastikan tidak lebih dari 999 per hari
+                if ($nextNumber > 999) {
+                    throw new \Exception('Maksimal 999 perbaikan per hari tercapai');
                 }
+            } else {
+                // Perbaikan pertama hari ini
+                $nextNumber = 1;
+            }
 
-                $newId = 'MG' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+            // Format: MG + DDMMYY + XXX
+            $newId = $todayPrefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
-                // Double check untuk memastikan ID belum ada
-                $exists = self::where('id', $newId)->exists();
-                if ($exists) {
-                    // Jika masih ada, increment lagi
-                    $nextNumber++;
-                    $newId = 'MG' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+            // Double check untuk memastikan ID belum ada
+            $exists = self::where('id', $newId)->exists();
+            if ($exists) {
+                $nextNumber++;
+                if ($nextNumber > 999) {
+                    throw new \Exception('Maksimal 999 perbaikan per hari tercapai');
                 }
+                $newId = $todayPrefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+            }
 
-                return $newId;
-            });
-        } catch (\Exception $e) {
-            // Fallback dengan timestamp jika ada error
-            $timestamp = now()->format('His'); // HourMinuteSecond
-            return 'MG' . $timestamp;
-        }
+            return $newId;
+        });
+    } catch (\Exception $e) {
+        // Fallback dengan timestamp jika ada error
+        $timestamp = now()->format('dmy') . now()->format('His');
+        return 'MG' . substr($timestamp, 0, 9); // Ambil 9 karakter pertama
     }
+}
 
     public $timestamps = true;
 
@@ -107,11 +125,10 @@ class Perbaikan extends Model
         return $this->hasMany(DetailPerbaikan::class, 'perbaikan_id', 'id')
             ->select(['perbaikan_id', 'process_step', 'created_at'])
             ->whereNotNull('process_step')
-            ->where('process_step', '!=', 'Data perbaikan diperbarui') // HANYA filter ini saja
+            ->where('process_step', '!=', 'Data perbaikan diperbarui')
             ->orderBy('created_at', 'desc');
     }
 
-    // DEPRECATED: Use getCurrentGaransiItems() instead
     public function garansiItems()
     {
         $latestGaransiTimestamp = $this->getLatestGaransiTimestamp();
@@ -128,20 +145,19 @@ class Perbaikan extends Model
             ->orderBy('garansi_sparepart', 'asc');
     }
 
-    // ============ CURRENT DATA METHODS (FIXED) ============
+    // ============ CURRENT DATA METHODS (SIMPLIFIED) ============
 
     /**
-     * Get CURRENT detail (latest record)
-     * FIXED: Return only current data, not historical
+     * Get CURRENT detail (latest record) - now from main table
      */
     public function getCurrentDetail()
     {
-        return DetailPerbaikan::getCurrentMainData($this->id);
+        // Return self since main data is now in perbaikan table
+        return $this;
     }
 
     /**
      * Get CURRENT garansi items
-     * FIXED: Return only current garansi, hide deleted ones
      */
     public function getCurrentGaransiItems()
     {
@@ -150,14 +166,13 @@ class Perbaikan extends Model
 
     /**
      * Check if garansi has changed compared to current state
-     * FIXED: Compare with current state only
      */
     public function hasGaransiChanged($newGaransiItems)
     {
         $currentGaransi = $this->getCurrentGaransiItems();
 
         // Convert current to comparable format
-        $currentFormatted = $currentGaransi->map(function($item) {
+        $currentFormatted = $currentGaransi->map(function ($item) {
             return [
                 'sparepart' => $item->garansi_sparepart,
                 'periode' => $item->garansi_periode
@@ -166,13 +181,13 @@ class Perbaikan extends Model
 
         // Convert new to comparable format and sort
         $newFormatted = collect($newGaransiItems)
-            ->map(function($item) {
+            ->map(function ($item) {
                 return [
                     'sparepart' => trim($item['sparepart'] ?? ''),
                     'periode' => trim($item['periode'] ?? '')
                 ];
             })
-            ->filter(function($item) {
+            ->filter(function ($item) {
                 return !empty($item['sparepart']) && !empty($item['periode']);
             })
             ->sortBy('sparepart')
@@ -182,57 +197,55 @@ class Perbaikan extends Model
         return $currentFormatted !== $newFormatted;
     }
 
-    // ============ ACCESSOR ATTRIBUTES ============
+    // ============ ACCESSOR ATTRIBUTES (SIMPLIFIED) ============
 
     /**
-     * Accessor untuk detail - ambil data terbaru
-     * FIXED: Use current detail instead of all history
+     * Accessor untuk detail - return self since data is in main table
      */
     public function getDetailAttribute()
     {
-        return $this->getCurrentDetail();
+        return $this;
     }
 
     /**
-     * Accessor untuk garansi items - ambil data terbaru
-     * FIXED: Use current garansi instead of all history
+     * Accessor untuk garansi items
      */
     public function getGaransiItemsAttribute()
     {
         return $this->getCurrentGaransiItems();
     }
 
-    public function getNamaDeviceAttribute()
+    // Direct access to fields (no longer need accessors)
+    public function getNamaDeviceAttribute($value)
     {
-        $detail = $this->getCurrentDetail();
-        return $detail ? $detail->nama_device : null;
+        return $value;
     }
 
-    public function getKategoriDeviceAttribute()
+    public function getKategoriDeviceAttribute($value)
     {
-        $detail = $this->getCurrentDetail();
-        return $detail ? $detail->kategori_device : null;
+        return $value;
     }
 
-    public function getMasalahAttribute()
+    public function getMasalahAttribute($value)
     {
-        $detail = $this->getCurrentDetail();
-        return $detail ? $detail->masalah : null;
+        return $value;
     }
 
-    public function getTindakanPerbaikanAttribute()
+    public function getTindakanPerbaikanAttribute($value)
     {
-        $detail = $this->getCurrentDetail();
-        return $detail ? $detail->tindakan_perbaikan : null;
+        return $value;
     }
 
     public function getHargaAttribute()
     {
-        $detail = $this->getCurrentDetail();
+        // Harga masih di detail_perbaikan
+        $detail = DetailPerbaikan::getCurrentMainData($this->id);
         return $detail ? $detail->harga : 0;
     }
 
-    // ============ LEGACY HELPER METHODS (Keep for backward compatibility) ============
+    // REMOVED: getGaransiAttribute() - field garansi sudah dihapus dari detail_perbaikan
+
+    // ============ LEGACY HELPER METHODS ============
 
     public function getLatestGaransiTimestamp()
     {
@@ -243,7 +256,6 @@ class Perbaikan extends Model
 
     public function getLatestGaransiItems()
     {
-        // REDIRECT to new method
         return $this->getCurrentGaransiItems();
     }
 
@@ -252,7 +264,7 @@ class Perbaikan extends Model
         return $this->details()
             ->select('process_step', 'created_at')
             ->whereNotNull('process_step')
-            ->where('process_step', '!=', 'Data perbaikan diperbarui') // HANYA filter ini saja
+            ->where('process_step', '!=', 'Data perbaikan diperbarui')
             ->orderBy('created_at', 'desc')
             ->get()
             ->unique('process_step')
@@ -263,9 +275,15 @@ class Perbaikan extends Model
 
     public function addProsesStep($step)
     {
-        // HANYA tolak "Data perbaikan diperbarui", yang lain boleh
         if ($step !== 'Data perbaikan diperbarui') {
-            DetailPerbaikan::updatePerbaikanRecords($this->id, [], $step);
+            // Create new detail record for process step only
+            DetailPerbaikan::create([
+                'perbaikan_id' => $this->id,
+                'harga' => $this->getHargaAttribute(), // Get from latest detail
+                'process_step' => $step,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
         }
         return $this;
     }
@@ -289,7 +307,7 @@ class Perbaikan extends Model
 
         return [
             'count' => $items->count(),
-            'text' => $items->map(function($item) {
+            'text' => $items->map(function ($item) {
                 return $item->garansi_sparepart . ': ' . $item->garansi_periode;
             })->implode('; '),
             'items' => $items->map(function ($item) {
@@ -298,45 +316,6 @@ class Perbaikan extends Model
                     'periode' => $item->garansi_periode
                 ];
             })->toArray()
-        ];
-    }
-
-    // ============ DEBUG METHODS ============
-
-    public function getAllGaransiHistory()
-    {
-        return $this->details()
-            ->select('garansi_sparepart', 'garansi_periode', 'created_at', 'process_step')
-            ->whereNotNull('garansi_sparepart')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->groupBy('created_at')
-            ->map(function ($group, $timestamp) {
-                return [
-                    'timestamp' => $timestamp,
-                    'process_step' => $group->first()->process_step,
-                    'items' => $group->map(function ($item) {
-                        return $item->garansi_sparepart . ': ' . $item->garansi_periode;
-                    })->toArray()
-                ];
-            })->values();
-    }
-
-    public function debugGaransiLogic()
-    {
-        $allDetails = $this->details()->orderBy('created_at', 'desc')->get();
-        $latestOverall = $allDetails->first();
-        $latestGaransiTimestamp = $this->getLatestGaransiTimestamp();
-        $currentGaransiItems = $this->getCurrentGaransiItems();
-
-        return [
-            'total_records' => $allDetails->count(),
-            'latest_overall_timestamp' => $latestOverall ? $latestOverall->created_at : null,
-            'latest_garansi_timestamp' => $latestGaransiTimestamp,
-            'current_garansi_items' => $currentGaransiItems->map(function ($item) {
-                return $item->garansi_sparepart . ': ' . $item->garansi_periode;
-            })->toArray(),
-            'all_garansi_history' => $this->getAllGaransiHistory()
         ];
     }
 }

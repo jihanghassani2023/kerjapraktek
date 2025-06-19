@@ -182,6 +182,7 @@
             align-items: center;
             font-size: 0.9rem;
             text-decoration: none;
+            transition: background-color 0.3s;
         }
         .btn i {
             margin-right: 8px;
@@ -300,6 +301,109 @@
             color: #888;
             font-size: 16px;
         }
+
+        /* Custom Modal Styles - SAMA SEPERTI data_karyawan.blade.php */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 10px;
+            padding: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .modal-header {
+            background-color: #dc3545;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+
+        .modal-header h4 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .modal-body p {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .user-name-highlight {
+            font-weight: bold;
+            color: #8c3a3a;
+        }
+
+        .modal-buttons {
+            padding: 0 20px 20px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 8px 20px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        .modal-btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #5a6268;
+        }
+
+        .modal-btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .modal-btn-delete:hover {
+            background-color: #c82333;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 60px;
@@ -319,6 +423,10 @@
             .data-label {
                 width: 100%;
                 margin-bottom: 5px;
+            }
+            .modal-container {
+                width: 95%;
+                margin: 20px;
             }
         }
     </style>
@@ -377,13 +485,10 @@
                     <a href="{{ route('karyawan.edit', $karyawan->id) }}" class="btn btn-edit">
                         <i class="fas fa-edit"></i> Edit
                     </a>
-                    <form action="{{ route('karyawan.destroy', $karyawan->id) }}" method="POST" style="display: inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-delete" onclick="return confirm('Apakah Anda yakin ingin menghapus karyawan ini?')">
-                            <i class="fas fa-trash"></i> Hapus
-                        </button>
-                    </form>
+                    <!-- UPDATED: Ganti dengan modal seperti di data_karyawan.blade.php -->
+                    <button type="button" class="btn btn-delete" onclick="showDeleteModal('{{ $karyawan->id }}', '{{ $karyawan->name }}')">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
                 </div>
             </div>
 
@@ -433,10 +538,10 @@
                                     @foreach($perbaikanList as $index => $perbaikan)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
-                                            <td>{{ $perbaikan->nama_device }}</td>
-                                            <td>{{ $perbaikan->masalah }}</td>
+                                            <td>{{ $perbaikan->nama_device }}</td> <!-- UPDATED: langsung dari perbaikan -->
+                                            <td>{{ $perbaikan->masalah }}</td> <!-- UPDATED: langsung dari perbaikan -->
                                             <td>{{ $perbaikan->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan) }}</td>
-                                            <td>Rp {{ number_format($perbaikan->harga, 0, ',', '.') }}</td>
+                                            <td>Rp {{ number_format($perbaikan->harga, 0, ',', '.') }}</td> <!-- UPDATED: dari accessor -->
                                             <td><span class="status-{{ strtolower($perbaikan->status) }}">{{ $perbaikan->status }}</span></td>
                                         </tr>
                                     @endforeach
@@ -460,5 +565,77 @@
             @endif
         </div>
     </div>
+
+    <!-- Custom Delete Confirmation Modal - SAMA SEPERTI data_karyawan.blade.php -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h4>Konfirmasi Hapus</h4>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus karyawan ini?</p>
+                <p class="user-name-highlight" id="userNameDisplay"></p>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="hideDeleteModal()">
+                    Cancel
+                </button>
+                <button type="button" class="modal-btn modal-btn-delete" onclick="confirmDelete()">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden form for deletion -->
+    <form id="deleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    <script>
+        let currentUserId = null;
+        let currentUserName = null;
+
+        function showDeleteModal(userId, userName) {
+            currentUserId = userId;
+            currentUserName = userName;
+
+            document.getElementById('userNameDisplay').textContent = userName;
+            document.getElementById('deleteModal').style.display = 'block';
+
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentUserId = null;
+            currentUserName = null;
+        }
+
+        function confirmDelete() {
+            if (currentUserId) {
+                const form = document.getElementById('deleteForm');
+                form.action = `/karyawan/${currentUserId}`;
+                form.submit();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideDeleteModal();
+            }
+        });
+    </script>
 </body>
 </html>

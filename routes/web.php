@@ -37,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     // Admin routes
+    // Admin routes
     Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
@@ -50,6 +51,11 @@ Route::middleware(['auth'])->group(function () {
 
         // Transaksi admin routes
         Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi');
+
+        // PINDAHKAN ROUTE EXPORT KE ATAS SEBELUM ROUTE DENGAN PARAMETER {id}
+        Route::get('/transaksi/export', [AdminController::class, 'exportTransaksi'])->name('transaksi.export');
+
+        // Route dengan parameter {id} di bawah
         Route::get('/transaksi/{id}', [AdminController::class, 'showTransaksi'])->name('transaksi.show');
         Route::put('/transaksi/{id}/status', [AdminController::class, 'updateStatus'])->name('transaksi.update-status');
 
@@ -64,9 +70,6 @@ Route::middleware(['auth'])->group(function () {
         // Perbaikan management - ADMIN HANYA BISA CREATE, TIDAK BISA EDIT
         Route::get('/perbaikan/create', [AdminController::class, 'createPerbaikan'])->name('perbaikan.create');
         Route::post('/perbaikan', [AdminController::class, 'storePerbaikan'])->name('perbaikan.store');
-        // DIHAPUS: Route edit dan update perbaikan untuk admin
-        // Route::get('/perbaikan/{id}/edit', [AdminController::class, 'editPerbaikan'])->name('perbaikan.edit');
-        // Route::put('/perbaikan/{id}', [AdminController::class, 'updatePerbaikan'])->name('perbaikan.update');
     });
 
     // Search suggestions API route (outside of admin group)
@@ -79,7 +82,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('transaksi')->name('transaksi.')->middleware(['auth'])->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('index');
         Route::get('/export', [TransaksiController::class, 'export'])->name('export');
-        Route::get('/{id}', [TransaksiController::class, 'show'])->name('show')->where('id', 'MG[0-9]{5}');
+        Route::get('/{id}', [TransaksiController::class, 'show'])->name('show')->where('id', 'MG\d{8}');
     });
 
     // Karyawan routes - for kepala toko

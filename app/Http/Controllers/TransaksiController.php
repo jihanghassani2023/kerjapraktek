@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/TransaksiController.php
 
 namespace App\Http\Controllers;
 
@@ -15,7 +16,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class TransaksiController extends Controller
 {
-    // Fixed export method
     public function export(Request $request)
     {
         // Get filter parameters
@@ -34,13 +34,14 @@ class TransaksiController extends Controller
             $query->whereYear('tanggal_perbaikan', $year);
         }
 
-        $transaksi = $query->with(['user', 'pelanggan', 'detail'])
+        $transaksi = $query->with(['user', 'pelanggan'])
             ->orderBy('tanggal_perbaikan', 'desc')
             ->get()
             ->map(function ($item) {
                 $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
                 return $item;
             });
+
         // Create a new spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -61,10 +62,10 @@ class TransaksiController extends Controller
             $sheet->setCellValue('A' . $row, $index + 1);
             $sheet->setCellValue('B' . $row, $t->id);
             $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
-            $sheet->setCellValue('D' . $row, $t->detail ? $t->detail->nama_device : 'N/A');
+            $sheet->setCellValue('D' . $row, $t->nama_device); // UPDATED: langsung dari perbaikan
             $sheet->setCellValue('E' . $row, $t->pelanggan ? $t->pelanggan->nama_pelanggan : 'N/A');
             $sheet->setCellValue('F' . $row, $t->user ? $t->user->name : 'N/A');
-            $sheet->setCellValue('G' . $row, $t->detail ? $t->detail->harga : 0);
+            $sheet->setCellValue('G' . $row, $t->harga); // UPDATED: dari accessor
             $sheet->setCellValue('H' . $row, $t->status);
             $row++;
         }
@@ -85,7 +86,7 @@ class TransaksiController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil parameter filter dari request (biarkan kosong jika tidak ada)
+        // Ambil parameter filter dari request
         $month = $request->input('month');
         $year = $request->input('year');
 
@@ -100,15 +101,14 @@ class TransaksiController extends Controller
         } elseif ($year) {
             $query->whereYear('tanggal_perbaikan', $year);
         }
-        // Jika keduanya kosong, tampilkan semua data
 
-        $transaksi = $query->with(['user', 'pelanggan', 'detail'])
+        $transaksi = $query->with(['user', 'pelanggan'])
             ->orderBy('tanggal_perbaikan', 'desc')
             ->get();
 
         // Calculate summary statistics
         $totalTransaksi = $transaksi->sum(function($item) {
-            return $item->detail ? $item->detail->harga : 0;
+            return $item->harga; // UPDATED: langsung dari accessor
         });
 
         $totalTransaksiHariIni = DetailPerbaikan::whereHas('perbaikan', function($query) {
@@ -122,21 +122,18 @@ class TransaksiController extends Controller
                   ->whereYear('tanggal_perbaikan', date('Y'));
         })->sum('harga');
 
-        // DIPERBAIKI: Get technicians AND kepala teknisi with their repair count
+        // Get technicians stats
         $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
         $teknisiStats = [];
 
         foreach ($teknisi as $t) {
-            // Base query untuk setiap teknisi/kepala teknisi
             $querySelesai = Perbaikan::where('user_id', $t->id)->where('status', 'Selesai');
             $queryPending = Perbaikan::where('user_id', $t->id)->whereIn('status', ['Menunggu', 'Proses']);
 
-            // For income calculation, join with detail table
             $incomeQuery = DetailPerbaikan::whereHas('perbaikan', function($query) use ($t) {
                 $query->where('user_id', $t->id);
             });
 
-            // Terapkan filter HANYA jika ada nilai (bukan kosong atau null)
             if ($month) {
                 $querySelesai->whereMonth('tanggal_perbaikan', $month);
                 $queryPending->whereMonth('tanggal_perbaikan', $month);
@@ -167,7 +164,7 @@ class TransaksiController extends Controller
             ];
         }
 
-        // Urutkan teknisi stats: Kepala Teknisi di atas, kemudian Teknisi
+        // Sort teknisi stats
         $teknisiStats = collect($teknisiStats)->sortBy(function ($teknisi) {
             if ($teknisi['role'] === 'kepala teknisi' ||
                 (isset($teknisi['jabatan']) && strtolower($teknisi['jabatan']) === 'kepala teknisi')) {
@@ -191,13 +188,11 @@ class TransaksiController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        // Always get fresh data with findOrFail
-        $transaksi = Perbaikan::with(['user', 'pelanggan', 'detail'])->findOrFail($id);
+        $transaksi = Perbaikan::with(['user', 'pelanggan'])->findOrFail($id);
 
         return view('kepala_toko.detail_transaksi', compact('user', 'transaksi'));
     }
 
-    // Sisanya tetap sama seperti kode asli...
     public function dashboard(Request $request)
     {
         $user = Auth::user();
@@ -233,7 +228,7 @@ class TransaksiController extends Controller
                     ->count();
 
                 $monthlyRepairCounts[] = [
-                    'month' => date('M', mktime(0, 0, 0, $i, 10)), // Short month name for better fit
+                    'month' => date('M', mktime(0, 0, 0, $i, 10)),
                     'selesai' => $selesaiCount,
                     'proses' => $prosesCount,
                     'menunggu' => $menungguCount
@@ -277,7 +272,7 @@ class TransaksiController extends Controller
 
         // Get latest transactions based on filter
         if ($selectedMonth === 'all') {
-            $latestTransaksi = Perbaikan::with(['user', 'detail'])
+            $latestTransaksi = Perbaikan::with(['user'])
                 ->where('status', 'Selesai')
                 ->whereYear('tanggal_perbaikan', $selectedYear)
                 ->orderBy('tanggal_perbaikan', 'desc')
@@ -300,7 +295,7 @@ class TransaksiController extends Controller
                 ->groupBy('user_id')
                 ->get();
         } else {
-            $latestTransaksi = Perbaikan::with(['user', 'detail'])
+            $latestTransaksi = Perbaikan::with(['user'])
                 ->where('status', 'Selesai')
                 ->whereMonth('tanggal_perbaikan', $selectedMonth)
                 ->whereYear('tanggal_perbaikan', $selectedYear)
