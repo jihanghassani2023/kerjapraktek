@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('kategori_device', 50)->nullable();
             $table->string('masalah', 200);
             $table->text('tindakan_perbaikan');
+            $table->decimal('harga', 15, 2);
 
             $table->timestamps();
         });

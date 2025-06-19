@@ -23,14 +23,15 @@ class AdminController extends Controller
 
         $totalTeknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->count();
 
-        $totalTransaksiHariIni = DetailPerbaikan::whereHas('perbaikan', function ($query) {
-            $query->whereDate('tanggal_perbaikan', date('Y-m-d'));
-        })->sum('harga');
+        // UPDATED: Ambil harga langsung dari tabel perbaikan
+        $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
+            ->whereDate('tanggal_perbaikan', date('Y-m-d'))
+            ->sum('harga');
 
-        $totalTransaksiBulanIni = DetailPerbaikan::whereHas('perbaikan', function ($query) {
-            $query->whereMonth('tanggal_perbaikan', date('m'))
-                ->whereYear('tanggal_perbaikan', date('Y'));
-        })->sum('harga');
+        $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
+            ->whereMonth('tanggal_perbaikan', date('m'))
+            ->whereYear('tanggal_perbaikan', date('Y'))
+            ->sum('harga');
 
         // If search is submitted via the search form, redirect to search results page
         if ($request->has('search') && $request->search) {
@@ -69,7 +70,7 @@ class AdminController extends Controller
 
         $query->where(function ($q) use ($search) {
             $q->where('id', 'like', "%{$search}%")
-                ->orWhere('nama_device', 'like', "%{$search}%") // UPDATED: langsung dari perbaikan
+                ->orWhere('nama_device', 'like', "%{$search}%")
                 ->orWhereHas('pelanggan', function ($subq) use ($search) {
                     $subq->where('nama_pelanggan', 'like', "%{$search}%")
                         ->orWhere('nomor_telp', 'like', "%{$search}%");
@@ -109,21 +110,17 @@ class AdminController extends Controller
                 return $item;
             });
 
-        // Calculate summary statistics
-        $totalTransaksi = $transaksi->sum(function ($item) {
-            return $item->harga; // UPDATED: langsung dari accessor
-        });
+        // UPDATED: Calculate summary statistics dari tabel perbaikan
+        $totalTransaksi = $transaksi->sum('harga');
 
-        $totalTransaksiHariIni = DetailPerbaikan::whereHas('perbaikan', function ($query) {
-            $query->where('status', 'Selesai')
-                ->whereDate('tanggal_perbaikan', date('Y-m-d'));
-        })->sum('harga');
+        $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
+            ->whereDate('tanggal_perbaikan', date('Y-m-d'))
+            ->sum('harga');
 
-        $totalTransaksiBulanIni = DetailPerbaikan::whereHas('perbaikan', function ($query) {
-            $query->where('status', 'Selesai')
-                ->whereMonth('tanggal_perbaikan', date('m'))
-                ->whereYear('tanggal_perbaikan', date('Y'));
-        })->sum('harga');
+        $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
+            ->whereMonth('tanggal_perbaikan', date('m'))
+            ->whereYear('tanggal_perbaikan', date('Y'))
+            ->sum('harga');
 
         // Get technicians stats
         $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
@@ -133,29 +130,24 @@ class AdminController extends Controller
             $querySelesai = Perbaikan::where('user_id', $t->id)->where('status', 'Selesai');
             $queryPending = Perbaikan::where('user_id', $t->id)->whereIn('status', ['Menunggu', 'Proses']);
 
-            $incomeQuery = DetailPerbaikan::whereHas('perbaikan', function ($query) use ($t) {
-                $query->where('user_id', $t->id);
-            });
+            // UPDATED: Income dari tabel perbaikan
+            $incomeQuery = Perbaikan::where('user_id', $t->id)->where('status', 'Selesai');
 
             if ($month) {
                 $querySelesai->whereMonth('tanggal_perbaikan', $month);
                 $queryPending->whereMonth('tanggal_perbaikan', $month);
-                $incomeQuery->whereHas('perbaikan', function ($query) use ($month) {
-                    $query->whereMonth('tanggal_perbaikan', $month);
-                });
+                $incomeQuery->whereMonth('tanggal_perbaikan', $month);
             }
 
             if ($year) {
                 $querySelesai->whereYear('tanggal_perbaikan', $year);
                 $queryPending->whereYear('tanggal_perbaikan', $year);
-                $incomeQuery->whereHas('perbaikan', function ($query) use ($year) {
-                    $query->whereYear('tanggal_perbaikan', $year);
-                });
+                $incomeQuery->whereYear('tanggal_perbaikan', $year);
             }
 
             $repairCount = $querySelesai->count();
             $pendingCount = $queryPending->count();
-            $income = $incomeQuery->sum('harga');
+            $income = $incomeQuery->sum('harga'); // UPDATED: sum dari tabel perbaikan
 
             $teknisiStats[] = [
                 'name' => $t->name,
@@ -213,6 +205,7 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:Menunggu,Proses,Selesai',
             'tindakan_perbaikan' => 'nullable|string',
+            'harga' => 'nullable|numeric', // BARU: validasi harga
         ]);
 
         if ($validator->fails()) {
@@ -236,10 +229,13 @@ class AdminController extends Controller
         }
 
         try {
-            // UPDATED: Update main perbaikan record
+            // UPDATED: Update main perbaikan record including harga
             $updates = [];
             if ($request->has('tindakan_perbaikan') && !empty($request->tindakan_perbaikan)) {
                 $updates['tindakan_perbaikan'] = $request->tindakan_perbaikan;
+            }
+            if ($request->has('harga') && !empty($request->harga)) {
+                $updates['harga'] = $request->harga; // BARU: update harga di main table
             }
 
             $perbaikan->status = $newStatus;
@@ -261,8 +257,6 @@ class AdminController extends Controller
 
             if ($statusMessage) {
                 $currentGaransiItems = $perbaikan->getCurrentGaransiItems();
-                $currentDetail = DetailPerbaikan::getCurrentMainData($perbaikan->id);
-                $currentHarga = $currentDetail ? $currentDetail->harga : 0;
 
                 if ($currentGaransiItems->count() > 0) {
                     $garansiArray = $currentGaransiItems->map(function ($item) {
@@ -272,16 +266,15 @@ class AdminController extends Controller
                         ];
                     })->toArray();
 
+                    // UPDATED: Create detail records tanpa harga
                     DetailPerbaikan::createPerbaikanRecordsFlexible(
                         $perbaikan->id,
-                        ['harga' => $currentHarga],
                         $garansiArray,
                         $statusMessage
                     );
                 } else {
                     DetailPerbaikan::createPerbaikanRecordsFlexible(
                         $perbaikan->id,
-                        ['harga' => $currentHarga],
                         [['sparepart' => null, 'periode' => null]],
                         $statusMessage
                     );
@@ -497,7 +490,7 @@ class AdminController extends Controller
         $sheet->setCellValue('D' . $row, $t->nama_device);
         $sheet->setCellValue('E' . $row, $t->pelanggan ? $t->pelanggan->nama_pelanggan : 'N/A');
         $sheet->setCellValue('F' . $row, $t->user ? $t->user->name : 'N/A');
-        $sheet->setCellValue('G' . $row, $t->harga);
+        $sheet->setCellValue('G' . $row, $t->harga); // UPDATED: langsung dari tabel perbaikan
         $sheet->setCellValue('H' . $row, $t->status);
         $row++;
     }
@@ -552,28 +545,21 @@ class AdminController extends Controller
         try {
             $kodeId = Perbaikan::generateKodePerbaikan();
 
-            // UPDATED: Create perbaikan dengan field yang dipindah
+            // UPDATED: Create perbaikan dengan harga di main table
             $perbaikan = new Perbaikan();
             $perbaikan->id = $kodeId;
             $perbaikan->pelanggan_id = $request->pelanggan_id;
             $perbaikan->user_id = $request->user_id;
             $perbaikan->tanggal_perbaikan = date('Y-m-d');
             $perbaikan->status = 'Menunggu';
-
-            // BARU: Set field yang dipindah ke tabel perbaikan
             $perbaikan->nama_device = $request->nama_device;
             $perbaikan->kategori_device = $request->kategori_device;
             $perbaikan->masalah = $request->masalah;
             $perbaikan->tindakan_perbaikan = $request->tindakan_perbaikan;
-
+            $perbaikan->harga = $request->harga; // BARU: Set harga di main table
             $perbaikan->created_at = now();
             $perbaikan->updated_at = now();
             $perbaikan->save();
-
-            // UPDATED: Prepare data hanya untuk harga
-            $detailData = [
-                'harga' => $request->harga
-            ];
 
             $garansiItems = [];
             foreach ($request->garansi_items as $item) {
@@ -593,9 +579,9 @@ class AdminController extends Controller
             }
 
             try {
+                // UPDATED: Create detail records tanpa harga
                 $createdRecords = DetailPerbaikan::createPerbaikanRecordsFlexible(
                     $perbaikan->id,
-                    $detailData,
                     $garansiItems,
                     'Menunggu Antrian Perbaikan'
                 );

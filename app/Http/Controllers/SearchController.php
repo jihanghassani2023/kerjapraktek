@@ -24,7 +24,7 @@ class SearchController extends Controller
             return response()->json([]);
         }
 
-        // UPDATED: Search for repairs matching the query
+        // Search for repairs matching the query
         $perbaikan = Perbaikan::with(['pelanggan'])
             ->where(function($q) use ($query) {
                 $q->where('id', 'like', "%{$query}%")

@@ -15,15 +15,13 @@ class DetailPerbaikan extends Model
 
     protected $fillable = [
         'perbaikan_id',
-        'harga',
         'process_step',
         'garansi_sparepart',
         'garansi_periode'
+        // REMOVED: 'harga' - sudah dipindah ke tabel perbaikan
     ];
 
-    protected $casts = [
-        'harga' => 'decimal:2'
-    ];
+    // REMOVED: harga cast - sudah tidak ada di tabel ini
 
     // Relasi ke Perbaikan
     public function perbaikan()
@@ -45,23 +43,21 @@ class DetailPerbaikan extends Model
     }
 
     /**
-     * Helper method untuk membuat records baru dengan semua garansi items
-     * UPDATED: Removed garansi field
+     * Helper method untuk membuat records baru dengan garansi items
+     * UPDATED: Removed harga parameter completely
      *
      * @param string $perbaikanId
-     * @param array $mainData (now only contains harga)
      * @param array $garansiItems
      * @param string $processStep
      * @return array
      */
-    public static function createPerbaikanRecords($perbaikanId, $mainData, $garansiItems, $processStep)
+    public static function createPerbaikanRecords($perbaikanId, $garansiItems, $processStep)
     {
         $records = [];
 
         foreach ($garansiItems as $garansi) {
             $records[] = self::create([
                 'perbaikan_id' => $perbaikanId,
-                'harga' => $mainData['harga'] ?? 0,
                 'process_step' => $processStep,
                 'garansi_sparepart' => $garansi['sparepart'],
                 'garansi_periode' => $garansi['periode']
@@ -73,14 +69,13 @@ class DetailPerbaikan extends Model
 
     /**
      * Helper method untuk update dengan membuat records baru
-     * UPDATED: Removed garansi field
+     * UPDATED: Removed harga handling
      *
      * @param string $perbaikanId
-     * @param array $updates (now only harga)
      * @param string|null $newProcessStep
      * @return array
      */
-    public static function updatePerbaikanRecords($perbaikanId, $updates = [], $newProcessStep = null)
+    public static function updatePerbaikanRecords($perbaikanId, $newProcessStep = null)
     {
         // Ambil data garansi terbaru (distinct)
         $latestGaransiItems = self::where('perbaikan_id', $perbaikanId)
@@ -92,7 +87,7 @@ class DetailPerbaikan extends Model
             })
             ->take(self::getGaransiItemsCount($perbaikanId));
 
-        // Ambil harga terbaru
+        // Ambil process step terbaru
         $latestMainData = self::where('perbaikan_id', $perbaikanId)
             ->latest()
             ->first();
@@ -106,7 +101,6 @@ class DetailPerbaikan extends Model
         foreach ($latestGaransiItems as $garansi) {
             $records[] = self::create([
                 'perbaikan_id' => $perbaikanId,
-                'harga' => $updates['harga'] ?? $latestMainData->harga,
                 'process_step' => $newProcessStep ?? $latestMainData->process_step,
                 'garansi_sparepart' => $garansi->garansi_sparepart,
                 'garansi_periode' => $garansi->garansi_periode
@@ -136,61 +130,61 @@ class DetailPerbaikan extends Model
      * @param string $perbaikanId
      * @return \Illuminate\Database\Eloquent\Collection
      */
-   public static function getLatestRecords($perbaikanId)
-{
-    // Ambil timestamp dari record terbaru
-    $latestTimestamp = self::where('perbaikan_id', $perbaikanId)
-        ->max('created_at');
+    public static function getLatestRecords($perbaikanId)
+    {
+        // Ambil timestamp dari record terbaru
+        $latestTimestamp = self::where('perbaikan_id', $perbaikanId)
+            ->max('created_at');
 
-    if (!$latestTimestamp) {
-        return collect([]);
+        if (!$latestTimestamp) {
+            return collect([]);
+        }
+
+        // Ambil HANYA record dengan timestamp terbaru
+        return self::where('perbaikan_id', $perbaikanId)
+            ->where('created_at', $latestTimestamp)
+            ->orderBy('id', 'desc')
+            ->get();
     }
 
-    // Ambil HANYA record dengan timestamp terbaru
-    return self::where('perbaikan_id', $perbaikanId)
-        ->where('created_at', $latestTimestamp)
-        ->orderBy('id', 'desc')
-        ->get();
-}
+    /**
+     * Get CURRENT garansi state - untuk display di UI
+     *
+     * @param string $perbaikanId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getCurrentGaransiItems($perbaikanId)
+    {
+        $latestRecords = self::getLatestRecords($perbaikanId);
 
-/**
- * Get CURRENT garansi state - untuk display di UI
- *
- * @param string $perbaikanId
- * @return \Illuminate\Database\Eloquent\Collection
- */
-public static function getCurrentGaransiItems($perbaikanId)
-{
-    $latestRecords = self::getLatestRecords($perbaikanId);
+        // Filter hanya garansi yang tidak null
+        return $latestRecords->filter(function($record) {
+            return !is_null($record->garansi_sparepart) && !is_null($record->garansi_periode);
+        });
+    }
 
-    // Filter hanya garansi yang tidak null
-    return $latestRecords->filter(function($record) {
-        return !is_null($record->garansi_sparepart) && !is_null($record->garansi_periode);
-    });
-}
+    /**
+     * Get CURRENT main data - untuk display di UI
+     * UPDATED: Return process step only, harga sudah di tabel perbaikan
+     *
+     * @param string $perbaikanId
+     * @return DetailPerbaikan|null
+     */
+    public static function getCurrentMainData($perbaikanId)
+    {
+        return self::getLatestRecords($perbaikanId)->first();
+    }
 
-/**
- * Get CURRENT main data - untuk display di UI
- * UPDATED: Only return harga, other fields are in perbaikan table
- *
- * @param string $perbaikanId
- * @return DetailPerbaikan|null
- */
-public static function getCurrentMainData($perbaikanId)
-{
-    return self::getLatestRecords($perbaikanId)->first();
-}
-
-/**
- * Check if garansi exists in current state
- *
- * @param string $perbaikanId
- * @return bool
- */
-public static function hasCurrentGaransi($perbaikanId)
-{
-    return self::getCurrentGaransiItems($perbaikanId)->count() > 0;
-}
+    /**
+     * Check if garansi exists in current state
+     *
+     * @param string $perbaikanId
+     * @return bool
+     */
+    public static function hasCurrentGaransi($perbaikanId)
+    {
+        return self::getCurrentGaransiItems($perbaikanId)->count() > 0;
+    }
 
     /**
      * Get distinct process steps history
@@ -226,11 +220,7 @@ public static function hasCurrentGaransi($perbaikanId)
             ->values();
     }
 
-    // Accessor untuk format harga
-    public function getFormattedHargaAttribute()
-    {
-        return 'Rp. ' . number_format($this->harga, 0, ',', '.');
-    }
+    // REMOVED: getFormattedHargaAttribute() - sudah tidak ada field harga
 
     // UPDATED: Accessor untuk format garansi (tidak lagi dari field garansi)
     public function getFormattedGaransiAttribute()
@@ -241,24 +231,19 @@ public static function hasCurrentGaransi($perbaikanId)
         return 'Tidak ada garansi';
     }
 
-    // Scope untuk filter berdasarkan range harga
-    public function scopeByHargaRange($query, $min, $max)
-    {
-        return $query->whereBetween('harga', [$min, $max]);
-    }
+    // REMOVED: scopeByHargaRange() - sudah tidak ada field harga
 
     /**
      * FLEXIBLE: Create perbaikan records - handle empty garansi cases
-     * UPDATED: Removed garansi field
+     * UPDATED: Removed harga handling completely
      *
      * @param string $perbaikanId
-     * @param array $mainData (only harga)
      * @param array $garansiItems (bisa kosong atau berisi null values)
      * @param string|null $processStep
      * @return array
      * @throws \Exception
      */
-    public static function createPerbaikanRecordsFlexible($perbaikanId, $mainData, $garansiItems, $processStep = null)
+    public static function createPerbaikanRecordsFlexible($perbaikanId, $garansiItems, $processStep = null)
     {
         try {
             $createdRecords = [];
@@ -281,7 +266,7 @@ public static function hasCurrentGaransi($perbaikanId)
             }
 
             // Gunakan database transaction untuk konsistensi
-            DB::transaction(function () use ($perbaikanId, $mainData, $garansiItems, $processStep, $timestamp, &$createdRecords) {
+            DB::transaction(function () use ($perbaikanId, $garansiItems, $processStep, $timestamp, &$createdRecords) {
 
                 // Buat record untuk setiap garansi item (termasuk yang null)
                 foreach ($garansiItems as $index => $garansiItem) {
@@ -290,11 +275,6 @@ public static function hasCurrentGaransi($perbaikanId)
                         'created_at' => $timestamp,
                         'updated_at' => $timestamp,
                     ];
-
-                    // Set harga
-                    if (isset($mainData['harga']) && !is_null($mainData['harga'])) {
-                        $recordData['harga'] = $mainData['harga'];
-                    }
 
                     // Set garansi data (bisa null)
                     if (isset($garansiItem['sparepart']) && !is_null($garansiItem['sparepart'])) {
@@ -339,7 +319,6 @@ public static function hasCurrentGaransi($perbaikanId)
             // Log error dengan detail
             logger()->error('Error in createPerbaikanRecordsFlexible: ' . $e->getMessage(), [
                 'perbaikan_id' => $perbaikanId,
-                'main_data' => $mainData,
                 'garansi_items' => $garansiItems,
                 'process_step' => $processStep,
                 'stack_trace' => $e->getTraceAsString()

@@ -10,7 +10,7 @@ return new class extends Migration
         Schema::create('detail_perbaikan', function (Blueprint $table) {
             $table->id();
             $table->string('perbaikan_id', 11);
-            $table->decimal('harga', 15, 2);
+
             $table->text('process_step')->nullable();
 
             // Garansi details boleh kosong (nullable)

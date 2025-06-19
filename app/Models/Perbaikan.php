@@ -25,7 +25,12 @@ class Perbaikan extends Model
         'nama_device',
         'kategori_device',
         'masalah',
-        'tindakan_perbaikan'
+        'tindakan_perbaikan',
+        'harga' // BARU: Field harga ditambahkan ke fillable
+    ];
+
+    protected $casts = [
+        'harga' => 'decimal:2' // BARU: Cast harga sebagai decimal
     ];
 
     protected static function boot()
@@ -39,61 +44,56 @@ class Perbaikan extends Model
         });
     }
 
-    /**
-     * GENERATE KODE PERBAIKAN - METHOD UTAMA
-     * Format: MG50001, MG50002, dst.
-     */// GANTI method generateKodePerbaikan() di app/Models/Perbaikan.php
+    public static function generateKodePerbaikan()
+    {
+        try {
+            return \Illuminate\Support\Facades\DB::transaction(function () {
+                // Format tanggal: DDMMYY
+                $datePrefix = now()->format('dmy'); // 190625 untuk 19 Juni 2025
 
-public static function generateKodePerbaikan()
-{
-    try {
-        return \Illuminate\Support\Facades\DB::transaction(function () {
-            // Format tanggal: DDMMYY
-            $datePrefix = now()->format('dmy'); // 190625 untuk 19 Juni 2025
+                // Cari perbaikan terakhir untuk hari ini
+                $todayPrefix = 'MG' . $datePrefix;
 
-            // Cari perbaikan terakhir untuk hari ini
-            $todayPrefix = 'MG' . $datePrefix;
+                $lastPerbaikan = self::where('id', 'LIKE', $todayPrefix . '%')
+                    ->orderBy('id', 'desc')
+                    ->lockForUpdate() // Lock untuk mencegah race condition
+                    ->first();
 
-            $lastPerbaikan = self::where('id', 'LIKE', $todayPrefix . '%')
-                ->orderBy('id', 'desc')
-                ->lockForUpdate() // Lock untuk mencegah race condition
-                ->first();
+                if ($lastPerbaikan) {
+                    // Ambil 3 digit terakhir dan increment
+                    $lastNumber = (int) substr($lastPerbaikan->id, -3);
+                    $nextNumber = $lastNumber + 1;
 
-            if ($lastPerbaikan) {
-                // Ambil 3 digit terakhir dan increment
-                $lastNumber = (int) substr($lastPerbaikan->id, -3);
-                $nextNumber = $lastNumber + 1;
-
-                // Pastikan tidak lebih dari 999 per hari
-                if ($nextNumber > 999) {
-                    throw new \Exception('Maksimal 999 perbaikan per hari tercapai');
+                    // Pastikan tidak lebih dari 999 per hari
+                    if ($nextNumber > 999) {
+                        throw new \Exception('Maksimal 999 perbaikan per hari tercapai');
+                    }
+                } else {
+                    // Perbaikan pertama hari ini
+                    $nextNumber = 1;
                 }
-            } else {
-                // Perbaikan pertama hari ini
-                $nextNumber = 1;
-            }
 
-            // Format: MG + DDMMYY + XXX
-            $newId = $todayPrefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-
-            // Double check untuk memastikan ID belum ada
-            $exists = self::where('id', $newId)->exists();
-            if ($exists) {
-                $nextNumber++;
-                if ($nextNumber > 999) {
-                    throw new \Exception('Maksimal 999 perbaikan per hari tercapai');
-                }
+                // Format: MG + DDMMYY + XXX
                 $newId = $todayPrefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-            }
 
-            return $newId;
-        });
-    } catch (\Exception $e) {
-        // Fallback dengan timestamp jika ada error
-        $timestamp = now()->format('dmy') . now()->format('His');
-        return 'MG' . substr($timestamp, 0, 9); // Ambil 9 karakter pertama
+                // Double check untuk memastikan ID belum ada
+                $exists = self::where('id', $newId)->exists();
+                if ($exists) {
+                    $nextNumber++;
+                    if ($nextNumber > 999) {
+                        throw new \Exception('Maksimal 999 perbaikan per hari tercapai');
+                    }
+                    $newId = $todayPrefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+                }
+
+                return $newId;
+            });
+        } catch (\Exception $e) {
+            // Fallback dengan timestamp jika ada error
+            $timestamp = now()->format('dmy') . now()->format('His');
+            return 'MG' . substr($timestamp, 0, 9); // Ambil 9 karakter pertama
+        }
     }
-}
 
     public $timestamps = true;
 
@@ -197,7 +197,7 @@ public static function generateKodePerbaikan()
         return $currentFormatted !== $newFormatted;
     }
 
-    // ============ ACCESSOR ATTRIBUTES (SIMPLIFIED) ============
+    // ============ ACCESSOR ATTRIBUTES ============
 
     /**
      * Accessor untuk detail - return self since data is in main table
@@ -215,7 +215,7 @@ public static function generateKodePerbaikan()
         return $this->getCurrentGaransiItems();
     }
 
-    // Direct access to fields (no longer need accessors)
+    // Direct access to fields
     public function getNamaDeviceAttribute($value)
     {
         return $value;
@@ -236,14 +236,17 @@ public static function generateKodePerbaikan()
         return $value;
     }
 
-    public function getHargaAttribute()
+    // UPDATED: Harga accessor - now directly from perbaikan table
+    public function getHargaAttribute($value)
     {
-        // Harga masih di detail_perbaikan
-        $detail = DetailPerbaikan::getCurrentMainData($this->id);
-        return $detail ? $detail->harga : 0;
+        return $value; // Langsung return value dari tabel perbaikan
     }
 
-    // REMOVED: getGaransiAttribute() - field garansi sudah dihapus dari detail_perbaikan
+    // BARU: Formatted harga accessor
+    public function getFormattedHargaAttribute()
+    {
+        return 'Rp. ' . number_format($this->harga, 0, ',', '.');
+    }
 
     // ============ LEGACY HELPER METHODS ============
 
@@ -276,10 +279,9 @@ public static function generateKodePerbaikan()
     public function addProsesStep($step)
     {
         if ($step !== 'Data perbaikan diperbarui') {
-            // Create new detail record for process step only
+            // Create new detail record for process step only (without harga)
             DetailPerbaikan::create([
                 'perbaikan_id' => $this->id,
-                'harga' => $this->getHargaAttribute(), // Get from latest detail
                 'process_step' => $step,
                 'created_at' => now(),
                 'updated_at' => now()
