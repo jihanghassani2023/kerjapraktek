@@ -126,7 +126,7 @@
             padding: 15px 20px;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .user-info {
@@ -499,10 +499,12 @@
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo"
+                onerror="this.src='https://via.placeholder.com/80'">
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -524,7 +526,8 @@
 
         <form method="POST" action="{{ route('logout') }}" style="margin-top: 0;">
             @csrf
-            <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
+            <button type="submit" class="logout"
+                style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </button>
@@ -581,8 +584,9 @@
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Tanggal Perbaikan</div>
-                               <div class="info-value">
-    {{ \App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan) }}</div>
+                                <div class="info-value">
+                                    {{ \App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan) }}
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">Nama Device</div>
@@ -607,10 +611,10 @@
                             <div class="info-row">
                                 <div class="info-label">Garansi</div>
                                 <div class="info-value">
-                                    @if ($transaksi->garansiItems && $transaksi->garansiItems->count() > 0)
-                                        @foreach ($transaksi->garansiItems as $garansi)
+                                    @if ($transaksi->garansi && $transaksi->garansi->count() > 0)
+                                        @foreach ($transaksi->garansi as $garansi)
                                             <div style="margin-bottom: 5px;">
-                                                {{ $garansi->garansi_sparepart }}: {{ $garansi->garansi_periode }}
+                                                {{ $garansi->sparepart }}: {{ $garansi->periode }}
                                             </div>
                                         @endforeach
                                     @else
@@ -662,14 +666,15 @@
                             $distinctProses = $transaksi->getDistinctProsesPengerjaan();
                         @endphp
 
-                        @if($distinctProses && $distinctProses->count() > 0)
+                        @if ($distinctProses && $distinctProses->count() > 0)
                             @php
                                 $latestProcess = $distinctProses->first();
                             @endphp
                             <div class="latest-process">
                                 <div class="process-header">
                                     <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
-                                    <div class="process-date">{{ $latestProcess->created_at->format('d M Y H:i') }}</div>
+                                    <div class="process-date">{{ $latestProcess->created_at->format('d M Y H:i') }}
+                                    </div>
                                 </div>
                                 <div class="process-content">{{ $latestProcess->process_step }}</div>
                                 <div class="show-all-link" onclick="toggleTimeline()">
@@ -679,7 +684,7 @@
 
                             <div id="timeline-container" class="timeline-container">
                                 <div class="timeline">
-                                    @foreach($distinctProses as $proses)
+                                    @foreach ($distinctProses as $proses)
                                         @php
                                             $isStatusChange =
                                                 $proses->process_step == 'Menunggu Antrian Perbaikan' ||
@@ -696,20 +701,23 @@
                                                 }
                                             }
                                         @endphp
-                                        <div class="timeline-item {{ $isStatusChange ? 'status-change '.$statusClass : '' }}" style="background-color: transparent !important;">
+                                        <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}"
+                                            style="background-color: transparent !important;">
                                             <div class="timeline-marker">
                                                 <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
                                             </div>
                                             <div class="timeline-content">
                                                 <div class="timeline-title">{{ $proses->process_step }}</div>
-                                                <div class="timeline-date">{{ $proses->created_at->format('d M Y H:i:s') }}</div>
+                                                <div class="timeline-date">
+                                                    {{ $proses->created_at->format('d M Y H:i:s') }}</div>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
                         @else
-                            <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
+                            <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang
+                                direkam.</p>
                         @endif
                     </div>
                 </div>
@@ -719,27 +727,33 @@
 
     <script>
         // Setup receipt data untuk print
-       // Setup receipt data untuk print - SAFEST VERSION
-// Setup receipt data untuk print - KEPALA TOKO VERSION
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.receiptGenerator) {
-        window.receiptGenerator.setData({
-            kode: {!! json_encode($transaksi->id) !!},
-            tanggal: {!! json_encode(\App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan)) !!},
-            device: {!! json_encode($transaksi->nama_device) !!},
-            kategori: {!! json_encode($transaksi->kategori_device ?? "Tidak ditentukan") !!},
-            masalah: {!! json_encode($transaksi->masalah) !!},
-            tindakan: {!! json_encode($transaksi->tindakan_perbaikan) !!},
-            harga: {!! json_encode('Rp. ' . number_format($transaksi->harga, 0, ",", ".")) !!},
-            garansi: {!! json_encode($transaksi->garansiItems && $transaksi->garansiItems->count() > 0 ? $transaksi->garansiItems->map(function($g) { return $g->garansi_sparepart . ': ' . $g->garansi_periode; })->join(', ') : 'Tidak ada') !!},
-            pelanggan: {!! json_encode($transaksi->pelanggan->nama_pelanggan) !!},
-            nomor_telp: {!! json_encode($transaksi->pelanggan->nomor_telp) !!},
-            email: {!! json_encode($transaksi->pelanggan->email ?: "-") !!},
-            teknisi: {!! json_encode($transaksi->user->name ?? "Tidak ada") !!},
-            status: {!! json_encode($transaksi->status) !!}
+        // Setup receipt data untuk print - SAFEST VERSION
+        // Setup receipt data untuk print - KEPALA TOKO VERSION
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.receiptGenerator) {
+                window.receiptGenerator.setData({
+                    kode: {!! json_encode($transaksi->id) !!},
+                    tanggal: {!! json_encode(\App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan)) !!},
+                    device: {!! json_encode($transaksi->nama_device) !!},
+                    kategori: {!! json_encode($transaksi->kategori_device ?? 'Tidak ditentukan') !!},
+                    masalah: {!! json_encode($transaksi->masalah) !!},
+                    tindakan: {!! json_encode($transaksi->tindakan_perbaikan) !!},
+                    harga: {!! json_encode('Rp. ' . number_format($transaksi->harga, 0, ',', '.')) !!},
+                    garansi: {!! json_encode(
+                        $transaksi->garansi && $transaksi->garansi->count() > 0
+                            ? $transaksi->garansi->map(function ($g) {
+                                    return $g->sparepart . ': ' . $g->periode;
+                                })->join(', ')
+                            : 'Tidak ada',
+                    ) !!},
+                    pelanggan: {!! json_encode($transaksi->pelanggan->nama_pelanggan) !!},
+                    nomor_telp: {!! json_encode($transaksi->pelanggan->nomor_telp) !!},
+                    email: {!! json_encode($transaksi->pelanggan->email ?: '-') !!},
+                    teknisi: {!! json_encode($transaksi->user->name ?? 'Tidak ada') !!},
+                    status: {!! json_encode($transaksi->status) !!}
+                });
+            }
         });
-    }
-});
 
         // Real-time clock function
         function updateRealTimeClock() {
@@ -776,9 +790,11 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 timelineContainer.style.display = 'none';
                 toggleIcon.className = 'fas fa-chevron-down';
-                showAllLink.innerHTML = 'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
+                showAllLink.innerHTML =
+                'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
     </script>
 </body>
+
 </html>

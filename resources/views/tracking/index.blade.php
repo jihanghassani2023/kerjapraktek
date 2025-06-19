@@ -134,6 +134,7 @@
                 opacity: 0;
                 transform: translateY(-5px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -281,7 +282,7 @@
             font-size: 14px;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .info-row:last-child {
@@ -312,7 +313,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .status-menunggu {
@@ -493,13 +494,8 @@
                     <form action="{{ route('tracking.check') }}" method="POST" id="trackingForm">
                         @csrf
                         <div class="input-group">
-                            <input type="text"
-                                   id="phoneInput"
-                                   name="key"
-                                   class="input-control"
-                                   placeholder="Nomor Telepon Anda"
-                                   maxlength="13"
-                                   value="{{ old('key') }}">
+                            <input type="text" id="phoneInput" name="key" class="input-control"
+                                placeholder="Nomor Telepon Anda" maxlength="13" value="{{ old('key') }}">
                             <div class="error-message" id="errorMessage">Nomor telepon tidak boleh kosong.</div>
                         </div>
                         <button type="submit" class="submit-btn" id="submitBtn">SUBMIT</button>
@@ -537,7 +533,7 @@
                         <span class="count">{{ $perbaikanAktif->count() }}</span>
                     </div>
 
-                    @if($perbaikanAktif->count() > 0)
+                    @if ($perbaikanAktif->count() > 0)
                         @foreach ($perbaikanAktif as $perbaikan)
                             <div class="repair-card" data-status="{{ $perbaikan->status }}">
                                 <div class="repair-title">
@@ -581,74 +577,71 @@
                                     </div>
                                 @endif
 
-                                @if ($perbaikan->garansiItems && $perbaikan->garansiItems->count() > 0)
+                                @if ($perbaikan->garansi && $perbaikan->garansi->count() > 0)
                                     <div class="info-row">
                                         <div class="info-label">Garansi</div>
                                         <div class="info-value">
-                                            @foreach ($perbaikan->garansiItems as $garansi)
+                                            @foreach ($perbaikan->garansi as $garansi)
                                                 <div style="margin-bottom: 3px;">
-                                                    {{ $garansi->garansi_sparepart }}: {{ $garansi->garansi_periode }}
+                                                    {{ $garansi->sparepart }}: {{ $garansi->periode }}
                                                 </div>
                                             @endforeach
                                         </div>
-                                    </div>
-                                @elseif ($perbaikan->garansi)
-                                    <div class="info-row">
-                                        <div class="info-label">Garansi</div>
-                                        <div class="info-value">{{ $perbaikan->garansi }}</div>
                                     </div>
                                 @endif
 
                                 @if ($perbaikan->status === 'Selesai')
                                     <div class="completed-info">
-                                        <i class="fas fa-check-circle"></i> Perbaikan selesai! Anda dapat mengambil device di toko kami.
+                                        <i class="fas fa-check-circle"></i> Perbaikan selesai! Anda dapat mengambil
+                                        device di toko kami.
                                     </div>
                                 @endif
 
                                 <!-- Progress terakhir -->
-@php
-    // FIXED: Gunakan method yang sudah difilter untuk menghindari duplikasi
-    $distinctProses = $perbaikan->getDistinctProsesPengerjaan();
-@endphp
+                                @php
+                                    // FIXED: Gunakan method yang sudah difilter untuk menghindari duplikasi
+                                    $distinctProses = $perbaikan->getDistinctProsesPengerjaan();
+                                @endphp
 
-@if ($distinctProses && $distinctProses->count() > 0)
-    @php
-        $latestProcess = $distinctProses->first();
-    @endphp
-    <div class="latest-progress">
-        <div class="progress-header">
-            <span>Progress Terakhir:</span>
-            <span class="progress-date">{{ $latestProcess->created_at->format('d M Y H:i') }}</span>
-        </div>
-        <div class="progress-content">{{ $latestProcess->process_step }}</div>
-        <div class="progress-link"
-            onclick="toggleProgress('progress-{{ $perbaikan->id }}')">
-            Lihat semua progress <i class="fas fa-chevron-down"></i>
-        </div>
-    </div>
-@endif
+                                @if ($distinctProses && $distinctProses->count() > 0)
+                                    @php
+                                        $latestProcess = $distinctProses->first();
+                                    @endphp
+                                    <div class="latest-progress">
+                                        <div class="progress-header">
+                                            <span>Progress Terakhir:</span>
+                                            <span
+                                                class="progress-date">{{ $latestProcess->created_at->format('d M Y H:i') }}</span>
+                                        </div>
+                                        <div class="progress-content">{{ $latestProcess->process_step }}</div>
+                                        <div class="progress-link"
+                                            onclick="toggleProgress('progress-{{ $perbaikan->id }}')">
+                                            Lihat semua progress <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
-                          <!-- Progress lengkap -->
-@if ($distinctProses && $distinctProses->count() > 0)
-    <div id="progress-{{ $perbaikan->id }}" class="full-progress" style="display: none;">
-        <div class="progress-title">Riwayat Proses Pengerjaan</div>
-        <div class="progress-timeline">
-            {{-- FIXED: Gunakan $distinctProses yang sudah difilter --}}
-            @foreach ($distinctProses as $process)
-                <div class="progress-item">
-                    <div class="progress-dot"></div>
-                    <div class="progress-content">
-                        <div class="progress-step">{{ $process->process_step }}</div>
-                        <div class="progress-time">
-                            {{ $process->created_at->format('d M Y H:i:s') }}
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-@endif
+                            <!-- Progress lengkap -->
+                            @if ($distinctProses && $distinctProses->count() > 0)
+                                <div id="progress-{{ $perbaikan->id }}" class="full-progress" style="display: none;">
+                                    <div class="progress-title">Riwayat Proses Pengerjaan</div>
+                                    <div class="progress-timeline">
+                                        {{-- FIXED: Gunakan $distinctProses yang sudah difilter --}}
+                                        @foreach ($distinctProses as $process)
+                                            <div class="progress-item">
+                                                <div class="progress-dot"></div>
+                                                <div class="progress-content">
+                                                    <div class="progress-step">{{ $process->process_step }}</div>
+                                                    <div class="progress-time">
+                                                        {{ $process->created_at->format('d M Y H:i:s') }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         @endforeach
                     @else
                         <div class="no-data">
@@ -670,13 +663,8 @@
                     <form action="{{ route('tracking.check') }}" method="POST" id="trackingForm">
                         @csrf
                         <div class="input-group">
-                            <input type="text"
-                                   id="phoneInput"
-                                   name="key"
-                                   class="input-control"
-                                   placeholder="Nomor Telepon Anda"
-                                   maxlength="13"
-                                   value="{{ old('key') }}">
+                            <input type="text" id="phoneInput" name="key" class="input-control"
+                                placeholder="Nomor Telepon Anda" maxlength="13" value="{{ old('key') }}">
 
                             @if ($errors->has('key'))
                                 <div class="error-message show">{{ $errors->first('key') }}</div>
@@ -769,4 +757,5 @@
         });
     </script>
 </body>
+
 </html>

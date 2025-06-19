@@ -7,26 +7,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('detail_perbaikan', function (Blueprint $table) {
+        Schema::create('garansi', function (Blueprint $table) {
             $table->id();
             $table->string('perbaikan_id', 11);
-
-            $table->text('process_step')->nullable();
-
-
+            $table->string('sparepart', 100);
+            $table->enum('periode', ['Tidak ada garansi', '1 Bulan', '12 Bulan']);
             $table->timestamps();
 
-            // Foreign key
+            // Foreign key constraint
             $table->foreign('perbaikan_id')->references('id')->on('perbaikan')->onDelete('cascade');
 
-            // Indexes untuk optimasi query
-            $table->index(['perbaikan_id', 'created_at']);
-
+            // Index untuk optimasi query
+            $table->index(['perbaikan_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('detail_perbaikan');
+        Schema::dropIfExists('garansi');
     }
 };

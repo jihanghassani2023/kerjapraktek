@@ -7,6 +7,7 @@ use App\Helpers\DateHelper;
 use Illuminate\Http\Request;
 use App\Models\Perbaikan;
 use App\Models\Pelanggan;
+use App\Models\Garansi;
 use Carbon\Carbon;
 
 class TrackingController extends Controller
@@ -36,9 +37,9 @@ class TrackingController extends Controller
                 ->with('error', 'Nomor telepon tidak ditemukan. Mohon periksa kembali nomor telepon Anda.');
         }
 
-        // UPDATED: Ambil data langsung dari perbaikan table
+        // Get perbaikan data with garansi relationship
         $allPerbaikan = Perbaikan::where('pelanggan_id', $pelanggan->id)
-                            ->with(['user', 'pelanggan'])
+                            ->with(['user', 'pelanggan', 'garansi'])
                             ->orderBy('tanggal_perbaikan', 'desc')
                             ->get()
                             ->map(function($item) {

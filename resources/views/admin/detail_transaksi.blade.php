@@ -509,6 +509,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
@@ -624,10 +625,10 @@
                             <div class="info-row">
                                 <div class="info-label">Garansi</div>
                                 <div class="info-value">
-                                    @if ($transaksi->garansiItems && $transaksi->garansiItems->count() > 0)
-                                        @foreach ($transaksi->garansiItems as $garansi)
+                                    @if ($transaksi->garansi && $transaksi->garansi->count() > 0)
+                                        @foreach ($transaksi->garansi as $garansi)
                                             <div style="margin-bottom: 5px;">
-                                                {{ $garansi->garansi_sparepart }}: {{ $garansi->garansi_periode }}
+                                                {{ $garansi->sparepart }}: {{ $garansi->periode }}
                                             </div>
                                         @endforeach
                                     @else
@@ -713,8 +714,7 @@
                             <div id="timeline-container" class="timeline-container">
                                 <div class="timeline">
                                     @foreach ($distinctProses as $proses)
-                                        <div class="timeline-item"
-                                            style="background-color: transparent !important;">
+                                        <div class="timeline-item" style="background-color: transparent !important;">
                                             <div class="timeline-marker">
                                                 <i class="fas fa-circle"></i>
                                             </div>
@@ -756,26 +756,26 @@
     <script>
         // Setup receipt data untuk print
         // Setup receipt data untuk print - SAFEST VERSION
-// Setup receipt data untuk print - ADMIN VERSION
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.receiptGenerator) {
-        window.receiptGenerator.setData({
-            kode: {!! json_encode($transaksi->id) !!},
-            tanggal: {!! json_encode(\App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan)) !!},
-            device: {!! json_encode($transaksi->nama_device) !!},
-            kategori: {!! json_encode($transaksi->kategori_device ?? "Tidak ditentukan") !!},
-            masalah: {!! json_encode($transaksi->masalah) !!},
-            tindakan: {!! json_encode($transaksi->tindakan_perbaikan) !!},
-            harga: {!! json_encode('Rp. ' . number_format($transaksi->harga, 0, ",", ".")) !!},
-            garansi: {!! json_encode($transaksi->garansiItems && $transaksi->garansiItems->count() > 0 ? $transaksi->garansiItems->map(function($g) { return $g->garansi_sparepart . ': ' . $g->garansi_periode; })->join(', ') : 'Tidak ada') !!},
-            pelanggan: {!! json_encode($transaksi->pelanggan->nama_pelanggan) !!},
-            nomor_telp: {!! json_encode($transaksi->pelanggan->nomor_telp) !!},
-            email: {!! json_encode($transaksi->pelanggan->email ?: "-") !!},
-            teknisi: {!! json_encode($transaksi->user->name ?? "Tidak ada") !!},
-            status: {!! json_encode($transaksi->status) !!}
+        // Setup receipt data untuk print - ADMIN VERSION
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.receiptGenerator) {
+                window.receiptGenerator.setData({
+                    kode: {!! json_encode($transaksi->id) !!},
+                    tanggal: {!! json_encode(\App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan)) !!},
+                    device: {!! json_encode($transaksi->nama_device) !!},
+                    kategori: {!! json_encode($transaksi->kategori_device ?? 'Tidak ditentukan') !!},
+                    masalah: {!! json_encode($transaksi->masalah) !!},
+                    tindakan: {!! json_encode($transaksi->tindakan_perbaikan) !!},
+                    harga: {!! json_encode('Rp. ' . number_format($transaksi->harga, 0, ',', '.')) !!},
+                  garansi: {!! json_encode($transaksi->garansi && $transaksi->garansi->count() > 0 ? $transaksi->garansi->map(function($g) { return $g->sparepart . ': ' . $g->periode; })->join(', ') : 'Tidak ada') !!},
+                    pelanggan: {!! json_encode($transaksi->pelanggan->nama_pelanggan) !!},
+                    nomor_telp: {!! json_encode($transaksi->pelanggan->nomor_telp) !!},
+                    email: {!! json_encode($transaksi->pelanggan->email ?: '-') !!},
+                    teknisi: {!! json_encode($transaksi->user->name ?? 'Tidak ada') !!},
+                    status: {!! json_encode($transaksi->status) !!}
+                });
+            }
         });
-    }
-});
 
         function toggleTimeline() {
             const timelineContainer = document.getElementById('timeline-container');
@@ -845,42 +845,42 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
 
                     fetch('/admin/transaksi/{{ $transaksi->id }}/status', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': token,
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({
-                            status: pendingStatus
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                status: pendingStatus
+                            })
                         })
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            updateUIAfterStatusChange(data.status);
-                            showNotification('Status berhasil diperbarui!', 'success');
-                        } else {
-                            throw new Error(data.message || 'Gagal mengubah status');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('Gagal mengubah status: ' + error.message, 'error');
-                    })
-                    .finally(() => {
-                        isProcessing = false;
-                        document.querySelectorAll('.btn-status').forEach(btn => {
-                            btn.disabled = false;
-                            btn.style.opacity = '1';
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                updateUIAfterStatusChange(data.status);
+                                showNotification('Status berhasil diperbarui!', 'success');
+                            } else {
+                                throw new Error(data.message || 'Gagal mengubah status');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showNotification('Gagal mengubah status: ' + error.message, 'error');
+                        })
+                        .finally(() => {
+                            isProcessing = false;
+                            document.querySelectorAll('.btn-status').forEach(btn => {
+                                btn.disabled = false;
+                                btn.style.opacity = '1';
+                            });
                         });
-                    });
                 }
             });
 
@@ -962,4 +962,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     </script>
 </body>
+
 </html>

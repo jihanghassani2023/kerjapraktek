@@ -795,20 +795,20 @@
                                 <div class="info-label">Harga</div>
                                 <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}</div>
                             </div>
-                            <div class="info-row">
-                                <div class="info-label">Garansi</div>
-                                <div class="info-value">
-                                    @if ($perbaikan->garansiItems->count() > 0)
-                                        @foreach ($perbaikan->garansiItems as $garansi)
-                                            <div style="margin-bottom: 5px;">
-                                                {{ $garansi->garansi_sparepart }}: {{ $garansi->garansi_periode }}
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        Tidak ada
-                                    @endif
-                                </div>
-                            </div>
+                          <div class="info-row">
+    <div class="info-label">Garansi</div>
+    <div class="info-value">
+        @if ($perbaikan->garansi && $perbaikan->garansi->count() > 0)
+            @foreach ($perbaikan->garansi as $garansi)
+                <div style="margin-bottom: 5px;">
+                    {{ $garansi->sparepart }}: {{ $garansi->periode }}
+                </div>
+            @endforeach
+        @else
+            Tidak ada
+        @endif
+    </div>
+</div>
                             <div class="info-row">
                                 <div class="info-label">Status</div>
                                 <div class="info-value">
@@ -840,7 +840,8 @@
                             </div>
                         </div>
                     </div>
-                </div><div class="col-md-6">
+                </div>
+                <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Proses Pengerjaan</h3>
@@ -856,14 +857,16 @@
                                 @endphp
                                 <div class="latest-process">
                                     <div class="process-header">
-                                        <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
+                                        <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir
+                                        </div>
                                         <div class="process-date">
                                             {{ $latestProcess->created_at->format('d M Y H:i') }}
                                         </div>
                                     </div>
                                     <div class="process-content">{{ $latestProcess->process_step }}</div>
                                     <div class="show-all-link" onclick="toggleTimeline()">
-                                        Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>
+                                        Lihat semua progress <i class="fas fa-chevron-down"
+                                            id="timeline-toggle-icon"></i>
                                     </div>
                                 </div>
 
@@ -889,7 +892,8 @@
                                             <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}"
                                                 style="background-color: transparent !important;">
                                                 <div class="timeline-marker">
-                                                    <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
+                                                    <i
+                                                        class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
                                                 </div>
                                                 <div class="timeline-content">
                                                     <div class="timeline-title">{{ $proses->process_step }}</div>
@@ -902,12 +906,14 @@
                                     </div>
                                 </div>
                             @else
-                                <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan yang direkam.</p>
+                                <p style="text-align: center; padding: 20px; color: #666;">Belum ada proses pengerjaan
+                                    yang direkam.</p>
                             @endif
 
                             @if ($perbaikan->status == 'Proses')
                                 <div class="add-process-form" id="addProcessForm">
-                                    <form action="{{ route('perbaikan.add-process', $perbaikan->id) }}" method="POST">
+                                    <form action="{{ route('perbaikan.add-process', $perbaikan->id) }}"
+                                        method="POST">
                                         @csrf
                                         <div class="input-group">
                                             <input type="text" name="proses_step" class="form-control"
@@ -982,7 +988,7 @@
                     masalah: {!! json_encode($perbaikan->masalah) !!},
                     tindakan: {!! json_encode($perbaikan->tindakan_perbaikan) !!},
                     harga: {!! json_encode('Rp. ' . number_format($perbaikan->harga, 0, ",", ".")) !!},
-                    garansi: {!! json_encode($perbaikan->garansiItems && $perbaikan->garansiItems->count() > 0 ? $perbaikan->garansiItems->map(function($g) { return $g->garansi_sparepart . ': ' . $g->garansi_periode; })->join(', ') : 'Tidak ada') !!},
+                    garansi: {!! json_encode($perbaikan->garansi && $perbaikan->garansi->count() > 0 ? $perbaikan->garansi->map(function($g) { return $g->sparepart . ': ' . $g->periode; })->join(', ') : 'Tidak ada') !!},
                     pelanggan: {!! json_encode($perbaikan->pelanggan->nama_pelanggan) !!},
                     nomor_telp: {!! json_encode($perbaikan->pelanggan->nomor_telp) !!},
                     email: {!! json_encode($perbaikan->pelanggan->email ?: "-") !!},
@@ -1004,7 +1010,8 @@
             } else {
                 timelineContainer.style.display = 'none';
                 toggleIcon.className = 'fas fa-chevron-down';
-                showAllLink.innerHTML = 'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
+                showAllLink.innerHTML =
+                'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
 
@@ -1067,41 +1074,41 @@
                 };
 
                 fetch('/perbaikan/{{ $perbaikan->id }}/status', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(requestData)
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        updateBasicUI(data.status);
-                        addNewTimelineEntry(data.status);
-                        showNotification('Status berhasil diperbarui!', 'success');
-                    } else {
-                        throw new Error(data.message || 'Gagal mengubah status');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Gagal mengubah status: ' + error.message, 'error');
-                })
-                .finally(() => {
-                    isProcessing = false;
-                    document.querySelectorAll('.btn-status').forEach(btn => {
-                        btn.disabled = false;
-                        btn.style.opacity = '1';
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(requestData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            updateBasicUI(data.status);
+                            addNewTimelineEntry(data.status);
+                            showNotification('Status berhasil diperbarui!', 'success');
+                        } else {
+                            throw new Error(data.message || 'Gagal mengubah status');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Gagal mengubah status: ' + error.message, 'error');
+                    })
+                    .finally(() => {
+                        isProcessing = false;
+                        document.querySelectorAll('.btn-status').forEach(btn => {
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                        });
                     });
-                });
             });
 
             function updateBasicUI(newStatus) {

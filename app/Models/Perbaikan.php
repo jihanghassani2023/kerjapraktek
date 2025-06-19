@@ -1,5 +1,5 @@
 <?php
-// app/Models/Perbaikan.php
+// app/Models/Perbaikan.php (UPDATED VERSION)
 
 namespace App\Models;
 
@@ -26,11 +26,11 @@ class Perbaikan extends Model
         'kategori_device',
         'masalah',
         'tindakan_perbaikan',
-        'harga' // BARU: Field harga ditambahkan ke fillable
+        'harga'
     ];
 
     protected $casts = [
-        'harga' => 'decimal:2' // BARU: Cast harga sebagai decimal
+        'harga' => 'decimal:2'
     ];
 
     protected static function boot()
@@ -48,35 +48,27 @@ class Perbaikan extends Model
     {
         try {
             return \Illuminate\Support\Facades\DB::transaction(function () {
-                // Format tanggal: DDMMYY
-                $datePrefix = now()->format('dmy'); // 190625 untuk 19 Juni 2025
-
-                // Cari perbaikan terakhir untuk hari ini
+                $datePrefix = now()->format('dmy');
                 $todayPrefix = 'MG' . $datePrefix;
 
                 $lastPerbaikan = self::where('id', 'LIKE', $todayPrefix . '%')
                     ->orderBy('id', 'desc')
-                    ->lockForUpdate() // Lock untuk mencegah race condition
+                    ->lockForUpdate()
                     ->first();
 
                 if ($lastPerbaikan) {
-                    // Ambil 3 digit terakhir dan increment
                     $lastNumber = (int) substr($lastPerbaikan->id, -3);
                     $nextNumber = $lastNumber + 1;
 
-                    // Pastikan tidak lebih dari 999 per hari
                     if ($nextNumber > 999) {
                         throw new \Exception('Maksimal 999 perbaikan per hari tercapai');
                     }
                 } else {
-                    // Perbaikan pertama hari ini
                     $nextNumber = 1;
                 }
 
-                // Format: MG + DDMMYY + XXX
                 $newId = $todayPrefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
-                // Double check untuk memastikan ID belum ada
                 $exists = self::where('id', $newId)->exists();
                 if ($exists) {
                     $nextNumber++;
@@ -89,9 +81,8 @@ class Perbaikan extends Model
                 return $newId;
             });
         } catch (\Exception $e) {
-            // Fallback dengan timestamp jika ada error
             $timestamp = now()->format('dmy') . now()->format('His');
-            return 'MG' . substr($timestamp, 0, 9); // Ambil 9 karakter pertama
+            return 'MG' . substr($timestamp, 0, 9);
         }
     }
 
@@ -109,12 +100,17 @@ class Perbaikan extends Model
         return $this->belongsTo(Pelanggan::class);
     }
 
+    // NEW: Direct relationship with Garansi table
+    public function garansi()
+    {
+        return $this->hasMany(Garansi::class, 'perbaikan_id', 'id');
+    }
+
     public function details()
     {
         return $this->hasMany(DetailPerbaikan::class, 'perbaikan_id', 'id');
     }
 
-    // DEPRECATED: Use getCurrentDetail() instead
     public function detail()
     {
         return $this->hasOne(DetailPerbaikan::class, 'perbaikan_id', 'id')->latest();
@@ -129,57 +125,37 @@ class Perbaikan extends Model
             ->orderBy('created_at', 'desc');
     }
 
+    // UPDATED: Use direct garansi relationship
     public function garansiItems()
     {
-        $latestGaransiTimestamp = $this->getLatestGaransiTimestamp();
-
-        if (!$latestGaransiTimestamp) {
-            return $this->hasMany(DetailPerbaikan::class, 'perbaikan_id', 'id')
-                ->whereRaw('1 = 0');
-        }
-
-        return $this->hasMany(DetailPerbaikan::class, 'perbaikan_id', 'id')
-            ->select(['perbaikan_id', 'garansi_sparepart', 'garansi_periode', 'created_at'])
-            ->whereNotNull('garansi_sparepart')
-            ->where('created_at', $latestGaransiTimestamp)
-            ->orderBy('garansi_sparepart', 'asc');
+        return $this->garansi()->orderBy('sparepart', 'asc');
     }
 
-    // ============ CURRENT DATA METHODS (SIMPLIFIED) ============
+    // ============ CURRENT DATA METHODS ============
 
-    /**
-     * Get CURRENT detail (latest record) - now from main table
-     */
     public function getCurrentDetail()
     {
-        // Return self since main data is now in perbaikan table
         return $this;
     }
 
-    /**
-     * Get CURRENT garansi items
-     */
+    // UPDATED: Get current garansi items from garansi table
     public function getCurrentGaransiItems()
     {
-        return DetailPerbaikan::getCurrentGaransiItems($this->id);
+        return $this->garansi;
     }
 
-    /**
-     * Check if garansi has changed compared to current state
-     */
+    // UPDATED: Check if garansi has changed compared to current state
     public function hasGaransiChanged($newGaransiItems)
     {
         $currentGaransi = $this->getCurrentGaransiItems();
 
-        // Convert current to comparable format
         $currentFormatted = $currentGaransi->map(function ($item) {
             return [
-                'sparepart' => $item->garansi_sparepart,
-                'periode' => $item->garansi_periode
+                'sparepart' => $item->sparepart,
+                'periode' => $item->periode
             ];
         })->sortBy('sparepart')->values()->toArray();
 
-        // Convert new to comparable format and sort
         $newFormatted = collect($newGaransiItems)
             ->map(function ($item) {
                 return [
@@ -199,23 +175,17 @@ class Perbaikan extends Model
 
     // ============ ACCESSOR ATTRIBUTES ============
 
-    /**
-     * Accessor untuk detail - return self since data is in main table
-     */
     public function getDetailAttribute()
     {
         return $this;
     }
 
-    /**
-     * Accessor untuk garansi items
-     */
+    // UPDATED: Use direct garansi relationship
     public function getGaransiItemsAttribute()
     {
         return $this->getCurrentGaransiItems();
     }
 
-    // Direct access to fields
     public function getNamaDeviceAttribute($value)
     {
         return $value;
@@ -236,31 +206,17 @@ class Perbaikan extends Model
         return $value;
     }
 
-    // UPDATED: Harga accessor - now directly from perbaikan table
     public function getHargaAttribute($value)
     {
-        return $value; // Langsung return value dari tabel perbaikan
+        return $value;
     }
 
-    // BARU: Formatted harga accessor
     public function getFormattedHargaAttribute()
     {
         return 'Rp. ' . number_format($this->harga, 0, ',', '.');
     }
 
-    // ============ LEGACY HELPER METHODS ============
-
-    public function getLatestGaransiTimestamp()
-    {
-        return $this->details()
-            ->whereNotNull('garansi_sparepart')
-            ->max('created_at');
-    }
-
-    public function getLatestGaransiItems()
-    {
-        return $this->getCurrentGaransiItems();
-    }
+    // ============ HELPER METHODS ============
 
     public function getDistinctProsesPengerjaan()
     {
@@ -274,12 +230,9 @@ class Perbaikan extends Model
             ->values();
     }
 
-    // ============ UTILITY METHODS ============
-
     public function addProsesStep($step)
     {
         if ($step !== 'Data perbaikan diperbarui') {
-            // Create new detail record for process step only (without harga)
             DetailPerbaikan::create([
                 'perbaikan_id' => $this->id,
                 'process_step' => $step,
@@ -295,6 +248,7 @@ class Perbaikan extends Model
         return $this->getCurrentGaransiItems()->count();
     }
 
+    // UPDATED: Get garansi summary from garansi table
     public function getGaransiSummary()
     {
         $items = $this->getCurrentGaransiItems();
@@ -310,14 +264,31 @@ class Perbaikan extends Model
         return [
             'count' => $items->count(),
             'text' => $items->map(function ($item) {
-                return $item->garansi_sparepart . ': ' . $item->garansi_periode;
+                return $item->sparepart . ': ' . $item->periode;
             })->implode('; '),
             'items' => $items->map(function ($item) {
                 return [
-                    'sparepart' => $item->garansi_sparepart,
-                    'periode' => $item->garansi_periode
+                    'sparepart' => $item->sparepart,
+                    'periode' => $item->periode
                 ];
             })->toArray()
         ];
+    }
+
+    // NEW: Method to sync garansi items
+    public function syncGaransiItems($garansiItems)
+    {
+        // Delete existing garansi items
+        $this->garansi()->delete();
+
+        // Create new garansi items
+        foreach ($garansiItems as $item) {
+            if (!empty($item['sparepart']) && !empty($item['periode'])) {
+                $this->garansi()->create([
+                    'sparepart' => trim($item['sparepart']),
+                    'periode' => trim($item['periode'])
+                ]);
+            }
+        }
     }
 }
