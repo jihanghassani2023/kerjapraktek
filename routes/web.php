@@ -82,7 +82,11 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('transaksi')->name('transaksi.')->middleware(['auth'])->group(function () {
         Route::get('/', [TransaksiController::class, 'index'])->name('index');
         Route::get('/export', [TransaksiController::class, 'export'])->name('export');
-        Route::get('/{id}', [TransaksiController::class, 'show'])->name('show')->where('id', 'MG\d{8}');
+        // FIXED: Hapus constraint yang terlalu ketat dan sesuaikan dengan format ID yang sebenarnya
+        // Format ID sebenarnya: MG + DDMMYY + XXX (contoh: MG190625001)
+        Route::get('/{id}', [TransaksiController::class, 'show'])
+            ->name('show')
+            ->where('id', 'MG\d{9}'); // MG + 6 digit tanggal + 3 digit urutan = 11 karakter total
     });
 
     // Karyawan routes - for kepala toko

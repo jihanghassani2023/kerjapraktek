@@ -7,6 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Detail Transaksi - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ asset('css/receipt-print.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/receipt-generator.js') }}"></script>
     <style>
         * {
             margin: 0;
@@ -174,7 +176,6 @@
             color: #333;
         }
 
-        /* Grid Layout */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -299,15 +300,6 @@
             background-color: #6d2d2d;
         }
 
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-
         .btn-print {
             background-color: #6c757d;
             color: white;
@@ -317,7 +309,6 @@
             background-color: #5a6268;
         }
 
-        /* Status actions styles */
         .status-actions {
             margin-top: 20px;
             padding: 15px;
@@ -350,26 +341,14 @@
             color: #ff6b6b;
         }
 
-        .btn-menunggu:hover {
-            background-color: #ffd0d0;
-        }
-
         .btn-proses {
             background-color: #fff4e0;
             color: #ffaa00;
         }
 
-        .btn-proses:hover {
-            background-color: #ffe6c0;
-        }
-
         .btn-selesai {
             background-color: #e7f9e7;
             color: #28a745;
-        }
-
-        .btn-selesai:hover {
-            background-color: #d0f0d0;
         }
 
         .alert {
@@ -390,7 +369,6 @@
             border: 1px solid #f5c6cb;
         }
 
-        /* Timeline Styles */
         .timeline {
             position: relative;
             margin-left: 20px;
@@ -448,57 +426,6 @@
             color: #666;
         }
 
-        /* Status change styling */
-        .timeline-item.status-change .timeline-marker {
-            border-color: #6c757d;
-        }
-
-        .timeline-item.status-change .timeline-marker i {
-            color: #6c757d;
-        }
-
-        .timeline-item.status-change .timeline-title {
-            font-style: italic;
-        }
-
-        /* Status-specific colors */
-        .timeline-item.status-menunggu .timeline-marker {
-            border-color: #ff6b6b;
-        }
-
-        .timeline-item.status-menunggu .timeline-marker i {
-            color: #ff6b6b;
-        }
-
-        .timeline-item.status-menunggu .timeline-title {
-            color: #ff6b6b;
-        }
-
-        .timeline-item.status-proses .timeline-marker {
-            border-color: #ffaa00;
-        }
-
-        .timeline-item.status-proses .timeline-marker i {
-            color: #ffaa00;
-        }
-
-        .timeline-item.status-proses .timeline-title {
-            color: #ffaa00;
-        }
-
-        .timeline-item.status-selesai .timeline-marker {
-            border-color: #28a745;
-        }
-
-        .timeline-item.status-selesai .timeline-marker i {
-            color: #28a745;
-        }
-
-        .timeline-item.status-selesai .timeline-title {
-            color: #28a745;
-        }
-
-        /* Latest Process Styles */
         .latest-process {
             background-color: #f8f9fa;
             border-radius: 8px;
@@ -545,20 +472,10 @@
             text-decoration: underline;
         }
 
-        /* Timeline Container */
         .timeline-container {
             display: none;
             margin-top: 20px;
         }
-
-        .actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-
 
         @media (max-width: 768px) {
             .sidebar {
@@ -656,8 +573,6 @@
             </div>
         @endif
 
-        <div id="statusAlert" class="alert alert-success" style="display: none;"></div>
-
         <div class="content-wrapper">
             <div class="content-header">
                 <h2 class="content-title">Transaksi #{{ $transaksi->id }}</h2>
@@ -666,9 +581,7 @@
                 </a>
             </div>
 
-            <!-- Grid layout for 2-column design -->
             <div class="grid-container">
-                <!-- Left Column: Main Information -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Informasi Perbaikan</h3>
@@ -677,7 +590,6 @@
                         </span>
                     </div>
                     <div class="card-body">
-                        <!-- Repair Information Section -->
                         <div class="info-section">
                             <div class="info-row">
                                 <div class="info-label">Kode Perbaikan</div>
@@ -719,13 +631,12 @@
                                             </div>
                                         @endforeach
                                     @else
-                                        {{ $transaksi->garansi ?: 'Tidak ada' }}
+                                        Tidak ada
                                     @endif
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Customer Information Section -->
                         <div class="info-section">
                             <h3 class="section-title">Informasi Pelanggan</h3>
                             <div class="info-row">
@@ -742,7 +653,6 @@
                             </div>
                         </div>
 
-                        <!-- Technician Information Section -->
                         <div class="info-section">
                             <h3 class="section-title">Informasi Teknisi</h3>
                             <div class="info-row">
@@ -757,7 +667,6 @@
                             @endif
                         </div>
 
-                        <!-- Status update section -->
                         <div class="status-actions">
                             <h4 class="status-title">Ubah Status Perbaikan</h4>
                             <div class="status-buttons">
@@ -775,15 +684,12 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Process Timeline -->
-                <!-- Right Column: Process Timeline -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Proses Pengerjaan</h3>
                     </div>
                     <div class="card-body">
                         @php
-                            // FIXED: Gunakan method yang sudah difilter untuk menghindari duplikasi
                             $distinctProses = $transaksi->getDistinctProsesPengerjaan();
                         @endphp
 
@@ -791,7 +697,6 @@
                             @php
                                 $latestProcess = $distinctProses->first();
                             @endphp
-                            <!-- Latest Process -->
                             <div class="latest-process">
                                 <div class="process-header">
                                     <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
@@ -805,32 +710,13 @@
                                 </div>
                             </div>
 
-                            <!-- Full Timeline -->
                             <div id="timeline-container" class="timeline-container">
                                 <div class="timeline">
-                                    {{-- FIXED: Gunakan $distinctProses yang sudah difilter --}}
                                     @foreach ($distinctProses as $proses)
-                                        @php
-                                            $isStatusChange =
-                                                $proses->process_step == 'Menunggu Antrian Perbaikan' ||
-                                                $proses->process_step == 'Device Anda Sedang diproses' ||
-                                                $proses->process_step == 'Device Anda Telah Selesai';
-
-                                            $statusClass = '';
-                                            if ($isStatusChange) {
-                                                if ($proses->process_step == 'Menunggu Antrian Perbaikan') {
-                                                    $statusClass = 'status-menunggu';
-                                                } elseif ($proses->process_step == 'Device Anda Sedang diproses') {
-                                                    $statusClass = 'status-proses';
-                                                } elseif ($proses->process_step == 'Device Anda Telah Selesai') {
-                                                    $statusClass = 'status-selesai';
-                                                }
-                                            }
-                                        @endphp
-                                        <div class="timeline-item {{ $isStatusChange ? 'status-change ' . $statusClass : '' }}"
+                                        <div class="timeline-item"
                                             style="background-color: transparent !important;">
                                             <div class="timeline-marker">
-                                                <i class="fas {{ $isStatusChange ? 'fa-flag' : 'fa-circle' }}"></i>
+                                                <i class="fas fa-circle"></i>
                                             </div>
                                             <div class="timeline-content">
                                                 <div class="timeline-title">{{ $proses->process_step }}</div>
@@ -852,7 +738,6 @@
         </div>
     </div>
 
-    <!-- Custom Confirmation Modal -->
     <div id="confirmationModal"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
         <div
@@ -869,7 +754,29 @@
     </div>
 
     <script>
-        // Toggle timeline function
+        // Setup receipt data untuk print
+        // Setup receipt data untuk print - SAFEST VERSION
+// Setup receipt data untuk print - ADMIN VERSION
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.receiptGenerator) {
+        window.receiptGenerator.setData({
+            kode: {!! json_encode($transaksi->id) !!},
+            tanggal: {!! json_encode(\App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan)) !!},
+            device: {!! json_encode($transaksi->nama_device) !!},
+            kategori: {!! json_encode($transaksi->kategori_device ?? "Tidak ditentukan") !!},
+            masalah: {!! json_encode($transaksi->masalah) !!},
+            tindakan: {!! json_encode($transaksi->tindakan_perbaikan) !!},
+            harga: {!! json_encode('Rp. ' . number_format($transaksi->harga, 0, ",", ".")) !!},
+            garansi: {!! json_encode($transaksi->garansiItems && $transaksi->garansiItems->count() > 0 ? $transaksi->garansiItems->map(function($g) { return $g->garansi_sparepart . ': ' . $g->garansi_periode; })->join(', ') : 'Tidak ada') !!},
+            pelanggan: {!! json_encode($transaksi->pelanggan->nama_pelanggan) !!},
+            nomor_telp: {!! json_encode($transaksi->pelanggan->nomor_telp) !!},
+            email: {!! json_encode($transaksi->pelanggan->email ?: "-") !!},
+            teknisi: {!! json_encode($transaksi->user->name ?? "Tidak ada") !!},
+            status: {!! json_encode($transaksi->status) !!}
+        });
+    }
+});
+
         function toggleTimeline() {
             const timelineContainer = document.getElementById('timeline-container');
             const toggleIcon = document.getElementById('timeline-toggle-icon');
@@ -887,13 +794,11 @@
             }
         }
 
-        // Execute when DOM is fully loaded
+        // Status update functionality
         document.addEventListener('DOMContentLoaded', function() {
-            // Get current status
             const currentStatus = '{{ $transaksi->status }}';
             let isProcessing = false;
 
-            // Hide status change section if status is already "Selesai"
             if (currentStatus === 'Selesai') {
                 const statusActions = document.querySelector('.status-actions');
                 if (statusActions) {
@@ -901,16 +806,13 @@
                 }
             }
 
-            // Set up the confirmation modal
             const modal = document.getElementById('confirmationModal');
             const confirmText = document.getElementById('confirmationText');
             const confirmYes = document.getElementById('confirmYes');
             const confirmNo = document.getElementById('confirmNo');
 
-            // Variables to store the status we want to change to
             let pendingStatus = '';
 
-            // Function to attach event listeners to status buttons
             function attachStatusButtonListeners() {
                 document.querySelectorAll('.btn-status').forEach(button => {
                     const newButton = button.cloneNode(true);
@@ -919,43 +821,29 @@
                     newButton.addEventListener('click', function() {
                         if (isProcessing) return;
 
-                        // Get the status from data attribute or button content
                         pendingStatus = this.getAttribute('data-status') || this.textContent.trim();
-
-                        // Set confirmation message
                         confirmText.textContent = 'APAKAH ANDA YAKIN MENGUBAH STATUS MENJADI ' +
                             pendingStatus + '?';
-
-                        // Show the confirmation modal
                         modal.style.display = 'block';
                     });
                 });
             }
 
-            // Initial attachment of event listeners
             attachStatusButtonListeners();
 
-            // Handle confirmation: YES
             confirmYes.addEventListener('click', function() {
                 if (pendingStatus && !isProcessing) {
                     isProcessing = true;
-
-                    // Get CSRF token
                     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-                    // Hide the modal
                     modal.style.display = 'none';
 
-                    // Show loading notification
                     showNotification('Mengubah status...', 'info');
 
-                    // Disable all status buttons
                     document.querySelectorAll('.btn-status').forEach(btn => {
                         btn.disabled = true;
                         btn.style.opacity = '0.5';
                     });
 
-                    // Send AJAX request
                     fetch('/admin/transaksi/{{ $transaksi->id }}/status', {
                         method: 'PUT',
                         headers: {
@@ -976,7 +864,6 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            // Update UI without page reload
                             updateUIAfterStatusChange(data.status);
                             showNotification('Status berhasil diperbarui!', 'success');
                         } else {
@@ -989,7 +876,6 @@
                     })
                     .finally(() => {
                         isProcessing = false;
-                        // Re-enable buttons
                         document.querySelectorAll('.btn-status').forEach(btn => {
                             btn.disabled = false;
                             btn.style.opacity = '1';
@@ -998,134 +884,17 @@
                 }
             });
 
-            // Function to update UI after successful status change
             function updateUIAfterStatusChange(newStatus) {
-                // Update status badge
                 const statusBadge = document.getElementById('statusBadge');
                 if (statusBadge) {
                     statusBadge.className = 'status-badge status-' + newStatus.toLowerCase();
                     statusBadge.textContent = newStatus;
                 }
 
-                // Update status action buttons
                 updateStatusButtons(newStatus);
-
-                // Add new timeline entry
-                addNewTimelineEntry(newStatus);
-
-                // Re-attach event listeners
                 attachStatusButtonListeners();
             }
 
-            // Function to add new timeline entry manually
-            function addNewTimelineEntry(newStatus) {
-                // Determine status message
-                let statusMessage = "";
-                if (newStatus === 'Menunggu') {
-                    statusMessage = "Menunggu Antrian Perbaikan";
-                } else if (newStatus === 'Proses') {
-                    statusMessage = "Device Anda Sedang diproses";
-                } else if (newStatus === 'Selesai') {
-                    statusMessage = "Device Anda Telah Selesai";
-                }
-
-                // Get current timestamp in Jakarta timezone
-                const now = new Date();
-                const jakartaTime = new Date(now.getTime() + (7 * 60 * 60 * 1000)); // UTC+7
-
-                const formattedDate = jakartaTime.toLocaleDateString('id-ID', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                });
-                const formattedTime = jakartaTime.toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                const displayTime = `${formattedDate} ${formattedTime}`;
-
-                // Update latest process section
-                const latestProcessContent = document.querySelector('.process-content');
-                if (latestProcessContent) {
-                    latestProcessContent.textContent = statusMessage;
-                }
-
-                const processDate = document.querySelector('.process-date');
-                if (processDate) {
-                    processDate.textContent = displayTime;
-                }
-
-                // Ensure latest process section is visible
-                const latestProcessDiv = document.querySelector('.latest-process');
-                if (latestProcessDiv) {
-                    latestProcessDiv.style.display = 'block';
-
-                    // Highlight the latest process
-                    latestProcessDiv.style.backgroundColor = '#e7f9e7';
-                    latestProcessDiv.style.border = '2px solid #28a745';
-                    latestProcessDiv.style.transition = 'all 0.3s ease';
-
-                    setTimeout(() => {
-                        latestProcessDiv.style.backgroundColor = '#f8f9fa';
-                        latestProcessDiv.style.border = 'none';
-                        latestProcessDiv.style.borderLeft = '4px solid #8c3a3a';
-                    }, 3000);
-
-                    // Scroll to the progress section
-                    latestProcessDiv.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                }
-
-                // Add to full timeline if it exists
-                const timeline = document.querySelector('.timeline');
-                if (timeline) {
-                    // Determine status class
-                    let statusClass = '';
-                    if (newStatus === 'Menunggu') {
-                        statusClass = 'status-menunggu';
-                    } else if (newStatus === 'Proses') {
-                        statusClass = 'status-proses';
-                    } else if (newStatus === 'Selesai') {
-                        statusClass = 'status-selesai';
-                    }
-
-                    // Create new timeline item
-                    const newTimelineItem = document.createElement('div');
-                    newTimelineItem.className = `timeline-item status-change ${statusClass}`;
-                    newTimelineItem.style.backgroundColor = 'transparent';
-
-                    const fullDateTime = jakartaTime.toLocaleDateString('id-ID', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                    }) + ' ' + jakartaTime.toLocaleTimeString('id-ID', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                    });
-
-                    newTimelineItem.innerHTML = `
-                        <div class="timeline-marker">
-                            <i class="fas fa-flag"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">${statusMessage}</div>
-                            <div class="timeline-date">${fullDateTime}</div>
-                        </div>
-                    `;
-
-                    // Add to the beginning of the timeline
-                    if (timeline.firstChild) {
-                        timeline.insertBefore(newTimelineItem, timeline.firstChild);
-                    } else {
-                        timeline.appendChild(newTimelineItem);
-                    }
-                }
-            }
-
-            // Function to update status action buttons
             function updateStatusButtons(newStatus) {
                 const statusActionsSection = document.querySelector('.status-actions');
                 const statusButtonsContainer = document.querySelector('.status-buttons');
@@ -1153,7 +922,6 @@
                 }
             }
 
-            // Function to show notification
             function showNotification(message, type) {
                 const notification = document.createElement('div');
                 const bgColor = type === 'success' ? '#28a745' : type === 'info' ? '#17a2b8' : '#dc3545';
@@ -1180,62 +948,17 @@
                 }, 3000);
             }
 
-            // Handle confirmation: NO
             confirmNo.addEventListener('click', function() {
-                // Just hide the modal
                 modal.style.display = 'none';
                 pendingStatus = '';
             });
 
-            // Close the modal if user clicks outside of it
             window.addEventListener('click', function(event) {
                 if (event.target === modal) {
                     modal.style.display = 'none';
                     pendingStatus = '';
                 }
             });
-        });
-
-        // Print functionality
-        window.addEventListener('beforeprint', function() {
-            document.querySelector('.sidebar').style.display = 'none';
-            document.querySelector('.main-content').style.marginLeft = '0';
-            document.querySelector('.header').style.display = 'none';
-            document.querySelector('.content-header .btn-print').style.display = 'none';
-
-            // Hide admin controls when printing
-            const statusActions = document.querySelector('.status-actions');
-            if (statusActions) statusActions.style.display = 'none';
-
-            document.querySelector('.show-all-link').style.display = 'none';
-
-            // Ensure full timeline is visible when printing
-            const timelineContainer = document.getElementById('timeline-container');
-            if (timelineContainer) {
-                timelineContainer.style.display = 'block';
-            }
-        });
-
-        window.addEventListener('afterprint', function() {
-            document.querySelector('.sidebar').style.display = 'flex';
-            document.querySelector('.main-content').style.marginLeft = '220px';
-            document.querySelector('.header').style.display = 'flex';
-            document.querySelector('.content-header .btn-print').style.display = 'inline-flex';
-
-            // Only show status actions if status is not "Selesai"
-            const currentStatus = document.getElementById('statusBadge').textContent.trim();
-            if (currentStatus !== 'Selesai') {
-                const statusActions = document.querySelector('.status-actions');
-                if (statusActions) statusActions.style.display = 'block';
-            }
-
-            document.querySelector('.show-all-link').style.display = 'block';
-
-            // Restore timeline to previous state after printing
-            const timelineContainer = document.getElementById('timeline-container');
-            if (timelineContainer && !document.querySelector('.show-all-link').innerHTML.includes('Sembunyikan')) {
-                timelineContainer.style.display = 'none';
-            }
         });
     </script>
 </body>

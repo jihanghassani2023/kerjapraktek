@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('perbaikan', function (Blueprint $table) {
-            $table->string('id', 11)->primary(); // MG50001
+            $table->string('id', 11)->primary();
             $table->date('tanggal_perbaikan');
             $table->enum('status', ['Menunggu', 'Proses', 'Selesai'])->default('Menunggu');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');

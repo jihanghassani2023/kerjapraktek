@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="id">
 
@@ -8,6 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Detail Transaksi - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ asset('css/receipt-print.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/receipt-generator.js') }}"></script>
     <style>
         * {
             margin: 0;
@@ -175,7 +176,6 @@
             color: #333;
         }
 
-        /* Grid Layout */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -295,24 +295,6 @@
             margin-right: 8px;
         }
 
-        .btn-primary {
-            background-color: #8c3a3a;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #6d2d2d;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-
         .btn-print {
             background-color: #6c757d;
             color: white;
@@ -340,13 +322,12 @@
             border: 1px solid #f5c6cb;
         }
 
-        /* Latest Process Styles */
         .latest-process {
-            background-color: #f8f9fa;
-            border-radius: 8px;
+            background-color: transparent;
+            border-radius: 5px;
             padding: 15px;
-            border-left: 4px solid #8c3a3a;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
         }
 
         .process-header {
@@ -387,10 +368,11 @@
             text-decoration: underline;
         }
 
-        /* Timeline Styles */
         .timeline-container {
             display: none;
             margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
         }
 
         .timeline {
@@ -455,6 +437,16 @@
             margin-bottom: 10px;
         }
 
+        .real-time-clock {
+            padding: 5px 8px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #333;
+            margin-left: 10px;
+            display: inline-block;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
@@ -482,7 +474,6 @@
             }
         }
 
-        /* Status-specific timeline colors */
         .timeline-item.status-menunggu .timeline-marker {
             border-color: #ff6b6b;
         }
@@ -505,17 +496,6 @@
 
         .timeline-item.status-selesai .timeline-marker i {
             color: #28a745;
-        }
-
-        /* Real-time clock styling */
-        .real-time-clock {
-            padding: 5px 8px;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-            font-size: 14px;
-            color: #333;
-            margin-left: 10px;
-            display: inline-block;
         }
     </style>
 </head>
@@ -577,8 +557,6 @@
             </div>
         @endif
 
-        <div id="statusAlert" class="alert alert-success" style="display: none;"></div>
-
         <div class="content-wrapper">
             <div class="content-header">
                 <h2 class="content-title">Transaksi #{{ $transaksi->id }}</h2>
@@ -587,9 +565,7 @@
                 </a>
             </div>
 
-            <!-- Grid layout for 2-column design -->
             <div class="grid-container">
-                <!-- Left Column: Main Information -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Informasi Perbaikan</h3>
@@ -598,7 +574,6 @@
                         </span>
                     </div>
                     <div class="card-body">
-                        <!-- Repair Information Section -->
                         <div class="info-section">
                             <div class="info-row">
                                 <div class="info-label">Kode Perbaikan</div>
@@ -639,13 +614,12 @@
                                             </div>
                                         @endforeach
                                     @else
-                                        {{ $transaksi->garansi ?: 'Tidak ada' }}
+                                        Tidak ada
                                     @endif
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Customer Information Section -->
                         <div class="info-section">
                             <h3 class="section-title">Informasi Pelanggan</h3>
                             <div class="info-row">
@@ -662,7 +636,6 @@
                             </div>
                         </div>
 
-                        <!-- Technician Information Section -->
                         <div class="info-section">
                             <h3 class="section-title">Informasi Teknisi</h3>
                             <div class="info-row">
@@ -679,8 +652,6 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Process Timeline -->
-                <!-- Right Column: Process Timeline -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Proses Pengerjaan</h3>
@@ -688,7 +659,6 @@
                     </div>
                     <div class="card-body">
                         @php
-                            // FIXED: Gunakan method yang sudah difilter untuk menghindari duplikasi
                             $distinctProses = $transaksi->getDistinctProsesPengerjaan();
                         @endphp
 
@@ -696,7 +666,6 @@
                             @php
                                 $latestProcess = $distinctProses->first();
                             @endphp
-                            <!-- Latest Process -->
                             <div class="latest-process">
                                 <div class="process-header">
                                     <div class="process-title"><i class="fas fa-clock"></i> Progress Terakhir</div>
@@ -708,10 +677,8 @@
                                 </div>
                             </div>
 
-                            <!-- Full Timeline (hidden by default) -->
                             <div id="timeline-container" class="timeline-container">
                                 <div class="timeline">
-                                    {{-- FIXED: Gunakan $distinctProses yang sudah difilter --}}
                                     @foreach($distinctProses as $proses)
                                         @php
                                             $isStatusChange =
@@ -751,17 +718,34 @@
     </div>
 
     <script>
-        // Real-time clock function with Jakarta/Indonesian timezone
+        // Setup receipt data untuk print
+       // Setup receipt data untuk print - SAFEST VERSION
+// Setup receipt data untuk print - KEPALA TOKO VERSION
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.receiptGenerator) {
+        window.receiptGenerator.setData({
+            kode: {!! json_encode($transaksi->id) !!},
+            tanggal: {!! json_encode(\App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan)) !!},
+            device: {!! json_encode($transaksi->nama_device) !!},
+            kategori: {!! json_encode($transaksi->kategori_device ?? "Tidak ditentukan") !!},
+            masalah: {!! json_encode($transaksi->masalah) !!},
+            tindakan: {!! json_encode($transaksi->tindakan_perbaikan) !!},
+            harga: {!! json_encode('Rp. ' . number_format($transaksi->harga, 0, ",", ".")) !!},
+            garansi: {!! json_encode($transaksi->garansiItems && $transaksi->garansiItems->count() > 0 ? $transaksi->garansiItems->map(function($g) { return $g->garansi_sparepart . ': ' . $g->garansi_periode; })->join(', ') : 'Tidak ada') !!},
+            pelanggan: {!! json_encode($transaksi->pelanggan->nama_pelanggan) !!},
+            nomor_telp: {!! json_encode($transaksi->pelanggan->nomor_telp) !!},
+            email: {!! json_encode($transaksi->pelanggan->email ?: "-") !!},
+            teknisi: {!! json_encode($transaksi->user->name ?? "Tidak ada") !!},
+            status: {!! json_encode($transaksi->status) !!}
+        });
+    }
+});
+
+        // Real-time clock function
         function updateRealTimeClock() {
             try {
-                // Get current date
                 const now = new Date();
-
-                // Calculate the time in Indonesia (GMT+7)
-                // First get the UTC time in milliseconds
                 const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-
-                // Then create a new date object with the time in Indonesia
                 const jakartaTime = new Date(utcTime + (3600000 * 7));
 
                 const hours = String(jakartaTime.getHours()).padStart(2, '0');
@@ -777,13 +761,9 @@
             }
         }
 
-        // Update clock every second
         setInterval(updateRealTimeClock, 1000);
-
-        // Initialize clock immediately
         updateRealTimeClock();
 
-        // Toggle timeline function
         function toggleTimeline() {
             const timelineContainer = document.getElementById('timeline-container');
             const toggleIcon = document.getElementById('timeline-toggle-icon');
@@ -799,35 +779,6 @@
                 showAllLink.innerHTML = 'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
-
-        // Print functionality
-        window.addEventListener('beforeprint', function() {
-            document.querySelector('.sidebar').style.display = 'none';
-            document.querySelector('.main-content').style.marginLeft = '0';
-            document.querySelector('.header').style.display = 'none';
-            document.querySelector('.content-header .btn-print').style.display = 'none';
-            document.querySelector('.show-all-link').style.display = 'none';
-
-            // Ensure full timeline is visible when printing
-            const timelineContainer = document.getElementById('timeline-container');
-            if(timelineContainer) {
-                timelineContainer.style.display = 'block';
-            }
-        });
-
-        window.addEventListener('afterprint', function() {
-            document.querySelector('.sidebar').style.display = 'flex';
-            document.querySelector('.main-content').style.marginLeft = '220px';
-            document.querySelector('.header').style.display = 'flex';
-            document.querySelector('.content-header .btn-print').style.display = 'inline-flex';
-            document.querySelector('.show-all-link').style.display = 'block';
-
-            // Restore timeline to previous state after printing
-            const timelineContainer = document.getElementById('timeline-container');
-            if(timelineContainer && !document.querySelector('.show-all-link').innerHTML.includes('Sembunyikan')) {
-                timelineContainer.style.display = 'none';
-            }
-        });
     </script>
 </body>
 </html>

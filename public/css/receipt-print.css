@@ -1,0 +1,299 @@
+/* ===========================================
+   UNIVERSAL RECEIPT PRINT STYLES
+   File: public/css/receipt-print.css
+   ========================================== */
+
+/* Print-only styles */
+@media print {
+    @page {
+        size: A4;
+        margin: 0.5in;
+    }
+
+    /* Hide semua elemen web saat print */
+    .sidebar,
+    .header,
+    .content-header,
+    .btn,
+    .status-actions,
+    .actions,
+    .add-process-form,
+    .show-all-link,
+    .timeline-container,
+    .card-header,
+    .nav,
+    .navigation,
+    .menu,
+    .grid-container,
+    .card {
+        display: none !important;
+    }
+
+    /* Reset body untuk receipt */
+    body {
+        font-family: 'Courier New', monospace !important;
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        color: #000 !important;
+        background: white !important;
+        margin: 0 !important;
+        padding: 20px !important;
+    }
+
+    /* Main content adjustment */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* Receipt container */
+    .receipt-wrapper {
+        max-width: 350px;
+        margin: 0 auto;
+        border: 2px dashed #000;
+        padding: 20px;
+        background: white;
+        display: block !important;
+    }
+
+    /* Receipt header */
+    .receipt-header {
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        display: block !important;
+    }
+
+    .receipt-logo {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 10px;
+        background: #8c3a3a;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    .receipt-company-name {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block !important;
+    }
+
+    .receipt-company-info {
+        font-size: 10px;
+        line-height: 1.2;
+        display: block !important;
+    }
+
+    /* Receipt title */
+    .receipt-title {
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        margin: 20px 0;
+        text-decoration: underline;
+        display: block !important;
+    }
+
+    /* Receipt sections */
+    .receipt-section {
+        margin-bottom: 15px;
+        display: block !important;
+    }
+
+    .receipt-section-title {
+        font-weight: bold;
+        border-bottom: 1px solid #000;
+        margin-bottom: 8px;
+        padding-bottom: 2px;
+        font-size: 12px;
+        display: block !important;
+    }
+
+    /* Info lines */
+    .receipt-info-line {
+        display: flex !important;
+        justify-content: space-between;
+        margin-bottom: 3px;
+        font-size: 11px;
+    }
+
+    .receipt-info-label {
+        font-weight: bold;
+        min-width: 120px;
+        display: inline-block !important;
+    }
+
+    .receipt-info-value {
+        text-align: right;
+        flex: 1;
+        word-break: break-word;
+        margin-left: 10px;
+        display: inline-block !important;
+    }
+
+    /* Separator */
+    .receipt-separator {
+        border-top: 1px dashed #000;
+        margin: 15px 0;
+        display: block !important;
+    }
+
+    /* Total section */
+    .receipt-total {
+        background: #f5f5f5;
+        padding: 10px;
+        border: 1px solid #000;
+        margin: 15px 0;
+        text-align: center;
+        display: block !important;
+    }
+
+    .receipt-total-label {
+        font-size: 12px;
+        margin-bottom: 5px;
+        display: block !important;
+    }
+
+    .receipt-total-amount {
+        font-size: 16px;
+        font-weight: bold;
+        display: block !important;
+    }
+
+    /* Status section */
+    .receipt-status {
+        text-align: center;
+        margin: 15px 0;
+        padding: 10px;
+        border: 2px solid #000;
+        display: block !important;
+    }
+
+    .receipt-status-label {
+        font-size: 11px;
+        margin-bottom: 5px;
+        display: block !important;
+    }
+
+    .receipt-status-badge {
+        font-size: 14px;
+        font-weight: bold;
+        padding: 5px 10px;
+        display: inline-block !important;
+    }
+
+    .receipt-status-selesai {
+        background: #e7f9e7;
+        color: #28a745;
+        border: 1px solid #28a745;
+    }
+
+    .receipt-status-proses {
+        background: #fff4e0;
+        color: #ffaa00;
+        border: 1px solid #ffaa00;
+    }
+
+    .receipt-status-menunggu {
+        background: #ffeaea;
+        color: #ff6b6b;
+        border: 1px solid #ff6b6b;
+    }
+
+    /* Garansi section */
+    .receipt-garansi {
+        background: #f9f9f9;
+        padding: 8px;
+        border: 1px solid #ccc;
+        margin: 10px 0;
+        display: block !important;
+    }
+
+    .receipt-garansi-title {
+        font-weight: bold;
+        font-size: 11px;
+        margin-bottom: 5px;
+        display: block !important;
+    }
+
+    .receipt-garansi-item {
+        font-size: 10px;
+        margin-bottom: 2px;
+        display: block !important;
+    }
+
+    /* Footer */
+    .receipt-footer {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 2px solid #000;
+        font-size: 10px;
+        display: block !important;
+    }
+
+    .receipt-footer-line {
+        margin-bottom: 3px;
+        display: block !important;
+    }
+
+    /* DateTime stamp */
+    .receipt-datetime {
+        text-align: center;
+        font-size: 10px;
+        margin: 15px 0;
+        border-top: 1px dashed #000;
+        border-bottom: 1px dashed #000;
+        padding: 5px 0;
+        display: block !important;
+    }
+
+    /* Show receipt container */
+    #receipt-print-container {
+        display: block !important;
+        position: static !important;
+    }
+
+    /* Hide all other content */
+    body * {
+        visibility: hidden;
+    }
+
+    #receipt-print-container,
+    #receipt-print-container * {
+        visibility: visible;
+    }
+}
+
+/* Screen styles - semua receipt elements hidden */
+@media screen {
+    .receipt-wrapper,
+    .receipt-header,
+    .receipt-logo,
+    .receipt-company-name,
+    .receipt-company-info,
+    .receipt-title,
+    .receipt-section,
+    .receipt-section-title,
+    .receipt-info-line,
+    .receipt-info-label,
+    .receipt-info-value,
+    .receipt-separator,
+    .receipt-total,
+    .receipt-status,
+    .receipt-garansi,
+    .receipt-footer,
+    .receipt-datetime,
+    #receipt-print-container {
+        display: none !important;
+    }
+}
