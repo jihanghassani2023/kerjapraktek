@@ -10,24 +10,40 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
+            overflow: hidden; /* Mencegah scroll */
         }
+
+        html {
+            overflow: hidden; /* Mencegah scroll pada html juga */
+        }
+
         .login-container {
             display: flex;
             height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Pastikan container tidak scroll */
         }
+
         .left-panel {
             background-color: #9D4E4E; /* Reddish-brown as shown in image */
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
+
         .logo-container {
             text-align: center;
         }
+
         .logo-container img {
             max-width: 500px;
+            max-height: 80vh; /* Batasi tinggi gambar */
+            width: auto;
+            height: auto;
         }
+
         .right-panel {
             flex: 1;
             display: flex;
@@ -35,7 +51,9 @@
             justify-content: center;
             background-color: white;
             position: relative;
+            overflow: hidden;
         }
+
         .right-panel::before {
             content: "";
             position: absolute;
@@ -46,21 +64,28 @@
             background: linear-gradient(135deg, #9D4E4E 50%, transparent 50%);
             z-index: 1;
         }
+
         .login-form {
             background-color: #FAF0F0; /* Light pink background */
             padding: 30px;
             border-radius: 8px;
             width: 300px;
+            max-width: 90%; /* Responsif untuk layar kecil */
             z-index: 2;
+            max-height: 90vh; /* Batasi tinggi form */
+            overflow-y: auto; /* Scroll internal jika diperlukan */
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
+
         .form-group input {
             width: 100%;
             padding: 8px;
@@ -68,6 +93,7 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+
         .btn-login {
             width: 100%;
             padding: 10px;
@@ -78,6 +104,7 @@
             cursor: pointer;
             font-weight: bold;
         }
+
         .error-message {
             color: red;
             font-size: 14px;
@@ -118,6 +145,146 @@
             margin-top: 0.25rem;
             font-size: 0.875em;
             color: #dc3545;
+        }
+
+        /* Media queries untuk responsivitas tanpa scroll */
+        @media (max-width: 900px) {
+            .login-container {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                height: 35vh;
+                flex: none;
+            }
+
+            .right-panel {
+                height: 65vh;
+                flex: none;
+            }
+
+            .logo-container img {
+                max-width: 250px;
+                max-height: 30vh;
+            }
+
+            .login-form {
+                padding: 20px;
+                width: 90%;
+                max-width: 350px;
+                min-width: 280px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .left-panel {
+                height: 30vh;
+            }
+
+            .right-panel {
+                height: 70vh;
+            }
+
+            .logo-container img {
+                max-width: 200px;
+                max-height: 25vh;
+            }
+
+            .login-form {
+                padding: 15px;
+                width: 85%;
+                max-width: 300px;
+                min-width: 250px;
+            }
+
+            .login-form h2 {
+                font-size: 1.3em;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .left-panel {
+                height: 25vh;
+            }
+
+            .right-panel {
+                height: 75vh;
+            }
+
+            .logo-container img {
+                max-width: 150px;
+                max-height: 20vh;
+            }
+
+            .login-form {
+                padding: 12px;
+                width: 90%;
+                max-width: 280px;
+                min-width: 200px;
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            .form-group label {
+                font-size: 0.9em;
+            }
+
+            .form-group input {
+                padding: 6px;
+                font-size: 0.9em;
+            }
+
+            .btn-login {
+                padding: 8px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .login-form {
+                padding: 15px;
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+
+            .form-group {
+                margin-bottom: 10px;
+            }
+
+            .logo-container img {
+                max-height: 40vh;
+            }
+        }
+
+        @media (max-height: 500px) {
+            .left-panel {
+                height: 25vh;
+            }
+
+            .right-panel {
+                height: 75vh;
+            }
+
+            .login-form {
+                padding: 10px;
+                max-height: 70vh;
+            }
+
+            .login-form h2 {
+                font-size: 1.2em;
+                margin-bottom: 10px;
+            }
+
+            .form-group {
+                margin-bottom: 8px;
+            }
+
+            .logo-container img {
+                max-height: 20vh;
+            }
         }
     </style>
 </head>
@@ -219,8 +386,6 @@
                 e.preventDefault();
             }
         });
-
-
 
         // Email validation helper function
         function isValidEmail(email) {

@@ -57,29 +57,48 @@ class AdminController extends Controller
         ));
     }
 
+    // FIXED: Search method dengan error handling yang lebih baik
     public function search(Request $request)
     {
-        $user = Auth::user();
-        $search = $request->input('search');
+        try {
+            $search = $request->get('search');
+            $user = Auth::user(); // FIXED: Gunakan Auth::user() bukan Auth()->user()
 
-        if (empty($search)) {
-            return redirect()->route('admin.dashboard');
+            // Validasi input search
+            if (empty($search)) {
+                return redirect()->back()->with('error', 'Kata kunci pencarian tidak boleh kosong.');
+            }
+
+            $perbaikan = Perbaikan::with(['user', 'pelanggan'])
+                ->where(function ($query) use ($search) {
+                    $query->where('id', 'LIKE', "%{$search}%")
+                        ->orWhere('nama_device', 'LIKE', "%{$search}%")
+                        ->orWhereHas('pelanggan', function ($q) use ($search) {
+                            $q->where('nama_pelanggan', 'LIKE', "%{$search}%");
+                        });
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Add formatted date for each item
+            $perbaikan = $perbaikan->map(function ($item) {
+                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
+                return $item;
+            });
+
+            // Gunakan satu view untuk semua role
+            return view('search_results', compact('perbaikan', 'search', 'user'));
+
+        } catch (\Exception $e) {
+            // Log error untuk debugging
+            Log::error('Search error: ' . $e->getMessage(), [
+                'search_term' => $request->get('search'),
+                'user_id' => Auth::id(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat melakukan pencarian. Silakan coba lagi.');
         }
-
-        $query = Perbaikan::with(['user', 'pelanggan']);
-
-        $query->where(function ($q) use ($search) {
-            $q->where('id', 'like', "%{$search}%")
-                ->orWhere('nama_device', 'like', "%{$search}%")
-                ->orWhereHas('pelanggan', function ($subq) use ($search) {
-                    $subq->where('nama_pelanggan', 'like', "%{$search}%")
-                        ->orWhere('nomor_telp', 'like', "%{$search}%");
-                });
-        });
-
-        $perbaikan = $query->orderBy('created_at', 'desc')->get();
-
-        return view('admin.search_results', compact('user', 'perbaikan', 'search'));
     }
 
     public function transaksi(Request $request)
@@ -571,7 +590,6 @@ class AdminController extends Controller
 
                 return redirect()->route('admin.transaksi')
                     ->with('success', "Perbaikan berhasil disimpan dengan ID: {$perbaikan->id}. Garansi: " . $garansiText);
-
             } catch (\Exception $detailException) {
                 $perbaikan->delete();
                 throw $detailException;

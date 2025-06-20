@@ -7,8 +7,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Detail Transaksi - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="{{ asset('css/receipt-print.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/receipt-generator.js') }}"></script>
     <style>
         * {
             margin: 0;
@@ -279,31 +277,6 @@
             color: #28a745;
         }
 
-        .btn {
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .btn i {
-            margin-right: 8px;
-        }
-
-        .btn-print {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-print:hover {
-            background-color: #5a6268;
-        }
-
         .alert {
             padding: 15px;
             border-radius: 5px;
@@ -564,9 +537,6 @@
         <div class="content-wrapper">
             <div class="content-header">
                 <h2 class="content-title">Transaksi #{{ $transaksi->id }}</h2>
-                <a href="javascript:window.print()" class="btn btn-print">
-                    <i class="fas fa-print"></i> Cetak
-                </a>
             </div>
 
             <div class="grid-container">
@@ -660,7 +630,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Proses Pengerjaan</h3>
-                        <div class="real-time-clock" id="realTimeClock">00:00:00</div>
+
                     </div>
                     <div class="card-body">
                         @php
@@ -727,35 +697,6 @@
     </div>
 
     <script>
-        // Setup receipt data untuk print
-        // Setup receipt data untuk print - SAFEST VERSION
-        // Setup receipt data untuk print - KEPALA TOKO VERSION
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.receiptGenerator) {
-                window.receiptGenerator.setData({
-                    kode: {!! json_encode($transaksi->id) !!},
-                    tanggal: {!! json_encode(\App\Helpers\DateHelper::formatTanggalIndonesia($transaksi->tanggal_perbaikan)) !!},
-                    device: {!! json_encode($transaksi->nama_device) !!},
-                    kategori: {!! json_encode($transaksi->kategori_device ?? 'Tidak ditentukan') !!},
-                    masalah: {!! json_encode($transaksi->masalah) !!},
-                    tindakan: {!! json_encode($transaksi->tindakan_perbaikan) !!},
-                    harga: {!! json_encode('Rp. ' . number_format($transaksi->harga, 0, ',', '.')) !!},
-                    garansi: {!! json_encode(
-                        $transaksi->garansi && $transaksi->garansi->count() > 0
-                            ? $transaksi->garansi->map(function ($g) {
-                                    return $g->sparepart . ': ' . $g->periode;
-                                })->join(', ')
-                            : 'Tidak ada',
-                    ) !!},
-                    pelanggan: {!! json_encode($transaksi->pelanggan->nama_pelanggan) !!},
-                    nomor_telp: {!! json_encode($transaksi->pelanggan->nomor_telp) !!},
-                    email: {!! json_encode($transaksi->pelanggan->email ?: '-') !!},
-                    teknisi: {!! json_encode($transaksi->user->name ?? 'Tidak ada') !!},
-                    status: {!! json_encode($transaksi->status) !!}
-                });
-            }
-        });
-
         // Real-time clock function
         function updateRealTimeClock() {
             try {

@@ -191,24 +191,7 @@
         .btn-filter:hover {
             background-color: #6d2d2d;
         }
-        .btn-export {
-            padding: 8px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            text-decoration: none;
-        }
-        .btn-export:hover {
-            background-color: #218838;
-            color: white;
-        }
+
         .empty-state {
             text-align: center;
             padding: 40px 0;
@@ -238,7 +221,7 @@
             <span>Dashboard</span>
         </a>
         <a href="{{ route('teknisi.laporan') }}" class="menu-item active">
-            <i class="fas fa-clipboard-list"></i>
+       <i class="fas fa-chart-bar"></i>
             <span>Laporan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
@@ -291,10 +274,7 @@
                     </select>
                 </form>
             </div>
-            <!-- PERBAIKAN: Gunakan route name yang sesuai dengan yang ada di routes/web.php -->
-            <a href="{{ route('laporan.export') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="btn-export">
-                <i class="fas fa-file-export"></i> Export Laporan
-            </a>
+
         </div>
 
         @if($perbaikan->count() > 0)

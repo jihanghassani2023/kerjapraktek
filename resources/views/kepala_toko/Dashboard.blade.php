@@ -118,6 +118,105 @@
             color: #8c3a3a;
             font-size: 20px;
         }
+
+        /* Search box styles */
+        .search-container {
+            margin: 20px 0;
+            display: flex;
+            max-width: 1600px;
+            position: relative;
+        }
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-right: none;
+            border-radius: 5px 0 0 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #8c3a3a;
+        }
+        .search-button {
+            background-color: #8c3a3a;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .search-button:hover {
+            background-color: #6d2d2d;
+        }
+        /* Suggestions dropdown styles */
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .search-suggestion-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .search-suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .search-suggestion-item:hover {
+            background-color: #f5f5f5;
+        }
+        .suggestion-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        .suggestion-details {
+            display: flex;
+            font-size: 0.85em;
+            color: #666;
+            gap: 10px;
+        }
+        .suggestion-detail {
+            display: flex;
+            align-items: center;
+        }
+        .suggestion-detail i {
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+        .suggestion-status {
+            font-size: 0.85em;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .suggestion-status-menunggu {
+            background-color: #ffeaea;
+            color: #ff6b6b;
+        }
+        .suggestion-status-proses {
+            background-color: #fff4e0;
+            color: #ffaa00;
+        }
+        .suggestion-status-selesai {
+            background-color: #e7f9e7;
+            color: #28a745;
+        }
+
         .dashboard-title {
             margin: 25px 0;
             font-size: 1.5em;
@@ -287,6 +386,9 @@
                 width: 100%;
                 justify-content: flex-start;
             }
+            .search-container {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -330,6 +432,15 @@
                     <i class="fas fa-user"></i>
                 </div>
             </div>
+        </div>
+
+        <!-- Search box with autocomplete suggestions -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Cari berdasarkan kode, nama pelanggan, atau barang...">
+            <button type="button" id="searchButton" class="search-button">
+                <i class="fas fa-search"></i>
+            </button>
+            <div id="searchSuggestions" class="search-suggestions"></div>
         </div>
 
         <div style="margin-top: 30px;"></div>
@@ -513,6 +624,101 @@
                         axis: 'x',
                         intersect: false
                     }
+                }
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const searchSuggestions = document.getElementById('searchSuggestions');
+            let searchTimeout;
+
+            // Search functionality
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm.length >= 1) {
+                    // Redirect to search page with query parameter
+                    window.location.href = `{{ route('kepala-toko.search') }}?search=${encodeURIComponent(searchTerm)}`;
+                }
+            }
+
+            // Search button click
+            searchButton.addEventListener('click', performSearch);
+
+            // Search on Enter key
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+
+            // Search suggestions (autocomplete)
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length >= 2) {
+                    searchTimeout = setTimeout(() => {
+                        fetchSearchSuggestions(query);
+                    }, 300);
+                } else {
+                    searchSuggestions.style.display = 'none';
+                }
+            });
+
+            // Fetch search suggestions
+            function fetchSearchSuggestions(query) {
+                fetch(`{{ route('search.suggestions') }}?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySearchSuggestions(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching suggestions:', error);
+                        searchSuggestions.style.display = 'none';
+                    });
+            }
+
+            // Display search suggestions
+            function displaySearchSuggestions(suggestions) {
+                if (suggestions.length === 0) {
+                    searchSuggestions.style.display = 'none';
+                    return;
+                }
+
+                const suggestionsList = suggestions.map(item => `
+                    <div class="search-suggestion-item" onclick="selectSuggestion('${item.url}')">
+                        <div class="suggestion-title">${item.kode_perbaikan} - ${item.nama_device}</div>
+                        <div class="suggestion-details">
+                            <span class="suggestion-detail">
+                                <i class="fas fa-user"></i>
+                                ${item.nama_pelanggan}
+                            </span>
+                            <span class="suggestion-detail">
+                                <i class="fas fa-calendar"></i>
+                                ${item.tanggal}
+                            </span>
+                            <span class="suggestion-status suggestion-status-${item.status.toLowerCase()}">
+                                ${item.status}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+
+                searchSuggestions.innerHTML = suggestionsList;
+                searchSuggestions.style.display = 'block';
+            }
+
+            // Select suggestion
+            window.selectSuggestion = function(url) {
+                window.location.href = url;
+            };
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
+                    searchSuggestions.style.display = 'none';
                 }
             });
         });

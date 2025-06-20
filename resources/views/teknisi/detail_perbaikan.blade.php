@@ -7,8 +7,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Detail Perbaikan - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="{{ asset('css/receipt-print.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/receipt-generator.js') }}"></script>
     <style>
         * {
             margin: 0;
@@ -333,15 +331,6 @@
 
         .btn-danger:hover {
             background-color: #c82333;
-        }
-
-        .btn-print {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-print:hover {
-            background-color: #5a6268;
         }
 
         .actions {
@@ -712,7 +701,7 @@
         </a>
 
         <a href="{{ route('teknisi.laporan') }}" class="menu-item">
-            <i class="fas fa-clipboard-list"></i>
+           <i class="fas fa-chart-bar"></i>
             <span>Laporan</span>
         </a>
 
@@ -749,9 +738,6 @@
         <div class="content-wrapper">
             <div class="content-header">
                 <h2 class="content-title">Perbaikan #{{ $perbaikan->id }}</h2>
-                <a href="javascript:window.print()" class="btn btn-print">
-                    <i class="fas fa-print"></i> Cetak
-                </a>
             </div>
 
             <div class="row">
@@ -977,27 +963,6 @@
     </div>
 
     <script>
-        // Setup receipt data untuk print - TEKNISI VERSION (FIXED)
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.receiptGenerator) {
-                window.receiptGenerator.setData({
-                    kode: {!! json_encode($perbaikan->id) !!},
-                    tanggal: {!! json_encode(\App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan)) !!},
-                    device: {!! json_encode($perbaikan->nama_device) !!},
-                    kategori: {!! json_encode($perbaikan->kategori_device ?? "Tidak ditentukan") !!},
-                    masalah: {!! json_encode($perbaikan->masalah) !!},
-                    tindakan: {!! json_encode($perbaikan->tindakan_perbaikan) !!},
-                    harga: {!! json_encode('Rp. ' . number_format($perbaikan->harga, 0, ",", ".")) !!},
-                    garansi: {!! json_encode($perbaikan->garansi && $perbaikan->garansi->count() > 0 ? $perbaikan->garansi->map(function($g) { return $g->sparepart . ': ' . $g->periode; })->join(', ') : 'Tidak ada') !!},
-                    pelanggan: {!! json_encode($perbaikan->pelanggan->nama_pelanggan) !!},
-                    nomor_telp: {!! json_encode($perbaikan->pelanggan->nomor_telp) !!},
-                    email: {!! json_encode($perbaikan->pelanggan->email ?: "-") !!},
-                    teknisi: {!! json_encode($perbaikan->user->name ?? "Tidak ada") !!},
-                    status: {!! json_encode($perbaikan->status) !!}
-                });
-            }
-        });
-
         function toggleTimeline() {
             const timelineContainer = document.getElementById('timeline-container');
             const toggleIcon = document.getElementById('timeline-toggle-icon');

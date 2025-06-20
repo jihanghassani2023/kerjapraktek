@@ -505,7 +505,7 @@
         </a>
 
         <a href="{{ route('teknisi.laporan') }}" class="menu-item">
-            <i class="fas fa-clipboard-list"></i>
+            <i class="fas fa-chart-bar"></i>
             <span>Laporan</span>
         </a>
 

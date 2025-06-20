@@ -80,7 +80,11 @@ class LaporanController extends Controller
         // Download the file
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
-
+    public function kepalaTokoDashboard()
+{
+    // Logic untuk dashboard kepala toko
+    return view('kepala_toko.dashboard', compact('data'));
+}
     public function index(Request $request)
     {
         $user = Auth::user();

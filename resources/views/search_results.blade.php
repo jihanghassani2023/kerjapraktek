@@ -1,4 +1,4 @@
-<!-- resources/views/admin/search_results.blade.php -->
+<!-- resources/views/search_results.blade.php -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -306,25 +306,53 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
-
         </div>
-        <a href="/admin/dashboard" class="menu-item">
-            <i class="fas fa-home"></i>
-            <span>Dashboard</span>
-        </a>
-        <a href="/admin/transaksi" class="menu-item">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
-        </a>
-        <a href="/admin/pelanggan" class="menu-item">
-            <i class="fas fa-users"></i>
-            <span>Pelanggan</span>
-        </a>
-        <a href="/admin/perbaikan/create" class="menu-item">
-            <i class="fas fa-tools"></i>
-            <span>Tambah Perbaikan</span>
-        </a>
-        <form method="POST" action="/logout" style="margin-top: auto;">
+
+        @if($user->isAdmin())
+            <!-- Admin Menu -->
+            <a href="{{ route('admin.dashboard') }}" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ route('admin.transaksi') }}" class="menu-item">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transaksi</span>
+            </a>
+            <a href="{{ route('admin.pelanggan') }}" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span>Pelanggan</span>
+            </a>
+            <a href="{{ route('admin.perbaikan.create') }}" class="menu-item">
+                <i class="fas fa-tools"></i>
+                <span>Tambah Perbaikan</span>
+            </a>
+        @elseif($user->isKepalaToko())
+            <!-- Kepala Toko Menu -->
+            <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ route('user.index') }}" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span>User</span>
+            </a>
+            <a href="{{ route('laporan.index') }}" class="menu-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Laporan</span>
+            </a>
+        @else
+            <!-- Teknisi Menu -->
+            <a href="{{ route('teknisi.dashboard') }}" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ route('teknisi.laporan') }}" class="menu-item">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Laporan</span>
+            </a>
+        @endif
+
+        <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
             <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
                 <i class="fas fa-sign-out-alt"></i>
@@ -341,7 +369,15 @@
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
                     <div class="user-name">{{ $user->name }}</div>
-                    <div class="user-role">Admin</div>
+                    <div class="user-role">
+                        @if($user->isAdmin())
+                            Admin
+                        @elseif($user->isKepalaToko())
+                            Kepala Toko
+                        @else
+                            Teknisi
+                        @endif
+                    </div>
                 </div>
                 <div class="user-avatar">
                     <i class="fas fa-user"></i>
@@ -350,15 +386,32 @@
         </div>
 
         <div class="search-bar">
-            <form action="/admin/search" method="GET" class="search-form">
+            @if($user->isAdmin())
+                <form action="{{ route('admin.search') }}" method="GET" class="search-form">
+            @elseif($user->isKepalaToko())
+                <form action="{{ route('kepala-toko.search') }}" method="GET" class="search-form">
+            @else
+                <form action="{{ route('teknisi.search') }}" method="GET" class="search-form">
+            @endif
                 <input type="text" name="search" class="search-input" placeholder="Cari berdasarkan kode, nama pelanggan, atau device..." value="{{ $search }}">
                 <button type="submit" class="search-button">
                     <i class="fas fa-search"></i>
                 </button>
             </form>
-            <a href="/admin/dashboard" class="back-link">
-                <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
-            </a>
+
+            @if($user->isAdmin())
+                <a href="{{ route('admin.dashboard') }}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+                </a>
+            @elseif($user->isKepalaToko())
+                <a href="{{ route('kepala-toko.dashboard') }}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+                </a>
+            @else
+                <a href="{{ route('teknisi.dashboard') }}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+                </a>
+            @endif
         </div>
 
         <div class="content-section">
@@ -388,10 +441,16 @@
                         </thead>
                         <tbody>
                             @foreach($perbaikan as $index => $item)
-                                <tr onclick="window.location='/admin/transaksi/{{ $item->id }}';">
+                                @if($user->isAdmin())
+                                    <tr onclick="window.location='{{ route('admin.transaksi.show', $item->id) }}';">
+                                @elseif($user->isKepalaToko())
+                                    <tr onclick="window.location='{{ route('laporan.show', $item->id) }}';">
+                                @else
+                                    <tr onclick="window.location='{{ route('perbaikan.show', $item->id) }}';">
+                                @endif
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $item->id }}</td>
-                                 <td>{{ $item->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan) }}</td>
+                                    <td>{{ $item->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan) }}</td>
                                     <td>{{ $item->nama_device }}</td>
                                     <td>{{ $item->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $item->user->name ?? 'Belum ditugaskan' }}</td>

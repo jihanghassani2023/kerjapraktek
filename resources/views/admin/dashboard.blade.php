@@ -661,12 +661,12 @@
             const allRows = Array.from(tableBody.querySelectorAll('.transaction-row'));
             let searchTimeout;
 
-            // Search functionality
+            // Search functionality - MENGGUNAKAN SEARCH RESULTS YANG UNIFIED
             function performSearch() {
                 const searchTerm = searchInput.value.trim();
                 if (searchTerm.length >= 1) {
-                    // Redirect to search page with query parameter
-                    window.location.href = `{{ route('admin.search') }}?search=${encodeURIComponent(searchTerm)}`;
+                    // Redirect ke halaman search results yang unified (bukan folder admin)
+                    window.location.href = `/admin/search?search=${encodeURIComponent(searchTerm)}`;
                 }
             }
 
