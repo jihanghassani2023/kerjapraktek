@@ -1,5 +1,5 @@
 <?php
-// app/Http/Controllers/TransaksiController.php
+// app/Http/Controllers/LaporanController.php
 
 namespace App\Http\Controllers;
 
@@ -7,14 +7,13 @@ use App\Helpers\DateHelper;
 use App\Models\Perbaikan;
 use App\Models\DetailPerbaikan;
 use App\Models\User;
-use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class TransaksiController extends Controller
+class LaporanController extends Controller
 {
     public function export(Request $request)
     {
@@ -62,16 +61,16 @@ class TransaksiController extends Controller
             $sheet->setCellValue('A' . $row, $index + 1);
             $sheet->setCellValue('B' . $row, $t->id);
             $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
-            $sheet->setCellValue('D' . $row, $t->nama_device); // UPDATED: langsung dari perbaikan
+            $sheet->setCellValue('D' . $row, $t->nama_device);
             $sheet->setCellValue('E' . $row, $t->pelanggan ? $t->pelanggan->nama_pelanggan : 'N/A');
             $sheet->setCellValue('F' . $row, $t->user ? $t->user->name : 'N/A');
-            $sheet->setCellValue('G' . $row, $t->harga); // UPDATED: langsung dari tabel perbaikan
+            $sheet->setCellValue('G' . $row, $t->harga);
             $sheet->setCellValue('H' . $row, $t->status);
             $row++;
         }
 
         // Create temporary file
-        $fileName = 'transaksi_' . date('YmdHis') . '.xlsx';
+        $fileName = 'laporan_' . date('YmdHis') . '.xlsx';
         $filePath = storage_path('app/public/' . $fileName);
 
         // Save the spreadsheet
@@ -106,7 +105,7 @@ class TransaksiController extends Controller
             ->orderBy('tanggal_perbaikan', 'desc')
             ->get();
 
-        // UPDATED: Calculate summary statistics dari tabel perbaikan
+        // Calculate summary statistics dari tabel perbaikan
         $totalTransaksi = $transaksi->sum('harga');
 
         $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
@@ -125,8 +124,6 @@ class TransaksiController extends Controller
         foreach ($teknisi as $t) {
             $querySelesai = Perbaikan::where('user_id', $t->id)->where('status', 'Selesai');
             $queryPending = Perbaikan::where('user_id', $t->id)->whereIn('status', ['Menunggu', 'Proses']);
-
-            // UPDATED: Income dari tabel perbaikan
             $incomeQuery = Perbaikan::where('user_id', $t->id)->where('status', 'Selesai');
 
             if ($month) {
@@ -143,7 +140,7 @@ class TransaksiController extends Controller
 
             $repairCount = $querySelesai->count();
             $pendingCount = $queryPending->count();
-            $income = $incomeQuery->sum('harga'); // UPDATED: sum dari tabel perbaikan
+            $income = $incomeQuery->sum('harga');
 
             $teknisiStats[] = [
                 'name' => $t->name,
@@ -164,7 +161,7 @@ class TransaksiController extends Controller
             return 1;
         })->values()->toArray();
 
-        return view('kepala_toko.transaksi', compact(
+        return view('kepala_toko.laporan', compact(
             'user',
             'transaksi',
             'totalTransaksi',
@@ -274,7 +271,6 @@ class TransaksiController extends Controller
                     return $item;
                 });
 
-            // UPDATED: Calculate transactions for selected year dari tabel perbaikan
             $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
                 ->whereYear('tanggal_perbaikan', $selectedYear)
                 ->sum('harga');
@@ -297,7 +293,6 @@ class TransaksiController extends Controller
                     return $item;
                 });
 
-            // UPDATED: Calculate transactions for selected month and year dari tabel perbaikan
             $totalTransaksiBulanIni = Perbaikan::where('status', 'Selesai')
                 ->whereMonth('tanggal_perbaikan', $selectedMonth)
                 ->whereYear('tanggal_perbaikan', $selectedYear)
@@ -318,7 +313,6 @@ class TransaksiController extends Controller
             $yearOptions[] = $year;
         }
 
-        // UPDATED: Calculate transactions for today (always current date) dari tabel perbaikan
         $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
             ->whereDate('tanggal_perbaikan', date('Y-m-d'))
             ->sum('harga');

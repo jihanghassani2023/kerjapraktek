@@ -6,8 +6,10 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\PerbaikanController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 
 // Route halaman tracking untuk pelanggan
@@ -76,22 +78,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
     // Kepala toko routes
-    Route::get('/kepala-toko/dashboard', [TransaksiController::class, 'dashboard'])->name('kepala-toko.dashboard');
+    Route::get('/kepala-toko/dashboard', [LaporanController::class, 'dashboard'])->name('kepala-toko.dashboard');
 
-    // Transaksi routes for kepala toko
-    Route::prefix('transaksi')->name('transaksi.')->middleware(['auth'])->group(function () {
-        Route::get('/', [TransaksiController::class, 'index'])->name('index');
-        Route::get('/export', [TransaksiController::class, 'export'])->name('export');
-        // FIXED: Hapus constraint yang terlalu ketat dan sesuaikan dengan format ID yang sebenarnya
-        // Format ID sebenarnya: MG + DDMMYY + XXX (contoh: MG190625001)
-        Route::get('/{id}', [TransaksiController::class, 'show'])
+    // Laporan routes for kepala toko
+    Route::prefix('laporan')->name('laporan.')->middleware(['auth'])->group(function () {
+        Route::get('/', [LaporanController::class, 'index'])->name('index');
+        Route::get('/export', [LaporanController::class, 'export'])->name('export');
+        Route::get('/{id}', [LaporanController::class, 'show'])
             ->name('show')
-            ->where('id', 'MG\d{9}'); // MG + 6 digit tanggal + 3 digit urutan = 11 karakter total
+            ->where('id', 'MG\d{9}'); // Constraint untuk format ID MG + 9 digit
     });
-
-    // Karyawan routes - for kepala toko
     Route::middleware(['auth'])->group(function () {
-        Route::resource('karyawan', KaryawanController::class);
+        Route::resource('user', UserController::class);
     });
 
     // Teknisi routes

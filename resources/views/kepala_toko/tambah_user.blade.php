@@ -306,13 +306,13 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('karyawan.index') }}" class="menu-item active">
+        <a href="{{ route('user.index') }}" class="menu-item active">
             <i class="fas fa-users"></i>
             <span>User</span>
         </a>
-        <a href="{{ route('transaksi.index') }}" class="menu-item">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
+        <a href="{{ route('laporan.index') }}" class="menu-item">
+             <i class="fas fa-chart-bar"></i>
+            <span>Laporan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
@@ -343,7 +343,7 @@
 
         <div class="title-section">
             <h1 class="page-title">Tambah User Baru</h1>
-            <a href="{{ route('karyawan.index') }}" class="btn btn-secondary">
+            <a href="{{ route('user.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
         </div>
@@ -360,7 +360,7 @@
         @endif
 
         <div class="content-section">
-            <form action="{{ route('karyawan.store') }}" method="POST" id="tambahKaryawanForm" novalidate>
+            <form action="{{ route('user.store') }}" method="POST" id="tambahKaryawanForm" novalidate>
                 @csrf
 
                 <div class="form-group">

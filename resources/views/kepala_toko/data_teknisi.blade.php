@@ -207,9 +207,9 @@
             <i class="fas fa-users"></i>
             <span>Data Teknisi</span>
         </a>
-        <a href="{{ route('transaksi.index') }}" class="menu-item">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
+        <a href="{{ route('laporan.index') }}" class="menu-item">
+             <i class="fas fa-chart-bar"></i>
+            <span>Laporan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
@@ -252,7 +252,7 @@
                     <thead>
                         <tr>
                             <th>NO</th>
-                            <th>ID KARYAWAN</th>
+                            <th>ID User</th>
                             <th>NAMA TEKNISI</th>
                             <th>TTL</th>
                             <th>ALAMAT</th>

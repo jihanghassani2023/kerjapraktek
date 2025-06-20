@@ -299,13 +299,13 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('karyawan.index') }}" class="menu-item">
+        <a href="{{ route('user.index') }}" class="menu-item">
             <i class="fas fa-users"></i>
             <span>User</span>
         </a>
-        <a href="{{ route('transaksi.index') }}" class="menu-item">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
+        <a href="{{ route('laporan.index') }}" class="menu-item">
+             <i class="fas fa-chart-bar"></i>
+            <span>Laporan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf

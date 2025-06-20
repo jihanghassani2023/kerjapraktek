@@ -510,16 +510,17 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('transaksi.index') }}" class="menu-item active">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
-        </a>
-        <a href="{{ route('karyawan.index') }}" class="menu-item">
+        <a href="{{ route('user.index') }}" class="menu-item">
             <i class="fas fa-users"></i>
-            <span>Karyawan</span>
+            <span>User</span>
         </a>
 
-        <a href="{{ route('transaksi.index') }}" class="back-btn">
+        <a href="{{ route('laporan.index') }}" class="menu-item active">
+            <i class="fas fa-chart-bar"></i>
+            <span>Laporan</span>
+        </a>
+
+        <a href="{{ route('laporan.index') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali</span>
         </a>

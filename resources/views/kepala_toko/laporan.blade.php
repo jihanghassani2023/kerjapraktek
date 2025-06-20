@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaksi - MG TECH</title>
+    <title>Laporan - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -358,13 +358,13 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('karyawan.index') }}" class="menu-item">
+        <a href="{{ route('user.index') }}" class="menu-item">
             <i class="fas fa-users"></i>
             <span>User</span>
         </a>
-        <a href="{{ route('transaksi.index') }}" class="menu-item active">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
+        <a href="{{ route('laporan.index') }}" class="menu-item active">
+            <i class="fas fa-chart-bar"></i>
+            <span>Laporan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
@@ -378,7 +378,7 @@
     <div class="main-content">
         <div class="header">
             <div>
-                <h2>Transaksi</h2>
+                <h2>Laporan</h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -393,8 +393,8 @@
 
         <div class="title-section">
             <h1 class="page-title">Data Laporan</h1>
-            <a href="{{ route('transaksi.export') }}" class="btn btn-export">
-                <i class="fas fa-file-export"></i> Export Data Transaksi
+            <a href="{{ route('laporan.export') }}" class="btn btn-export">
+                <i class="fas fa-file-export"></i> Export Data
             </a>
         </div>
 
@@ -405,7 +405,7 @@
         @endif
 
         <div class="section-tabs">
-            <div class="tab-item active" data-tab="transaksi">Transaksi</div>
+            <div class="tab-item active" data-tab="transaksi">Laporan</div>
             <div class="tab-item" data-tab="teknisi">Performa Teknisi</div>
         </div>
 
@@ -413,7 +413,7 @@
             <div class="filter-container">
                 <div class="filter-group">
                     <span class="filter-label">Filter:</span>
-                    <form action="{{ route('transaksi.index') }}" method="GET" id="filterForm">
+                    <form action="{{ route('laporan.index') }}" method="GET" id="filterForm">
                         <select name="month" class="filter-select" onchange="document.getElementById('filterForm').submit()">
                             <option value="">Semua Bulan</option>
                             @php
@@ -471,7 +471,7 @@
                         </thead>
                         <tbody>
                             @forelse($transaksi as $index => $t)
-                                <tr onclick="window.location='{{ route('transaksi.show', $t->id) }}';" style="cursor: pointer;">
+                                <tr onclick="window.location='{{ route('laporan.show', $t->id) }}';" style="cursor: pointer;">
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $t->id }}</td>
                                    <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}</td>

@@ -253,13 +253,13 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('karyawan.index') }}" class="menu-item active">
+        <a href="{{ route('user.index') }}" class="menu-item active">
             <i class="fas fa-users"></i>
             <span>User</span>
         </a>
-        <a href="{{ route('transaksi.index') }}" class="menu-item">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
+        <a href="{{ route('laporan.index') }}" class="menu-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>Laporan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
@@ -288,7 +288,7 @@
 
         <div class="title-section">
             <h1 class="page-title">Edit User</h1>
-            <a href="{{ route('karyawan.index') }}" class="btn btn-secondary">
+            <a href="{{ route('user.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
         </div>
@@ -305,48 +305,48 @@
         @endif
 
         <div class="content-section">
-            <form action="{{ route('karyawan.update', $karyawan->id) }}" method="POST" id="editUserForm" novalidate>
+            <form action="{{ route('user.update', $userData->id) }}" method="POST" id="editUserForm" novalidate>
                 @csrf
                 @method('PUT')
 
                 <div class="form-group">
-                    <label for="karyawan_id">ID User</label>
-                    <input type="text" class="form-control" id="karyawan_id" value="{{ $karyawan->id }}" readonly disabled>
-                    <input type="hidden" name="karyawan_id" value="{{ $karyawan->id }}">
+                    <label for="user">ID User</label>
+                    <input type="text" class="form-control" id="user_id" value="{{ $userData->id }}" readonly disabled>
+                    <input type="hidden" name="user_id" value="{{ $userData->id }}">
                 </div>
 
                 <div class="form-group">
-                    <label for="name">Nama User</label>
-                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $karyawan->name) }}">
-                    @error('name')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    <div class="invalid-feedback" id="name-error" style="display: none;"></div>
-                </div>
+                   <label for="name">Nama User</label>
+<input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $userData->name) }}">
+@error('name')
+    <div class="invalid-feedback">{{ $message }}</div>
+@enderror
+<div class="invalid-feedback" id="name-error" style="display: none;"></div>
+</div>
 
-                <div class="form-group">
-                    <label for="alamat">Alamat</label>
-                    <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat">{{ old('alamat', $karyawan->alamat) }}</textarea>
-                    @error('alamat')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    <div class="invalid-feedback" id="alamat-error" style="display: none;"></div>
-                </div>
+<div class="form-group">
+    <label for="alamat">Alamat</label>
+    <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat">{{ old('alamat', $userData->alamat) }}</textarea>
+    @error('alamat')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+    <div class="invalid-feedback" id="alamat-error" style="display: none;"></div>
+</div>
 
-                <div class="form-group">
-                    <label for="jabatan">Jabatan</label>
-                    <select class="form-control @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan">
-                        <option value="">-- Pilih Jabatan --</option>
-                        <option value="Kepala Toko" {{ old('jabatan', $karyawan->jabatan) == 'Kepala Toko' ? 'selected' : '' }}>Kepala Toko</option>
-                        <option value="Kepala Teknisi" {{ old('jabatan', $karyawan->jabatan) == 'Kepala Teknisi' ? 'selected' : '' }}>Kepala Teknisi</option>
-                        <option value="Teknisi" {{ old('jabatan', $karyawan->jabatan) == 'Teknisi' ? 'selected' : '' }}>Teknisi</option>
-                        <option value="Admin" {{ old('jabatan', $karyawan->jabatan) == 'Admin' ? 'selected' : '' }}>Admin</option>
-                    </select>
-                    @error('jabatan')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    <div class="invalid-feedback" id="jabatan-error" style="display: none;"></div>
-                </div>
+<div class="form-group">
+    <label for="jabatan">Jabatan</label>
+    <select class="form-control @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan">
+        <option value="">-- Pilih Jabatan --</option>
+        <option value="Kepala Toko" {{ old('jabatan', $userData->jabatan) == 'Kepala Toko' ? 'selected' : '' }}>Kepala Toko</option>
+        <option value="Kepala Teknisi" {{ old('jabatan', $userData->jabatan) == 'Kepala Teknisi' ? 'selected' : '' }}>Kepala Teknisi</option>
+        <option value="Teknisi" {{ old('jabatan', $userData->jabatan) == 'Teknisi' ? 'selected' : '' }}>Teknisi</option>
+        <option value="Admin" {{ old('jabatan', $userData->jabatan) == 'Admin' ? 'selected' : '' }}>Admin</option>
+    </select>
+    @error('jabatan')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+    <div class="invalid-feedback" id="jabatan-error" style="display: none;"></div>
+</div>
 
                 <div style="text-align: right;">
                     <button type="submit" class="btn btn-primary">

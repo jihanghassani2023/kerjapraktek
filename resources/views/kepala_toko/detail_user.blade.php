@@ -302,7 +302,6 @@
             font-size: 16px;
         }
 
-        /* Custom Modal Styles - SAMA SEPERTI data_karyawan.blade.php */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -441,16 +440,16 @@
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('karyawan.index') }}" class="menu-item active">
+        <a href="{{ route('user.index') }}" class="menu-item active">
             <i class="fas fa-users"></i>
-            <span>Data User</span>
+            <span>User</span>
         </a>
-        <a href="{{ route('transaksi.index') }}" class="menu-item">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
+        <a href="{{ route('laporan.index') }}" class="menu-item">
+            <i class="fas fa-chart-bar"></i>
+            <span>Laporan</span>
         </a>
 
-        <a href="{{ route('karyawan.index') }}" class="back-btn">
+        <a href="{{ route('user.index') }}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             <span>Kembali</span>
         </a>
@@ -480,13 +479,13 @@
 
         <div class="content-wrapper">
             <div class="content-header">
-                <h2 class="content-title">Detail Data User</h2>
+                <h2 class="content-title">Detail User</h2>
                 <div class="action-buttons">
-                    <a href="{{ route('karyawan.edit', $karyawan->id) }}" class="btn btn-edit">
+                    <a href="{{ route('user.edit', $userData->id) }}" class="btn btn-edit">
                         <i class="fas fa-edit"></i> Edit
                     </a>
-                    <!-- UPDATED: Ganti dengan modal seperti di data_karyawan.blade.php -->
-                    <button type="button" class="btn btn-delete" onclick="showDeleteModal('{{ $karyawan->id }}', '{{ $karyawan->name }}')">
+
+                    <button type="button" class="btn btn-delete" onclick="showDeleteModal('{{ $userData->id }}', '{{ $userData->name }}')">
                         <i class="fas fa-trash"></i> Hapus
                     </button>
                 </div>
@@ -499,24 +498,24 @@
                 <div class="card-body">
                     <div class="data-row">
                         <div class="data-label">ID User</div>
-                        <div class="data-value">{{ $karyawan->id }}</div>
+                        <div class="data-value">{{ $userData->id }}</div>
                     </div>
                     <div class="data-row">
                         <div class="data-label">Nama User</div>
-                        <div class="data-value">{{ $karyawan->name }}</div>
+                        <div class="data-value">{{ $userData->name }}</div>
                     </div>
                     <div class="data-row">
                         <div class="data-label">Alamat</div>
-                        <div class="data-value">{{ $karyawan->alamat }}</div>
+                        <div class="data-value">{{ $userData->alamat }}</div>
                     </div>
                     <div class="data-row">
                         <div class="data-label">Jabatan</div>
-                        <div class="data-value">{{ $karyawan->jabatan }}</div>
+                        <div class="data-value">{{ $userData->jabatan }}</div>
                     </div>
                 </div>
             </div>
 
-            @if($karyawan->jabatan == 'Teknisi' || $karyawan->jabatan == 'Kepala Teknisi')
+            @if($userData->jabatan == 'Teknisi' || $userData->jabatan == 'Kepala Teknisi')
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Riwayat Perbaikan</h3>
@@ -550,7 +549,7 @@
                         @else
                             <div class="empty-state">
                                 <i class="fas fa-info-circle"></i>
-                                <p class="empty-state-text">Belum ada data perbaikan yang dilakukan oleh karyawan ini.</p>
+                                <p class="empty-state-text">Belum ada data perbaikan yang dilakukan oleh User ini.</p>
                             </div>
                         @endif
                     </div>
@@ -559,21 +558,21 @@
                 <div class="info-box">
                     <i class="fas fa-info-circle"></i>
                     <div class="info-text">
-                        User dengan jabatan {{ $karyawan->jabatan }} tidak memiliki akses untuk melakukan perbaikan.
+                        User dengan jabatan {{ $userData->jabatan }} tidak memiliki akses untuk melakukan perbaikan.
                     </div>
                 </div>
             @endif
         </div>
     </div>
 
-    <!-- Custom Delete Confirmation Modal - SAMA SEPERTI data_karyawan.blade.php -->
+
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-container">
             <div class="modal-header">
                 <h4>Konfirmasi Hapus</h4>
             </div>
             <div class="modal-body">
-                <p>Apakah Anda yakin ingin menghapus karyawan ini?</p>
+                <p>Apakah Anda yakin ingin menghapus user ini?</p>
                 <p class="user-name-highlight" id="userNameDisplay"></p>
             </div>
             <div class="modal-buttons">
@@ -618,7 +617,7 @@
         function confirmDelete() {
             if (currentUserId) {
                 const form = document.getElementById('deleteForm');
-                form.action = `/karyawan/${currentUserId}`;
+                form.action = `/user/${currentUserId}`;
                 form.submit();
             }
         }
