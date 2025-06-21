@@ -251,8 +251,8 @@
             <span>Data Perbaikan</span>
         </a>
         <a href="{{ route('admin.transaksi') }}" class="menu-item">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
+            <i class="fas fa-chart-bar"></i>
+            <span>Laporan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf

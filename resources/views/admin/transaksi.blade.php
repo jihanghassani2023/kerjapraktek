@@ -439,8 +439,8 @@
             <span>Dashboard</span>
         </a>
         <a href="{{ route('admin.transaksi') }}" class="menu-item active">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Transaksi</span>
+             <i class="fas fa-chart-bar"></i>
+            <span>Laporan</span>
         </a>
         <a href="{{ route('admin.pelanggan') }}" class="menu-item">
             <i class="fas fa-users"></i>
@@ -481,7 +481,7 @@
 <div class="title-section">
     <h1 class="page-title">Data Laporan</h1>
     <a href="{{ route('admin.transaksi.export') }}" class="btn btn-export">
-        <i class="fas fa-file-export"></i> Export Data Transaksi
+        <i class="fas fa-file-export"></i> Export Data
     </a>
 </div>
 

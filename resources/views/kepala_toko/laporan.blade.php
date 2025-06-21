@@ -405,7 +405,7 @@
         @endif
 
         <div class="section-tabs">
-            <div class="tab-item active" data-tab="transaksi">Laporan</div>
+            <div class="tab-item active" data-tab="transaksi">Transaksi</div>
             <div class="tab-item" data-tab="teknisi">Performa Teknisi</div>
         </div>
 
