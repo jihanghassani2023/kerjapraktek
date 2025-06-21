@@ -446,7 +446,8 @@
                                 @elseif($user->isKepalaToko())
                                     <tr onclick="window.location='{{ route('laporan.show', $item->id) }}';">
                                 @else
-                                    <tr onclick="window.location='{{ route('perbaikan.show', $item->id) }}';">
+                                    {{-- ✅ FIXED: Menggunakan route teknisi.perbaikan.show yang benar --}}
+                                    <tr onclick="window.location='{{ route('teknisi.perbaikan.show', $item->id) }}';">
                                 @endif
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $item->id }}</td>

@@ -12,40 +12,19 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
-// ==========================================
-// PUBLIC ROUTES (NO AUTH REQUIRED)
-// ==========================================
-
 // Route halaman tracking untuk pelanggan
 Route::get('/', [TrackingController::class, 'index'])->name('tracking.index');
 Route::post('/check', [TrackingController::class, 'check'])->name('tracking.check');
 
-// Authentication routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// ==========================================
-// AUTHENTICATED ROUTES
-// ==========================================
-
+// Dashboard routes
 Route::middleware(['auth'])->group(function () {
-
-    // ==========================================
-    // DASHBOARD REDIRECT ROUTE
-    // ==========================================
+    // Rute default dashboard yang akan melakukan redirect sesuai role
     Route::get('/dashboard', function () {
+        // Menggunakan Auth::user()->role langsung
         $role = Auth::user()->role;
 
         if ($role === 'admin') {
@@ -59,24 +38,26 @@ Route::middleware(['auth'])->group(function () {
         }
     })->name('dashboard');
 
-    // ==========================================
-    // SEARCH SUGGESTIONS API (SHARED)
-    // ==========================================
-    Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
-
-    // ==========================================
-    // ADMIN ROUTES
-    // ==========================================
-    Route::prefix('admin')->name('admin.')->group(function () {
-        // Dashboard
+    // Admin routes
+    // Admin routes
+    Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-        // Search functionality
+        // Search functionality route
         Route::get('/search', [AdminController::class, 'search'])->name('search');
 
-        // Transaksi management
+        // Add this new route for admin to update repair status
+        Route::put('/perbaikan/{id}/status', [AdminController::class, 'updateStatus'])->name('perbaikan.update-status');
+
+        Route::get('/pelanggan/{id}/edit-pelanggan', [AdminController::class, 'editPelanggan'])->name('perbaikan.edit-pelanggan');
+
+        // Transaksi admin routes
         Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi');
+
+        // PINDAHKAN ROUTE EXPORT KE ATAS SEBELUM ROUTE DENGAN PARAMETER {id}
         Route::get('/transaksi/export', [AdminController::class, 'exportTransaksi'])->name('transaksi.export');
+
+        // Route dengan parameter {id} di bawah
         Route::get('/transaksi/{id}', [AdminController::class, 'showTransaksi'])->name('transaksi.show');
         Route::put('/transaksi/{id}/status', [AdminController::class, 'updateStatus'])->name('transaksi.update-status');
 
@@ -87,79 +68,59 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pelanggan/{id}/edit', [AdminController::class, 'editPelanggan'])->name('pelanggan.edit');
         Route::put('/pelanggan/{id}', [AdminController::class, 'updatePelanggan'])->name('pelanggan.update');
         Route::delete('/pelanggan/{id}', [AdminController::class, 'destroyPelanggan'])->name('pelanggan.destroy');
-        Route::get('/pelanggan/{id}/edit-pelanggan', [AdminController::class, 'editPelanggan'])->name('perbaikan.edit-pelanggan');
 
-        // Perbaikan management (Admin only create, not edit)
+        // Perbaikan management - ADMIN HANYA BISA CREATE, TIDAK BISA EDIT
         Route::get('/perbaikan/create', [AdminController::class, 'createPerbaikan'])->name('perbaikan.create');
         Route::post('/perbaikan', [AdminController::class, 'storePerbaikan'])->name('perbaikan.store');
-        Route::put('/perbaikan/{id}/status', [AdminController::class, 'updateStatus'])->name('perbaikan.update-status');
-
-        // API routes
-        Route::get('/api/customers', [AdminController::class, 'getCustomers'])->name('api.customers');
     });
 
-    // ==========================================
-    // KEPALA TOKO ROUTES
-    // ==========================================
-    Route::prefix('kepala-toko')->name('kepala-toko.')->group(function () {
-        // Dashboard
-        Route::get('/dashboard', [LaporanController::class, 'dashboard'])->name('dashboard');
+    // Search suggestions API route (outside of admin group)
+    Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
-        // Search functionality
-        Route::get('/search', [AdminController::class, 'search'])->name('search');
-    });
+    // Kepala toko routes
+    Route::get('/kepala-toko/dashboard', [LaporanController::class, 'dashboard'])->name('kepala-toko.dashboard');
 
-    // ==========================================
-    // LAPORAN ROUTES (KEPALA TOKO)
-    // ==========================================
-    Route::prefix('laporan')->name('laporan.')->group(function () {
+    // Laporan routes for kepala toko
+    Route::prefix('laporan')->name('laporan.')->middleware(['auth'])->group(function () {
         Route::get('/', [LaporanController::class, 'index'])->name('index');
         Route::get('/export', [LaporanController::class, 'export'])->name('export');
         Route::get('/{id}', [LaporanController::class, 'show'])
             ->name('show')
             ->where('id', 'MG\d{9}'); // Constraint untuk format ID MG + 9 digit
     });
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('user', UserController::class);
+    });
 
-    // ==========================================
-    // USER MANAGEMENT ROUTES (KEPALA TOKO)
-    // ==========================================
-    Route::resource('user', UserController::class);
-
-    // ==========================================
-    // TEKNISI ROUTES
-    // ==========================================
-    Route::prefix('teknisi')->name('teknisi.')->group(function () {
+    // Teknisi routes
+    Route::prefix('teknisi')->middleware(['auth'])->group(function () {
         // Dashboard
-        Route::get('/dashboard', [PerbaikanController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [PerbaikanController::class, 'index'])->name('teknisi.dashboard');
 
-        // Search functionality
-        Route::get('/search', [AdminController::class, 'search'])->name('search');
+        Route::post('/perbaikan/{id}/add-process', [PerbaikanController::class, 'addProcessStep'])->name('perbaikan.add-process');
 
-        // Laporan
-        Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('laporan');
+        // Laporan page
+        Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('teknisi.laporan');
 
-        // Perbaikan management
+        // Export laporan route - mengarah ke method yang benar
+        Route::get('/laporan/export', [PerbaikanController::class, 'exportLaporan'])->name('laporan.export');
+
+        // Perbaikan routes (hanya untuk view, edit, dan update status)
         Route::get('/perbaikan/{id}', [PerbaikanController::class, 'show'])->name('perbaikan.show');
         Route::get('/perbaikan/{id}/edit', [PerbaikanController::class, 'edit'])->name('perbaikan.edit');
         Route::put('/perbaikan/{id}', [PerbaikanController::class, 'update'])->name('perbaikan.update');
-        Route::post('/perbaikan/{id}/add-process', [PerbaikanController::class, 'addProcessStep'])->name('perbaikan.add-process');
 
-        // Status management
+        // Confirm status change
         Route::get('/perbaikan/{id}/confirm-status/{status}', [PerbaikanController::class, 'confirmStatus'])->name('perbaikan.confirm-status');
     });
+    // routes/web.php
+Route::get('/admin/search', [AdminController::class, 'search'])->name('admin.search');
+Route::get('/kepala-toko/search', [AdminController::class, 'search'])->name('kepala-toko.search');
 
-    // ==========================================
-    // SHARED PERBAIKAN ROUTES
-    // ==========================================
-    // Unified route for status updates (used by both admin and teknisi)
+
+    // Add this to your routes/web.php
+    Route::get('/admin/api/customers', [AdminController::class, 'getCustomers'])->name('admin.api.customers');
+
+    // FIX: Unified single route for status updates - this lets both admin and teknisi controllers handle status updates
     Route::put('/perbaikan/{id}/status', [PerbaikanController::class, 'updateStatus'])->name('perbaikan.update-status');
 });
-
-// ==========================================
-// ROUTE ALIASES & REDIRECTS
-// ==========================================
-
-// Redirect old routes if needed
-Route::redirect('/admin', '/admin/dashboard');
-Route::redirect('/kepala-toko', '/kepala-toko/dashboard');
-Route::redirect('/teknisi', '/teknisi/dashboard');
