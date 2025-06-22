@@ -442,7 +442,9 @@ public function exportTransaksi(Request $request)
 
     // Include relasi user, pelanggan, garansi
     $transaksi = $query->with(['user', 'pelanggan', 'garansi'])->orderBy('tanggal_perbaikan', 'desc')->get();
-
+     if ($transaksi->isEmpty()) {
+        return back()->with('info', 'Tidak ada data yang bisa diekspor.');
+    }
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
 

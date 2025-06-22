@@ -277,8 +277,6 @@
         table tr:hover {
             background-color: #f5f5f5;
         }
-
-        /* Fixed Status Colors Based on Status */
         .status-menunggu {
             color: #dc3545;
             font-weight: bold;
@@ -505,9 +503,18 @@
                             <option value="">Semua Bulan</option>
                             @php
                                 $namaBulan = [
-                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                    1 => 'Januari',
+                                    2 => 'Februari',
+                                    3 => 'Maret',
+                                    4 => 'April',
+                                    5 => 'Mei',
+                                    6 => 'Juni',
+                                    7 => 'Juli',
+                                    8 => 'Agustus',
+                                    9 => 'September',
+                                    10 => 'Oktober',
+                                    11 => 'November',
+                                    12 => 'Desember',
                                 ];
                             @endphp
                             @for ($i = 1; $i <= 12; $i++)
@@ -629,63 +636,61 @@
         </div>
     </div>
 
- <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // --- EXPORT BUTTON DYNAMIC UPDATE ---
-        function updateExportLink() {
-            const monthSelect = document.querySelector('select[name="month"]');
-            const yearSelect = document.querySelector('select[name="year"]');
-            const exportBtn = document.getElementById('export-btn');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function updateExportLink() {
+                const monthSelect = document.querySelector('select[name="month"]');
+                const yearSelect = document.querySelector('select[name="year"]');
+                const exportBtn = document.getElementById('export-btn');
 
-            if (exportBtn) {
-                const baseUrl = "{{ route('admin.transaksi.export') }}";
-                const params = new URLSearchParams();
+                if (exportBtn) {
+                    const baseUrl = "{{ route('admin.transaksi.export') }}";
+                    const params = new URLSearchParams();
 
-                if (monthSelect && monthSelect.value) {
-                    params.append('month', monthSelect.value);
+                    if (monthSelect && monthSelect.value) {
+                        params.append('month', monthSelect.value);
+                    }
+                    if (yearSelect && yearSelect.value) {
+                        params.append('year', yearSelect.value);
+                    }
+
+                    exportBtn.href = baseUrl + (params.toString() ? '?' + params.toString() : '');
                 }
-                if (yearSelect && yearSelect.value) {
-                    params.append('year', yearSelect.value);
-                }
-
-                exportBtn.href = baseUrl + (params.toString() ? '?' + params.toString() : '');
             }
-        }
 
-        updateExportLink(); // Initial call
+            updateExportLink();
 
-        const filterSelects = document.querySelectorAll('.filter-select');
-        filterSelects.forEach(select => {
-            select.addEventListener('change', function () {
-                updateExportLink();
-                setTimeout(() => {
-                    document.getElementById('filterForm').submit();
-                }, 100);
+            const filterSelects = document.querySelectorAll('.filter-select');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    updateExportLink();
+                    setTimeout(() => {
+                        document.getElementById('filterForm').submit();
+                    }, 100);
+                });
+            });
+
+            const tabItems = document.querySelectorAll('.tab-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabItems.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+
+                    if (!targetTab) return;
+
+                    tabItems.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    this.classList.add('active');
+                    const content = document.getElementById(targetTab + '-tab');
+                    if (content) {
+                        content.classList.add('active');
+                    }
+                });
             });
         });
-
-        // --- TAB SWITCHING ---
-        const tabItems = document.querySelectorAll('.tab-item');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabItems.forEach(tab => {
-            tab.addEventListener('click', function () {
-                const targetTab = this.getAttribute('data-tab');
-
-                if (!targetTab) return;
-
-                tabItems.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-
-                this.classList.add('active');
-                const content = document.getElementById(targetTab + '-tab');
-                if (content) {
-                    content.classList.add('active');
-                }
-            });
-        });
-    });
-</script>
+    </script>
 
 
 

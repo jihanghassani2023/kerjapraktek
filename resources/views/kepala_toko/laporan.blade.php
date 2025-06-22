@@ -316,7 +316,6 @@
             width: 16px;
             text-align: center;
         }
-        /* Color coding for different stats */
         .teknisi-stat .fa-check-circle {
             color: #28a745;
         }
@@ -393,9 +392,11 @@
 
         <div class="title-section">
             <div></div>
-            <a href="{{ route('laporan.export') }}" class="btn btn-export">
-                <i class="fas fa-file-export"></i> Export Data
-            </a>
+          <a href="{{ route('laporan.export', ['month' => request('month'), 'year' => request('year')]) }}" class="btn btn-export">
+    <i class="fas fa-file-export"></i> Export Data
+</a>
+
+
         </div>
 
         @if(session('info'))
