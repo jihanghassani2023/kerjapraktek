@@ -1,9 +1,19 @@
+# Backup .htaccess yang ada
+cp .htaccess .htaccess.backup
+
+# Update .htaccess dengan rule untuk file statis
+cat > .htaccess << 'EOF'
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
     RewriteEngine On
+
+    # Handle static files - redirect to public folder
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(img|css|js|assets)/(.*)$ public/$1/$2 [L]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -23,3 +33,4 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+EOF
