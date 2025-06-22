@@ -516,7 +516,7 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">Dashboard <span>ADMIN</span></h1>
+            <h1 class="page-title">Dashboard <span class="user-role">ADMIN</span></h1>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
                     <div class="user-name">{{ $user->name }}</div>

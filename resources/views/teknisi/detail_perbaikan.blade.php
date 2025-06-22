@@ -22,7 +22,7 @@
         }
 
         .sidebar {
-            width: 150px;
+            width: 220px;
             background-color: #8c3a3a;
             color: white;
             padding: 20px 0;
@@ -39,19 +39,19 @@
         }
 
         .sidebar-logo img {
-            width: 70px;
+            width: 80px;
             height: auto;
         }
 
         .sidebar-logo span {
             display: block;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 20px;
             margin-top: 10px;
         }
 
         .menu-item {
-            padding: 15px 15px;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
             color: white;
@@ -111,9 +111,9 @@
             margin-right: 10px;
         }
 
-        .main-content {
+         .main-content {
             flex: 1;
-            margin-left: 150px;
+            margin-left: 220px;
             padding: 20px;
         }
 
@@ -125,7 +125,6 @@
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
         }
 
         .page-title {
@@ -173,14 +172,14 @@
         }
 
         .content-wrapper {
-            padding: 0;
+            padding: 30px 0;
         }
 
         .content-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         .content-title {
@@ -222,7 +221,7 @@
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             overflow: hidden;
         }
 
@@ -701,7 +700,7 @@
         </a>
 
         <a href="{{ route('teknisi.laporan') }}" class="menu-item">
-           <i class="fas fa-chart-bar"></i>
+            <i class="fas fa-chart-bar"></i>
             <span>Laporan</span>
         </a>
 
@@ -781,20 +780,20 @@
                                 <div class="info-label">Harga</div>
                                 <div class="info-value">Rp. {{ number_format($perbaikan->harga, 0, ',', '.') }}</div>
                             </div>
-                          <div class="info-row">
-    <div class="info-label">Garansi</div>
-    <div class="info-value">
-        @if ($perbaikan->garansi && $perbaikan->garansi->count() > 0)
-            @foreach ($perbaikan->garansi as $garansi)
-                <div style="margin-bottom: 5px;">
-                    {{ $garansi->sparepart }}: {{ $garansi->periode }}
-                </div>
-            @endforeach
-        @else
-            Tidak ada
-        @endif
-    </div>
-</div>
+                            <div class="info-row">
+                                <div class="info-label">Garansi</div>
+                                <div class="info-value">
+                                    @if ($perbaikan->garansi && $perbaikan->garansi->count() > 0)
+                                        @foreach ($perbaikan->garansi as $garansi)
+                                            <div style="margin-bottom: 5px;">
+                                                {{ $garansi->sparepart }}: {{ $garansi->periode }}
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        Tidak ada
+                                    @endif
+                                </div>
+                            </div>
                             <div class="info-row">
                                 <div class="info-label">Status</div>
                                 <div class="info-value">
@@ -976,7 +975,7 @@
                 timelineContainer.style.display = 'none';
                 toggleIcon.className = 'fas fa-chevron-down';
                 showAllLink.innerHTML =
-                'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
+                    'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
 

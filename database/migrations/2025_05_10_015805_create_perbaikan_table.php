@@ -12,8 +12,12 @@ return new class extends Migration
             $table->string('id', 11)->primary();
             $table->date('tanggal_perbaikan');
             $table->enum('status', ['Menunggu', 'Proses', 'Selesai'])->default('Menunggu');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('pelanggan_id')->constrained('pelanggan')->onDelete('cascade');
+            $table->unsignedInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->unsignedInteger('pelanggan_id');
+            $table->foreign('pelanggan_id')->references('id')->on('pelanggan')->onDelete('cascade');
+
             $table->string('nama_device', 100);
             $table->string('kategori_device', 50)->nullable();
             $table->string('masalah', 200);

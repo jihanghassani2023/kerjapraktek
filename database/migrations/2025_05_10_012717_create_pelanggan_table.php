@@ -9,7 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pelanggan', function (Blueprint $table) {
-            $table->id();
+           $table->increments('id');
+
             $table->string('nama_pelanggan',50);
             $table->string('nomor_telp', 13);  // Limit to 13 characters
             $table->string('email',100)->nullable();

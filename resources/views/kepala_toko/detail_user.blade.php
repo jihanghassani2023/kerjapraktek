@@ -18,15 +18,33 @@
             min-height: 100vh;
         }
         .sidebar {
-            width: 202px;
+            width: 220px;
             background-color: #8c3a3a;
             color: white;
+            padding: 20px 0;
             display: flex;
             flex-direction: column;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
         }
+          .sidebar-logo {
+            padding: 15px 20px 30px;
+            text-align: center;
+        }
+
+        .sidebar-logo img {
+            width: 80px;
+            height: auto;
+        }
+
+        .sidebar-logo span {
+            display: block;
+            font-weight: bold;
+            font-size: 20px;
+            margin-top: 10px;
+        }
+
         .logo-container {
             padding: 20px;
             display: flex;
@@ -96,13 +114,11 @@
         .back-btn i {
             margin-right: 10px;
         }
-        .main-content {
-            flex: 1;
-            margin-left: 202px;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-        }
+      .main-content {
+    flex: 1;
+    margin-left: 220px;
+    padding: 20px;
+}
         .top-header {
             background-color: white;
             padding: 20px;
@@ -432,9 +448,9 @@
 </head>
 <body>
     <div class="sidebar">
-        <div class="logo-container">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG TECH Logo" width="30" height="30" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'30\' height=\'30\' viewBox=\'0 0 30 30\'><rect width=\'30\' height=\'30\' fill=\'white\'/><text x=\'50%\' y=\'50%\' font-size=\'14\' text-anchor=\'middle\' fill=\'%238c3a3a\' font-family=\'Arial\' dominant-baseline=\'middle\'>MG</text></svg>'">
-            <span class="logo-text">MG TECH</span>
+       <div class="sidebar-logo">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo"
+                onerror="this.src='https://via.placeholder.com/80'">
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>

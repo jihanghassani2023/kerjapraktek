@@ -15,6 +15,7 @@
             font-family: 'Arial', sans-serif;
         }
 
+
         body {
             background-color: #f5f5f5;
             display: flex;
@@ -22,7 +23,7 @@
         }
 
         .sidebar {
-            width: 150px;
+            width: 220px;
             background-color: #8c3a3a;
             color: white;
             padding: 20px 0;
@@ -39,19 +40,20 @@
         }
 
         .sidebar-logo img {
-            width: 70px;
+            width: 80px;
             height: auto;
         }
 
         .sidebar-logo span {
             display: block;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 20px;
             margin-top: 10px;
         }
 
+
         .menu-item {
-            padding: 15px 15px;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
             color: white;
@@ -113,16 +115,19 @@
 
         .main-content {
             flex: 1;
-            margin-left: 150px;
+            margin-left: 220px;
             padding: 20px;
         }
 
-        .header {
+
+       .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e3e3e3;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .page-title {

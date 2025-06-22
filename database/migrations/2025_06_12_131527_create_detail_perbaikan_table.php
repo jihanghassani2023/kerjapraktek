@@ -8,7 +8,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('detail_perbaikan', function (Blueprint $table) {
-            $table->id();
+           $table->increments('id');
             $table->string('perbaikan_id', 11);
 
             $table->text('process_step')->nullable();

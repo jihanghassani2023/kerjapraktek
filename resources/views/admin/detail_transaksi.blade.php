@@ -521,7 +521,7 @@
             <span>Dashboard</span>
         </a>
         <a href="{{ route('admin.transaksi') }}" class="menu-item active">
-         <i class="fas fa-chart-bar"></i>
+            <i class="fas fa-chart-bar"></i>
             <span>Laporan</span>
         </a>
         <a href="{{ route('admin.pelanggan') }}" class="menu-item">
@@ -689,7 +689,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Proses Pengerjaan</h3>
                     </div>
-                    <div class="card-body">
+                   <div class="card-body" id="prosesPengerjaanContainer">
                         @php
                             $distinctProses = $transaksi->getDistinctProsesPengerjaan();
                         @endphp
@@ -767,7 +767,13 @@
                     masalah: {!! json_encode($transaksi->masalah) !!},
                     tindakan: {!! json_encode($transaksi->tindakan_perbaikan) !!},
                     harga: {!! json_encode('Rp. ' . number_format($transaksi->harga, 0, ',', '.')) !!},
-                  garansi: {!! json_encode($transaksi->garansi && $transaksi->garansi->count() > 0 ? $transaksi->garansi->map(function($g) { return $g->sparepart . ': ' . $g->periode; })->join(', ') : 'Tidak ada') !!},
+                    garansi: {!! json_encode(
+                        $transaksi->garansi && $transaksi->garansi->count() > 0
+                            ? $transaksi->garansi->map(function ($g) {
+                                    return $g->sparepart . ': ' . $g->periode;
+                                })->join(', ')
+                            : 'Tidak ada',
+                    ) !!},
                     pelanggan: {!! json_encode($transaksi->pelanggan->nama_pelanggan) !!},
                     nomor_telp: {!! json_encode($transaksi->pelanggan->nomor_telp) !!},
                     email: {!! json_encode($transaksi->pelanggan->email ?: '-') !!},
@@ -793,6 +799,38 @@
                     'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
+        function updateLatestProcessDisplay(newStatus) {
+    const processTitle = document.querySelector('.latest-process .process-title');
+    const processContent = document.querySelector('.latest-process .process-content');
+    const processDate = document.querySelector('.latest-process .process-date');
+
+    let message = "";
+    if (newStatus === 'Menunggu') {
+        message = "Menunggu Antrian Perbaikan";
+    } else if (newStatus === 'Proses') {
+        message = "Device Anda Sedang diproses";
+    } else if (newStatus === 'Selesai') {
+        message = "Device Anda Telah Selesai";
+    }
+
+    const now = new Date();
+    const formattedDate = now.toLocaleString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    if (processContent) {
+        processContent.textContent = message;
+    }
+
+    if (processDate) {
+        processDate.textContent = formattedDate;
+    }
+}
+
 
         // Status update functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -865,7 +903,13 @@
                         .then(data => {
                             if (data.success) {
                                 updateUIAfterStatusChange(data.status);
-                                showNotification('Status berhasil diperbarui!', 'success');
+
+                                addNewTimelineEntry(data.status);
+
+                                updateLatestProcessDisplay(data.status);
+                                 showNotification('Status berhasil diperbarui!', 'success');
+
+
                             } else {
                                 throw new Error(data.message || 'Gagal mengubah status');
                             }
@@ -885,15 +929,30 @@
             });
 
             function updateUIAfterStatusChange(newStatus) {
+                // Ubah badge status
                 const statusBadge = document.getElementById('statusBadge');
                 if (statusBadge) {
                     statusBadge.className = 'status-badge status-' + newStatus.toLowerCase();
                     statusBadge.textContent = newStatus;
                 }
 
+                // Tampilkan atau sembunyikan section tombol status
                 updateStatusButtons(newStatus);
                 attachStatusButtonListeners();
+
+                // Tampilkan atau sembunyikan proses pengerjaan
+                const prosesCard = document.querySelector('.card .card-title');
+                if (prosesCard && prosesCard.textContent.includes('Proses Pengerjaan')) {
+                    const prosesCardBody = prosesCard.closest('.card').querySelector('.card-body');
+                    if (newStatus === 'Proses') {
+                        prosesCardBody.style.display = 'block';
+                    } else {
+                        prosesCardBody.style.display = 'none';
+                    }
+                }
             }
+
+
 
             function updateStatusButtons(newStatus) {
                 const statusActionsSection = document.querySelector('.status-actions');
@@ -921,6 +980,41 @@
                     }
                 }
             }
+
+            function addNewTimelineEntry(newStatus) {
+                let statusMessage = "";
+                if (newStatus === 'Menunggu') {
+                    statusMessage = "Menunggu Antrian Perbaikan";
+                } else if (newStatus === 'Proses') {
+                    statusMessage = "Device Anda Sedang diproses";
+                } else if (newStatus === 'Selesai') {
+                    statusMessage = "Device Anda Telah Selesai";
+                }
+
+                const now = new Date();
+                const displayTime = now.toLocaleString('id-ID', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item status-change status-' + newStatus.toLowerCase();
+                timelineItem.innerHTML = `
+        <div class="timeline-marker"><i class="fas fa-flag"></i></div>
+        <div class="timeline-content">
+            <div class="timeline-title">${statusMessage}</div>
+            <div class="timeline-date">${displayTime}</div>
+        </div>`;
+
+                const timelineContainer = document.querySelector('.timeline');
+                if (timelineContainer) {
+                    timelineContainer.prepend(timelineItem);
+                }
+            }
+
 
             function showNotification(message, type) {
                 const notification = document.createElement('div');
