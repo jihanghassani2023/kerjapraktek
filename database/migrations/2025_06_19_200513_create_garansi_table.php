@@ -13,11 +13,8 @@ return new class extends Migration
             $table->string('sparepart', 100);
             $table->enum('periode', ['Tidak ada garansi', '1 Bulan', '12 Bulan']);
             $table->timestamps();
-
-            // Foreign key constraint
             $table->foreign('perbaikan_id')->references('id')->on('perbaikan')->onDelete('cascade');
 
-            // Index untuk optimasi query
             $table->index(['perbaikan_id']);
         });
     }

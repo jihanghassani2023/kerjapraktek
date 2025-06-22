@@ -15,11 +15,7 @@ return new class extends Migration
 
 
             $table->timestamps();
-
-            // Foreign key
             $table->foreign('perbaikan_id')->references('id')->on('perbaikan')->onDelete('cascade');
-
-            // Indexes untuk optimasi query
             $table->index(['perbaikan_id', 'created_at']);
 
         });

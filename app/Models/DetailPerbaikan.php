@@ -1,5 +1,4 @@
 <?php
-// app/Models/DetailPerbaikan.php (UPDATED VERSION)
 
 namespace App\Models;
 
@@ -16,32 +15,24 @@ class DetailPerbaikan extends Model
     protected $fillable = [
         'perbaikan_id',
         'process_step'
-        // REMOVED: garansi fields - now in separate table
     ];
 
-    // Relasi ke Perbaikan
     public function perbaikan()
     {
         return $this->belongsTo(Perbaikan::class, 'perbaikan_id', 'id');
     }
 
-    // Scope untuk mendapatkan data terbaru
     public function scopeLatestData($query)
     {
         return $query->orderBy('created_at', 'desc');
     }
 
-    // Scope untuk mendapatkan proses pengerjaan saja
     public function scopeProcessOnly($query)
     {
         return $query->select('process_step', 'created_at')
-                    ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc');
     }
 
-    /**
-     * SIMPLIFIED: Create process step records only
-     * Garansi is now handled separately in Garansi model
-     */
     public static function createProcessStep($perbaikanId, $processStep)
     {
         return self::create([
@@ -50,9 +41,6 @@ class DetailPerbaikan extends Model
         ]);
     }
 
-    /**
-     * Get latest process step for a perbaikan
-     */
     public static function getLatestProcessStep($perbaikanId)
     {
         return self::where('perbaikan_id', $perbaikanId)
@@ -61,9 +49,6 @@ class DetailPerbaikan extends Model
             ->first();
     }
 
-    /**
-     * Get distinct process steps history
-     */
     public static function getProcessHistory($perbaikanId)
     {
         return self::where('perbaikan_id', $perbaikanId)
@@ -74,14 +59,9 @@ class DetailPerbaikan extends Model
             ->unique('process_step')
             ->values();
     }
-
-    /**
-     * DEPRECATED: These methods are no longer needed since garansi is in separate table
-     * Kept for backward compatibility during transition
-     */
     public static function getCurrentGaransiItems($perbaikanId)
     {
-        // Redirect to Perbaikan model
+
         $perbaikan = \App\Models\Perbaikan::find($perbaikanId);
         return $perbaikan ? $perbaikan->getCurrentGaransiItems() : collect([]);
     }
@@ -99,16 +79,11 @@ class DetailPerbaikan extends Model
         return $perbaikan ? $perbaikan->getCurrentGaransiItems()->count() > 0 : false;
     }
 
-    /**
-     * UPDATED: Simplified method for creating process records
-     * No longer handles garansi - that's done in Garansi model
-     */
+
     public static function createPerbaikanRecordsFlexible($perbaikanId, $garansiItems = null, $processStep = null)
     {
         try {
             $createdRecords = [];
-
-            // Validate perbaikan exists
             $perbaikan = \App\Models\Perbaikan::find($perbaikanId);
             if (!$perbaikan) {
                 throw new \InvalidArgumentException('Perbaikan dengan ID ' . $perbaikanId . ' tidak ditemukan');
@@ -116,12 +91,10 @@ class DetailPerbaikan extends Model
 
             DB::transaction(function () use ($perbaikanId, $garansiItems, $processStep, &$createdRecords, $perbaikan) {
 
-                // 1. Handle garansi items if provided (update garansi table)
                 if ($garansiItems !== null && !empty($garansiItems)) {
-                    // Filter valid garansi items
-                    $validGaransiItems = collect($garansiItems)->filter(function($item) {
+                    $validGaransiItems = collect($garansiItems)->filter(function ($item) {
                         return isset($item['sparepart']) && isset($item['periode']) &&
-                               !empty(trim($item['sparepart'])) && !empty(trim($item['periode']));
+                            !empty(trim($item['sparepart'])) && !empty(trim($item['periode']));
                     })->toArray();
 
                     if (!empty($validGaransiItems)) {
@@ -129,7 +102,6 @@ class DetailPerbaikan extends Model
                     }
                 }
 
-                // 2. Create process step record if provided
                 if ($processStep && !empty(trim($processStep))) {
                     $record = self::create([
                         'perbaikan_id' => $perbaikanId,
@@ -153,7 +125,6 @@ class DetailPerbaikan extends Model
             ]);
 
             return $createdRecords;
-
         } catch (\Exception $e) {
             logger()->error('Error in createPerbaikanRecordsFlexible: ' . $e->getMessage(), [
                 'perbaikan_id' => $perbaikanId,

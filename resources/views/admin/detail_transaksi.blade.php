@@ -689,7 +689,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Proses Pengerjaan</h3>
                     </div>
-                   <div class="card-body" id="prosesPengerjaanContainer">
+                    <div class="card-body" id="prosesPengerjaanContainer">
                         @php
                             $distinctProses = $transaksi->getDistinctProsesPengerjaan();
                         @endphp
@@ -754,9 +754,6 @@
     </div>
 
     <script>
-        // Setup receipt data untuk print
-        // Setup receipt data untuk print - SAFEST VERSION
-        // Setup receipt data untuk print - ADMIN VERSION
         document.addEventListener('DOMContentLoaded', function() {
             if (window.receiptGenerator) {
                 window.receiptGenerator.setData({
@@ -799,40 +796,39 @@
                     'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
+
         function updateLatestProcessDisplay(newStatus) {
-    const processTitle = document.querySelector('.latest-process .process-title');
-    const processContent = document.querySelector('.latest-process .process-content');
-    const processDate = document.querySelector('.latest-process .process-date');
+            const processTitle = document.querySelector('.latest-process .process-title');
+            const processContent = document.querySelector('.latest-process .process-content');
+            const processDate = document.querySelector('.latest-process .process-date');
 
-    let message = "";
-    if (newStatus === 'Menunggu') {
-        message = "Menunggu Antrian Perbaikan";
-    } else if (newStatus === 'Proses') {
-        message = "Device Anda Sedang diproses";
-    } else if (newStatus === 'Selesai') {
-        message = "Device Anda Telah Selesai";
-    }
+            let message = "";
+            if (newStatus === 'Menunggu') {
+                message = "Menunggu Antrian Perbaikan";
+            } else if (newStatus === 'Proses') {
+                message = "Device Anda Sedang diproses";
+            } else if (newStatus === 'Selesai') {
+                message = "Device Anda Telah Selesai";
+            }
 
-    const now = new Date();
-    const formattedDate = now.toLocaleString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+            const now = new Date();
+            const formattedDate = now.toLocaleString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
 
-    if (processContent) {
-        processContent.textContent = message;
-    }
+            if (processContent) {
+                processContent.textContent = message;
+            }
 
-    if (processDate) {
-        processDate.textContent = formattedDate;
-    }
-}
+            if (processDate) {
+                processDate.textContent = formattedDate;
+            }
+        }
 
-
-        // Status update functionality
         document.addEventListener('DOMContentLoaded', function() {
             const currentStatus = '{{ $transaksi->status }}';
             let isProcessing = false;
@@ -907,7 +903,7 @@
                                 addNewTimelineEntry(data.status);
 
                                 updateLatestProcessDisplay(data.status);
-                                 showNotification('Status berhasil diperbarui!', 'success');
+                                showNotification('Status berhasil diperbarui!', 'success');
 
 
                             } else {
@@ -929,18 +925,15 @@
             });
 
             function updateUIAfterStatusChange(newStatus) {
-                // Ubah badge status
                 const statusBadge = document.getElementById('statusBadge');
                 if (statusBadge) {
                     statusBadge.className = 'status-badge status-' + newStatus.toLowerCase();
                     statusBadge.textContent = newStatus;
                 }
 
-                // Tampilkan atau sembunyikan section tombol status
                 updateStatusButtons(newStatus);
                 attachStatusButtonListeners();
 
-                // Tampilkan atau sembunyikan proses pengerjaan
                 const prosesCard = document.querySelector('.card .card-title');
                 if (prosesCard && prosesCard.textContent.includes('Proses Pengerjaan')) {
                     const prosesCardBody = prosesCard.closest('.card').querySelector('.card-body');

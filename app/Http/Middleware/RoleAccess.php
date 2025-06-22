@@ -25,12 +25,10 @@ class RoleAccess
         $user = Auth::user();
 
         if (Auth::check()) {
-            Auth::logout();  // Logout pengguna yang sudah login
-            $request->session()->invalidate();  // Hancurkan sesi
-            $request->session()->regenerateToken();  // Regenerasi token sesi
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
         }
-
-        // Jika email atau role tidak sesuai, redirect ke login
         return redirect()->route('login');
     }
 }

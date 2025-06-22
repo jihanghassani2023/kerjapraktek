@@ -12,7 +12,7 @@ return new class extends Migration
            $table->increments('id');
 
             $table->string('nama_pelanggan',50);
-            $table->string('nomor_telp', 13);  // Limit to 13 characters
+            $table->string('nomor_telp', 13);
             $table->string('email',100)->nullable();
             $table->timestamps();
         });

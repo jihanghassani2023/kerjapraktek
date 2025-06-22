@@ -1,8 +1,6 @@
-// Universal Receipt Generator
-// File: public/js/receipt-generator.js
+
 
 window.receiptGenerator = {
-    // Data yang akan diisi dari setiap halaman
     data: {
         kode: '',
         tanggal: '',
@@ -19,12 +17,10 @@ window.receiptGenerator = {
         status: ''
     },
 
-    // Set data transaksi
     setData: function(data) {
         this.data = { ...this.data, ...data };
     },
 
-    // Generate receipt HTML
     generateReceipt: function() {
         const currentDate = new Date();
         const dateStr = currentDate.toLocaleDateString('id-ID');
@@ -155,32 +151,26 @@ window.receiptGenerator = {
         `;
     },
 
-    // Inject receipt into page for printing
     injectForPrint: function() {
-        // Remove existing container
         const existingContainer = document.getElementById('receipt-print-container');
         if (existingContainer) {
             existingContainer.remove();
         }
 
-        // Create new container
         const receiptContainer = document.createElement('div');
         receiptContainer.id = 'receipt-print-container';
         receiptContainer.innerHTML = this.generateReceipt();
 
-        // Append to body
         document.body.appendChild(receiptContainer);
     }
 };
 
-// Auto-setup print events
 window.addEventListener('beforeprint', function() {
     if (window.receiptGenerator && window.receiptGenerator.data.kode) {
         window.receiptGenerator.injectForPrint();
     }
 });
 
-// Clean up after print
 window.addEventListener('afterprint', function() {
     const container = document.getElementById('receipt-print-container');
     if (container) {

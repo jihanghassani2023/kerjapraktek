@@ -43,8 +43,6 @@ class KaryawanController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
-
-        // Determine user role based on jabatan
         $userRole = 'user';
         if ($request->jabatan == 'Admin') {
             $userRole = 'admin';
@@ -106,7 +104,6 @@ class KaryawanController extends Controller
                 ->withInput();
         }
 
-        // Determine user role based on jabatan
         $userRole = 'user';
         if ($request->jabatan == 'Admin') {
             $userRole = 'admin';

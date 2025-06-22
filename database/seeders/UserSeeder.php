@@ -10,16 +10,14 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        // Tambahkan data untuk admin
 
-        // Tambahkan data untuk kepala toko
         User::firstOrCreate([
             'email' => 'robertchandra@kepalatoko.mgtech',
         ], [
            'name' => 'Robert Chandra',
             'password' => Hash::make('Kepalatoko_mgtech1'),
             'role' => 'kepala_toko',
-            'alamat' => 'Jl. Kepala Toko No. 456, Palembang',
+            'alamat' => 'Jl. Sukabangun',
             'jabatan' => 'Kepala Toko',
         ]);
 

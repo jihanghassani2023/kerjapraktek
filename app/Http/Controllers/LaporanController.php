@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/LaporanController.php
 
 namespace App\Http\Controllers;
 
@@ -8,6 +7,7 @@ use App\Models\Perbaikan;
 use App\Models\DetailPerbaikan;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -17,90 +17,110 @@ class LaporanController extends Controller
 {
     public function export(Request $request)
     {
-        // Get filter parameters
         $month = $request->input('month');
         $year = $request->input('year');
 
-        // Query data based on filters
         $query = Perbaikan::query();
 
         if ($month && $year) {
-            $query->whereMonth('tanggal_perbaikan', $month)
-                ->whereYear('tanggal_perbaikan', $year);
+            $query->whereMonth('tanggal_perbaikan', $month)->whereYear('tanggal_perbaikan', $year);
         } elseif ($month) {
-            $query->whereMonth('tanggal_perbaikan', $month);
+            $query->whereMonth('tanggal_perbaikan', $month)->whereYear('tanggal_perbaikan', date('Y'));
         } elseif ($year) {
             $query->whereYear('tanggal_perbaikan', $year);
         }
 
-        $transaksi = $query->with(['user', 'pelanggan'])
-            ->orderBy('tanggal_perbaikan', 'desc')
-            ->get()
-            ->map(function ($item) {
-                $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
-                return $item;
-            });
+        $transaksi = $query->with(['user', 'pelanggan'])->orderBy('tanggal_perbaikan', 'desc')->get();
 
-        // Create a new spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Add headers
-        $sheet->setCellValue('A1', 'No.');
-        $sheet->setCellValue('B1', 'Kode Perbaikan');
-        $sheet->setCellValue('C1', 'Tanggal');
-        $sheet->setCellValue('D1', 'Device');
-        $sheet->setCellValue('E1', 'Pelanggan');
-        $sheet->setCellValue('F1', 'Teknisi');
-        $sheet->setCellValue('G1', 'Harga');
-        $sheet->setCellValue('H1', 'Status');
+        // Judul dan filter
+        $sheet->setCellValue('A1', 'LAPORAN PERBAIKAN');
+        $sheet->mergeCells('A1:K1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
 
-        // Add data
-        $row = 2;
+        $filterText = 'Filter: ';
+        if ($month && $year) {
+            $filterText .= DateHelper::namaBulan($month) . ' ' . $year;
+        } elseif ($month) {
+            $filterText .= DateHelper::namaBulan($month);
+        } elseif ($year) {
+            $filterText .= $year;
+        } else {
+            $filterText .= 'Semua Data';
+        }
+        $sheet->setCellValue('A2', $filterText);
+        $sheet->mergeCells('A2:K2');
+
+        // Header tabel
+        $headers = ['No.', 'Kode Perbaikan', 'Tanggal', 'Device', 'Pelanggan', 'Teknisi', 'Harga', 'Status', 'Masalah', 'Tindakan', 'Garansi'];
+        $column = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($column . '4', $header);
+            $sheet->getStyle($column . '4')->getFont()->setBold(true);
+            $column++;
+        }
+
+        // Isi data
+        $row = 5;
         foreach ($transaksi as $index => $t) {
             $sheet->setCellValue('A' . $row, $index + 1);
             $sheet->setCellValue('B' . $row, $t->id);
-            $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
+            $sheet->setCellValue('C' . $row, Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
             $sheet->setCellValue('D' . $row, $t->nama_device);
-            $sheet->setCellValue('E' . $row, $t->pelanggan ? $t->pelanggan->nama_pelanggan : 'N/A');
-            $sheet->setCellValue('F' . $row, $t->user ? $t->user->name : 'N/A');
-            $sheet->setCellValue('G' . $row, $t->harga);
+            $sheet->setCellValue('E' . $row, $t->pelanggan->nama_pelanggan ?? 'N/A');
+            $sheet->setCellValue('F' . $row, $t->user->name ?? 'N/A');
+            $sheet->setCellValue('G' . $row, 'Rp. ' . number_format($t->harga, 0, ',', '.'));
             $sheet->setCellValue('H' . $row, $t->status);
+            $sheet->setCellValue('I' . $row, $t->masalah ?? '-');
+            $sheet->setCellValue('J' . $row, $t->tindakan ?? '-');
+            $sheet->setCellValue('K' . $row, $t->garansi ?? '-');
             $row++;
         }
 
-        // Create temporary file
-        $fileName = 'laporan_' . date('YmdHis') . '.xlsx';
+        foreach (range('A', 'K') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filterInfo = '';
+        if ($month && $year) {
+            $filterInfo = '_' . DateHelper::namaBulan($month) . '_' . $year;
+        } elseif ($month) {
+            $filterInfo = '_' . DateHelper::namaBulan($month);
+        } elseif ($year) {
+            $filterInfo = '_' . $year;
+        }
+
+        $fileName = 'laporan_transaksi' . $filterInfo . '_' . date('YmdHis') . '.xlsx';
         $filePath = storage_path('app/public/' . $fileName);
 
-        // Save the spreadsheet
         $writer = new Xlsx($spreadsheet);
         $writer->save($filePath);
 
-        // Download the file
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
-    public function kepalaTokoDashboard()
-{
-    // Logic untuk dashboard kepala toko
-    return view('kepala_toko.dashboard', compact('data'));
-}
+
+
     public function index(Request $request)
     {
         $user = Auth::user();
 
-        // Ambil parameter filter dari request
         $month = $request->input('month');
         $year = $request->input('year');
 
-        // Query transaksi dengan filter kondisional
+        // Debug: Log parameter yang diterima
+        Log::info('Index parameters:', ['month' => $month, 'year' => $year]);
+
         $query = Perbaikan::query();
 
+        // Perbaiki logika filter yang sama
         if ($month && $year) {
             $query->whereMonth('tanggal_perbaikan', $month)
-                  ->whereYear('tanggal_perbaikan', $year);
+                ->whereYear('tanggal_perbaikan', $year);
         } elseif ($month) {
-            $query->whereMonth('tanggal_perbaikan', $month);
+            $query->whereMonth('tanggal_perbaikan', $month)
+                ->whereYear('tanggal_perbaikan', date('Y')); // Default ke tahun ini
         } elseif ($year) {
             $query->whereYear('tanggal_perbaikan', $year);
         }
@@ -109,7 +129,6 @@ class LaporanController extends Controller
             ->orderBy('tanggal_perbaikan', 'desc')
             ->get();
 
-        // Calculate summary statistics dari tabel perbaikan
         $totalTransaksi = $transaksi->sum('harga');
 
         $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
@@ -121,7 +140,6 @@ class LaporanController extends Controller
             ->whereYear('tanggal_perbaikan', date('Y'))
             ->sum('harga');
 
-        // Get technicians stats
         $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
         $teknisiStats = [];
 
@@ -130,13 +148,22 @@ class LaporanController extends Controller
             $queryPending = Perbaikan::where('user_id', $t->id)->whereIn('status', ['Menunggu', 'Proses']);
             $incomeQuery = Perbaikan::where('user_id', $t->id)->where('status', 'Selesai');
 
-            if ($month) {
-                $querySelesai->whereMonth('tanggal_perbaikan', $month);
-                $queryPending->whereMonth('tanggal_perbaikan', $month);
-                $incomeQuery->whereMonth('tanggal_perbaikan', $month);
-            }
-
-            if ($year) {
+            // Terapkan filter yang sama untuk teknisi stats
+            if ($month && $year) {
+                $querySelesai->whereMonth('tanggal_perbaikan', $month)
+                    ->whereYear('tanggal_perbaikan', $year);
+                $queryPending->whereMonth('tanggal_perbaikan', $month)
+                    ->whereYear('tanggal_perbaikan', $year);
+                $incomeQuery->whereMonth('tanggal_perbaikan', $month)
+                    ->whereYear('tanggal_perbaikan', $year);
+            } elseif ($month) {
+                $querySelesai->whereMonth('tanggal_perbaikan', $month)
+                    ->whereYear('tanggal_perbaikan', date('Y'));
+                $queryPending->whereMonth('tanggal_perbaikan', $month)
+                    ->whereYear('tanggal_perbaikan', date('Y'));
+                $incomeQuery->whereMonth('tanggal_perbaikan', $month)
+                    ->whereYear('tanggal_perbaikan', date('Y'));
+            } elseif ($year) {
                 $querySelesai->whereYear('tanggal_perbaikan', $year);
                 $queryPending->whereYear('tanggal_perbaikan', $year);
                 $incomeQuery->whereYear('tanggal_perbaikan', $year);
@@ -156,10 +183,11 @@ class LaporanController extends Controller
             ];
         }
 
-        // Sort teknisi stats
         $teknisiStats = collect($teknisiStats)->sortBy(function ($teknisi) {
-            if ($teknisi['role'] === 'kepala teknisi' ||
-                (isset($teknisi['jabatan']) && strtolower($teknisi['jabatan']) === 'kepala teknisi')) {
+            if (
+                $teknisi['role'] === 'kepala teknisi' ||
+                (isset($teknisi['jabatan']) && strtolower($teknisi['jabatan']) === 'kepala teknisi')
+            ) {
                 return 0;
             }
             return 1;
@@ -177,6 +205,7 @@ class LaporanController extends Controller
         ));
     }
 
+    // Fungsi lainnya tetap sama...
     public function show($id)
     {
         $user = Auth::user();
@@ -189,20 +218,16 @@ class LaporanController extends Controller
     {
         $user = Auth::user();
 
-        // Get selected year and month from request, default to current
         $selectedYear = $request->input('year', date('Y'));
-        $selectedMonth = $request->input('month', 'all'); // Default to 'all' for all months
+        $selectedMonth = $request->input('month', 'all');
 
         $karyawan = User::whereIn('role', ['admin', 'teknisi', 'kepala teknisi'])
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();
-
-        // Update: Get counts for each status based on selected month/year
         $monthlyRepairCounts = [];
 
         if ($selectedMonth === 'all') {
-            // Show all months for the selected year
             for ($i = 1; $i <= 12; $i++) {
                 $selesaiCount = Perbaikan::where('status', 'Selesai')
                     ->whereMonth('tanggal_perbaikan', $i)
@@ -227,7 +252,6 @@ class LaporanController extends Controller
                 ];
             }
         } else {
-            // Show only the selected month (weekly breakdown)
             $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $selectedMonth, $selectedYear);
             $weeksInMonth = ceil($daysInMonth / 7);
 
@@ -259,10 +283,8 @@ class LaporanController extends Controller
             }
         }
 
-        // Count only Teknisi and Kepala Teknisi
         $teknisiCount = User::whereIn('role', ['teknisi', 'kepala teknisi'])->count();
 
-        // Get latest transactions based on filter
         if ($selectedMonth === 'all') {
             $latestTransaksi = Perbaikan::with(['user'])
                 ->where('status', 'Selesai')
@@ -270,7 +292,7 @@ class LaporanController extends Controller
                 ->orderBy('tanggal_perbaikan', 'desc')
                 ->take(3)
                 ->get()
-                ->map(function($item) {
+                ->map(function ($item) {
                     $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
                     return $item;
                 });
@@ -292,7 +314,7 @@ class LaporanController extends Controller
                 ->orderBy('tanggal_perbaikan', 'desc')
                 ->take(3)
                 ->get()
-                ->map(function($item) {
+                ->map(function ($item) {
                     $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
                     return $item;
                 });
@@ -310,10 +332,9 @@ class LaporanController extends Controller
                 ->get();
         }
 
-        // Generate year options (current year ± 5 years)
         $currentYear = date('Y');
         $yearOptions = [];
-        for ($year = $currentYear - 5; $year <= $currentYear + 2; $year++) {
+        for ($year = $currentYear - 2; $year <= $currentYear + 2; $year++) {
             $yearOptions[] = $year;
         }
 
@@ -321,7 +342,6 @@ class LaporanController extends Controller
             ->whereDate('tanggal_perbaikan', date('Y-m-d'))
             ->sum('harga');
 
-        // Generate month options
         $monthOptions = [
             'all' => 'Semua Bulan',
             '01' => 'Januari',

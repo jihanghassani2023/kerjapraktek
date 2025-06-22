@@ -14,7 +14,7 @@ class PelangganController extends Controller
     {
         $user = Auth::user();
 
-        $pelanggan = Pelanggan::whereHas('perbaikan', function($query) use ($user) {
+        $pelanggan = Pelanggan::whereHas('perbaikan', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })->get();
 

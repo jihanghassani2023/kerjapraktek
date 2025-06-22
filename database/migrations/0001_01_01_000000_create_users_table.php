@@ -7,13 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->increments('id'); // Ini pakai INT, bukan BIGINT
+            $table->increments('id');
 
             $table->string('name', 50);
             $table->string('email', 100)->unique();
@@ -25,13 +23,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Set auto_increment to 10001
         DB::statement('ALTER TABLE users AUTO_INCREMENT = 10001');
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

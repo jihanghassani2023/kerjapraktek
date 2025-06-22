@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/AdminController.php
 
 namespace App\Http\Controllers;
 
@@ -7,7 +6,6 @@ use App\Models\Perbaikan;
 use App\Models\DetailPerbaikan;
 use App\Models\User;
 use App\Models\Pelanggan;
-use App\Models\Garansi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -33,12 +31,10 @@ class AdminController extends Controller
             ->whereYear('tanggal_perbaikan', date('Y'))
             ->sum('harga');
 
-        // If search is submitted via the search form, redirect to search results page
         if ($request->has('search') && $request->search) {
             return redirect()->route('admin.search', ['search' => $request->search]);
         }
 
-        // Mendapatkan transaksi terbaru
         $latestTransaksi = Perbaikan::with(['user', 'pelanggan'])
             ->orderBy('created_at', 'desc')
             ->take(30)
@@ -57,14 +53,12 @@ class AdminController extends Controller
         ));
     }
 
-    // FIXED: Search method dengan error handling yang lebih baik
     public function search(Request $request)
     {
         try {
             $search = $request->get('search');
-            $user = Auth::user(); // FIXED: Gunakan Auth::user() bukan Auth()->user()
+            $user = Auth::user();
 
-            // Validasi input search
             if (empty($search)) {
                 return redirect()->back()->with('error', 'Kata kunci pencarian tidak boleh kosong.');
             }
@@ -80,17 +74,13 @@ class AdminController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            // Add formatted date for each item
             $perbaikan = $perbaikan->map(function ($item) {
                 $item->tanggal_formatted = DateHelper::formatTanggalIndonesia($item->tanggal_perbaikan);
                 return $item;
             });
 
-            // Gunakan satu view untuk semua role
             return view('search_results', compact('perbaikan', 'search', 'user'));
-
         } catch (\Exception $e) {
-            // Log error untuk debugging
             Log::error('Search error: ' . $e->getMessage(), [
                 'search_term' => $request->get('search'),
                 'user_id' => Auth::id(),
@@ -104,12 +94,8 @@ class AdminController extends Controller
     public function transaksi(Request $request)
     {
         $user = Auth::user();
-
-        // Ambil parameter filter dari request
         $month = $request->input('month');
         $year = $request->input('year');
-
-        // Query transaksi dengan filter kondisional
         $query = Perbaikan::query();
 
         if ($month && $year) {
@@ -129,7 +115,6 @@ class AdminController extends Controller
                 return $item;
             });
 
-        // Calculate summary statistics
         $totalTransaksi = $transaksi->sum('harga');
 
         $totalTransaksiHariIni = Perbaikan::where('status', 'Selesai')
@@ -141,7 +126,6 @@ class AdminController extends Controller
             ->whereYear('tanggal_perbaikan', date('Y'))
             ->sum('harga');
 
-        // Get technicians stats
         $teknisi = User::whereIn('role', ['teknisi', 'kepala teknisi'])->get();
         $teknisiStats = [];
 
@@ -246,7 +230,6 @@ class AdminController extends Controller
         }
 
         try {
-            // Update main perbaikan record
             $updates = [];
             if ($request->has('tindakan_perbaikan') && !empty($request->tindakan_perbaikan)) {
                 $updates['tindakan_perbaikan'] = $request->tindakan_perbaikan;
@@ -272,7 +255,6 @@ class AdminController extends Controller
                 }
             }
 
-            // Create process step record only
             if ($statusMessage) {
                 DetailPerbaikan::createProcessStep($perbaikan->id, $statusMessage);
             }
@@ -301,7 +283,7 @@ class AdminController extends Controller
         }
     }
 
-    // Pelanggan management methods
+
     public function pelanggan()
     {
         $user = Auth::user();
@@ -428,7 +410,7 @@ class AdminController extends Controller
             ->with('success', 'Data pelanggan berhasil dihapus');
     }
 
-    // Perbaikan management
+
     public function createPerbaikan()
     {
         $user = Auth::user();
@@ -441,67 +423,115 @@ class AdminController extends Controller
         return view('admin.tambah_perbaikan', compact('user', 'pelanggan', 'teknisi'));
     }
 
-    public function exportTransaksi(Request $request)
-    {
-        // Get filter parameters
-        $month = $request->input('month');
-        $year = $request->input('year');
+public function exportTransaksi(Request $request)
+{
+    $month = $request->input('month');
+    $year = $request->input('year');
 
-        // Query data based on filters
-        $query = Perbaikan::query();
+    Log::info('Export parameters:', ['month' => $month, 'year' => $year]);
 
-        if ($month && $year) {
-            $query->whereMonth('tanggal_perbaikan', $month)
-                ->whereYear('tanggal_perbaikan', $year);
-        } elseif ($month) {
-            $query->whereMonth('tanggal_perbaikan', $month);
-        } elseif ($year) {
-            $query->whereYear('tanggal_perbaikan', $year);
-        }
+    $query = Perbaikan::query();
 
-        $transaksi = $query->with(['user', 'pelanggan'])
-            ->orderBy('tanggal_perbaikan', 'desc')
-            ->get();
-
-        // Create a new spreadsheet
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // Add headers
-        $sheet->setCellValue('A1', 'No.');
-        $sheet->setCellValue('B1', 'Kode Perbaikan');
-        $sheet->setCellValue('C1', 'Tanggal');
-        $sheet->setCellValue('D1', 'Device');
-        $sheet->setCellValue('E1', 'Pelanggan');
-        $sheet->setCellValue('F1', 'Teknisi');
-        $sheet->setCellValue('G1', 'Harga');
-        $sheet->setCellValue('H1', 'Status');
-
-        // Add data
-        $row = 2;
-        foreach ($transaksi as $index => $t) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $t->id);
-            $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
-            $sheet->setCellValue('D' . $row, $t->nama_device);
-            $sheet->setCellValue('E' . $row, $t->pelanggan ? $t->pelanggan->nama_pelanggan : 'N/A');
-            $sheet->setCellValue('F' . $row, $t->user ? $t->user->name : 'N/A');
-            $sheet->setCellValue('G' . $row, $t->harga);
-            $sheet->setCellValue('H' . $row, $t->status);
-            $row++;
-        }
-
-        // Create temporary file
-        $fileName = 'admin_transaksi_' . date('YmdHis') . '.xlsx';
-        $filePath = storage_path('app/public/' . $fileName);
-
-        // Save the spreadsheet
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($filePath);
-
-        // Download the file
-        return response()->download($filePath)->deleteFileAfterSend(true);
+    if ($month && $year) {
+        $query->whereMonth('tanggal_perbaikan', $month)->whereYear('tanggal_perbaikan', $year);
+    } elseif ($month) {
+        $query->whereMonth('tanggal_perbaikan', $month)->whereYear('tanggal_perbaikan', date('Y'));
+    } elseif ($year) {
+        $query->whereYear('tanggal_perbaikan', $year);
     }
+
+    // Include relasi user, pelanggan, garansi
+    $transaksi = $query->with(['user', 'pelanggan', 'garansi'])->orderBy('tanggal_perbaikan', 'desc')->get();
+
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // === Judul & Filter Info ===
+    $sheet->setCellValue('A1', 'LAPORAN PERBAIKAN');
+    $sheet->mergeCells('A1:K1');
+    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+    $namaBulan = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+    ];
+
+    $filterText = 'Filter: ';
+    if ($month && $year) {
+        $filterText .= $namaBulan[(int)$month] . ' ' . $year;
+    } elseif ($month) {
+        $filterText .= $namaBulan[(int)$month] . ' ' . date('Y');
+    } elseif ($year) {
+        $filterText .= $year;
+    } else {
+        $filterText .= 'Semua Data';
+    }
+
+    $sheet->setCellValue('A2', $filterText);
+    $sheet->mergeCells('A2:K2');
+
+    // === Header Tabel ===
+    $headers = [
+        'No.', 'Kode Perbaikan', 'Tanggal', 'Device', 'Pelanggan',
+        'Teknisi', 'Harga', 'Status', 'Masalah', 'Tindakan', 'Garansi'
+    ];
+
+    $column = 'A';
+    foreach ($headers as $header) {
+        $sheet->setCellValue($column . '4', $header);
+        $sheet->getStyle($column . '4')->getFont()->setBold(true);
+        $column++;
+    }
+
+    // === Isi Data ===
+    $row = 5;
+    foreach ($transaksi as $index => $t) {
+        // Format garansi: sparepart (periode), ...
+        $garansiText = $t->garansi->map(function ($g) {
+            return $g->sparepart . ' (' . $g->periode . ')';
+        })->implode(', ');
+
+        $sheet->setCellValue('A' . $row, $index + 1);
+        $sheet->setCellValue('B' . $row, $t->id);
+        $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
+        $sheet->setCellValue('D' . $row, $t->nama_device);
+        $sheet->setCellValue('E' . $row, $t->pelanggan->nama_pelanggan ?? 'N/A');
+        $sheet->setCellValue('F' . $row, $t->user->name ?? 'N/A');
+        $sheet->setCellValue('G' . $row, 'Rp. ' . number_format($t->harga, 0, ',', '.'));
+        $sheet->setCellValue('H' . $row, $t->status);
+        $sheet->setCellValue('I' . $row, $t->masalah ?? '-');
+        $sheet->setCellValue('J' . $row, $t->tindakan_perbaikan ?? '-');
+        $sheet->setCellValue('K' . $row, $garansiText ?: '-');
+        $row++;
+    }
+
+    // Auto-size kolom
+    foreach (range('A', 'K') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Nama file
+    $filterInfo = '';
+    if ($month && $year) {
+        $filterInfo = '_' . $namaBulan[(int)$month] . '_' . $year;
+    } elseif ($month) {
+        $filterInfo = '_' . $namaBulan[(int)$month] . '_' . date('Y');
+    } elseif ($year) {
+        $filterInfo = '_' . $year;
+    }
+
+    $fileName = 'admin_transaksi' . $filterInfo . '_' . date('YmdHis') . '.xlsx';
+    $filePath = storage_path('app/public/' . $fileName);
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($filePath);
+
+    return response()->download($filePath)->deleteFileAfterSend(true);
+}
+
+
+
 
     public function storePerbaikan(Request $request)
     {
@@ -540,8 +570,6 @@ class AdminController extends Controller
 
         try {
             $kodeId = Perbaikan::generateKodePerbaikan();
-
-            // Create perbaikan
             $perbaikan = new Perbaikan();
             $perbaikan->id = $kodeId;
             $perbaikan->pelanggan_id = $request->pelanggan_id;
@@ -557,7 +585,6 @@ class AdminController extends Controller
             $perbaikan->updated_at = now();
             $perbaikan->save();
 
-            // Process garansi items
             $garansiItems = [];
             foreach ($request->garansi_items as $item) {
                 if (!empty($item['sparepart']) && !empty($item['periode'])) {
@@ -576,10 +603,8 @@ class AdminController extends Controller
             }
 
             try {
-                // Sync garansi items to garansi table
-                $perbaikan->syncGaransiItems($garansiItems);
 
-                // Create initial process step
+                $perbaikan->syncGaransiItems($garansiItems);
                 DetailPerbaikan::createProcessStep($perbaikan->id, 'Menunggu Antrian Perbaikan');
 
                 $garansiText = collect($garansiItems)

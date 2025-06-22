@@ -1,8 +1,5 @@
 <?php
-// app/Models/Perbaikan.php (UPDATED VERSION)
-
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -88,8 +85,6 @@ class Perbaikan extends Model
 
     public $timestamps = true;
 
-    // ============ RELATIONSHIPS ============
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -100,7 +95,6 @@ class Perbaikan extends Model
         return $this->belongsTo(Pelanggan::class);
     }
 
-    // NEW: Direct relationship with Garansi table
     public function garansi()
     {
         return $this->hasMany(Garansi::class, 'perbaikan_id', 'id');
@@ -125,26 +119,22 @@ class Perbaikan extends Model
             ->orderBy('created_at', 'desc');
     }
 
-    // UPDATED: Use direct garansi relationship
     public function garansiItems()
     {
         return $this->garansi()->orderBy('sparepart', 'asc');
     }
 
-    // ============ CURRENT DATA METHODS ============
 
     public function getCurrentDetail()
     {
         return $this;
     }
 
-    // UPDATED: Get current garansi items from garansi table
     public function getCurrentGaransiItems()
     {
         return $this->garansi;
     }
 
-    // UPDATED: Check if garansi has changed compared to current state
     public function hasGaransiChanged($newGaransiItems)
     {
         $currentGaransi = $this->getCurrentGaransiItems();
@@ -173,14 +163,12 @@ class Perbaikan extends Model
         return $currentFormatted !== $newFormatted;
     }
 
-    // ============ ACCESSOR ATTRIBUTES ============
 
     public function getDetailAttribute()
     {
         return $this;
     }
 
-    // UPDATED: Use direct garansi relationship
     public function getGaransiItemsAttribute()
     {
         return $this->getCurrentGaransiItems();
@@ -216,8 +204,6 @@ class Perbaikan extends Model
         return 'Rp. ' . number_format($this->harga, 0, ',', '.');
     }
 
-    // ============ HELPER METHODS ============
-
     public function getDistinctProsesPengerjaan()
     {
         return $this->details()
@@ -248,7 +234,6 @@ class Perbaikan extends Model
         return $this->getCurrentGaransiItems()->count();
     }
 
-    // UPDATED: Get garansi summary from garansi table
     public function getGaransiSummary()
     {
         $items = $this->getCurrentGaransiItems();
@@ -274,14 +259,11 @@ class Perbaikan extends Model
             })->toArray()
         ];
     }
-
-    // NEW: Method to sync garansi items
     public function syncGaransiItems($garansiItems)
     {
-        // Delete existing garansi items
+
         $this->garansi()->delete();
 
-        // Create new garansi items
         foreach ($garansiItems as $item) {
             if (!empty($item['sparepart']) && !empty($item['periode'])) {
                 $this->garansi()->create([

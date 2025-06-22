@@ -285,7 +285,6 @@
             color: #8c3a3a;
         }
 
-        /* Autocomplete styling */
         .autocomplete-container {
             position: relative;
         }
@@ -322,7 +321,6 @@
             background-color: #e9ecef;
         }
 
-        /* Garansi Container */
         .garansi-container {
             border: 1px solid #e0e0e0;
             border-radius: 5px;
@@ -629,14 +627,11 @@
             const garansiContainer = document.getElementById('garansiContainer');
             const garansiHiddenInput = document.getElementById('garansi');
 
-            // CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            // Store all customers from database
             let allCustomers = [];
             let garansiIndex = 1;
 
-            // Error elements
             const errorElements = {
                 'nama_pelanggan': document.getElementById('nama-pelanggan-error'),
                 'user_id': document.getElementById('user-id-error'),
@@ -648,10 +643,8 @@
                 'garansi': document.getElementById('garansi-error')
             };
 
-            // Fetch customers from the database when page loads
             fetchCustomers();
 
-            // Function to show error
             function showError(fieldName, message) {
                 const field = document.getElementById(fieldName);
                 const errorDiv = errorElements[fieldName];
@@ -668,7 +661,6 @@
                 }
             }
 
-            // Function to hide error
             function hideError(fieldName) {
                 const field = document.getElementById(fieldName);
                 const errorDiv = errorElements[fieldName];

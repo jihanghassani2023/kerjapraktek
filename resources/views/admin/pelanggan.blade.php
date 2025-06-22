@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +13,13 @@
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
+
         body {
             background-color: #f5f5f5;
             display: flex;
             min-height: 100vh;
         }
+
         .sidebar {
             width: 220px;
             background-color: #8c3a3a;
@@ -28,20 +31,24 @@
             height: 100vh;
             overflow-y: auto;
         }
+
         .sidebar-logo {
             padding: 15px 20px 30px;
             text-align: center;
         }
+
         .sidebar-logo img {
             width: 80px;
             height: auto;
         }
+
         .sidebar-logo span {
             display: block;
             font-weight: bold;
             font-size: 20px;
             margin-top: 10px;
         }
+
         .menu-item {
             padding: 15px 20px;
             display: flex;
@@ -50,17 +57,21 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .menu-item.active {
             background-color: #6d2d2d;
         }
+
         .menu-item:hover {
             background-color: #6d2d2d;
         }
+
         .menu-item i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
+
         .logout {
             margin-top: auto;
             padding: 15px 20px;
@@ -70,19 +81,23 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .logout:hover {
             background-color: #6d2d2d;
         }
+
         .logout i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
+
         .main-content {
             flex: 1;
             margin-left: 220px;
             padding: 20px;
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -90,19 +105,23 @@
             padding: 15px 20px;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .user-info {
             text-align: right;
         }
+
         .user-name {
             color: #8c3a3a;
             font-weight: bold;
         }
+
         .user-role {
             color: #888;
             font-size: 0.9em;
         }
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -113,20 +132,24 @@
             justify-content: center;
             margin-left: 15px;
         }
+
         .user-avatar i {
             color: #8c3a3a;
             font-size: 20px;
         }
+
         .title-section {
             margin: 25px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+
         .page-title {
             font-size: 1.5em;
             color: #333;
         }
+
         .btn {
             padding: 10px 15px;
             border-radius: 5px;
@@ -138,53 +161,65 @@
             display: inline-flex;
             align-items: center;
         }
+
         .btn i {
             margin-right: 8px;
         }
+
         .btn-primary {
             background-color: #8c3a3a;
             color: white;
         }
+
         .btn-primary:hover {
             background-color: #6d2d2d;
         }
+
         .content-section {
             background-color: white;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .table-responsive {
             overflow-x: auto;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
         table th,
         table td {
             text-align: left;
             padding: 12px 15px;
             border-bottom: 1px solid #eee;
         }
+
         table th {
             background-color: #f8f9fa;
             font-weight: bold;
             color: #333;
         }
+
         table tr:hover {
             background-color: #f5f5f5;
         }
+
         .action-buttons {
             display: flex;
             gap: 5px;
             justify-content: center;
         }
+
         table th:last-child,
         table td:last-child {
             text-align: center;
         }
+
         .action-btn {
             padding: 6px 10px;
             border-radius: 4px;
@@ -201,29 +236,33 @@
             width: 32px;
             height: 32px;
         }
+
         .action-btn:hover {
             background-color: #dee2e6;
         }
+
         .action-btn i {
             font-size: 14px;
         }
+
         .alert {
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
         .alert-success {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+
         .alert-danger {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
 
-        /* Custom Modal Styles */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -254,6 +293,7 @@
                 opacity: 0;
                 transform: translate(-50%, -60%);
             }
+
             to {
                 opacity: 1;
                 transform: translate(-50%, -50%);
@@ -330,14 +370,17 @@
                 width: 70px;
                 overflow: hidden;
             }
+
             .sidebar-logo span,
             .menu-item span,
             .logout span {
                 display: none;
             }
+
             .main-content {
                 margin-left: 70px;
             }
+
             .modal-container {
                 width: 95%;
                 margin: 20px;
@@ -345,17 +388,19 @@
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo"
+                onerror="this.src='https://via.placeholder.com/80'">
         </div>
         <a href="{{ route('admin.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
         </a>
         <a href="{{ route('admin.transaksi') }}" class="menu-item">
-           <i class="fas fa-chart-bar"></i>
+            <i class="fas fa-chart-bar"></i>
             <span>Laporan</span>
         </a>
         <a href="{{ route('admin.pelanggan') }}" class="menu-item active">
@@ -368,7 +413,8 @@
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
-            <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
+            <button type="submit" class="logout"
+                style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </button>
@@ -398,13 +444,13 @@
             </a>
         </div>
 
-        @if(session('success'))
+        @if (session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
 
-        @if(session('error'))
+        @if (session('error'))
             <div class="alert alert-danger">
                 {{ session('error') }}
             </div>
@@ -431,10 +477,12 @@
                                 <td>{{ $p->email ?: '-' }}</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <a href="{{ route('admin.pelanggan.edit', $p->id) }}" class="action-btn" title="Edit">
+                                        <a href="{{ route('admin.pelanggan.edit', $p->id) }}" class="action-btn"
+                                            title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="action-btn" title="Hapus" onclick="showDeleteModal('{{ $p->id }}', '{{ $p->nama_pelanggan }}')">
+                                        <button type="button" class="action-btn" title="Hapus"
+                                            onclick="showDeleteModal('{{ $p->id }}', '{{ $p->nama_pelanggan }}')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -451,7 +499,6 @@
         </div>
     </div>
 
-    <!-- Custom Delete Confirmation Modal -->
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-container">
             <div class="modal-header">
@@ -472,7 +519,6 @@
         </div>
     </div>
 
-    <!-- Hidden form for deletion -->
     <form id="deleteForm" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
@@ -489,7 +535,6 @@
             document.getElementById('pelangganNameDisplay').textContent = pelangganName;
             document.getElementById('deleteModal').style.display = 'block';
 
-            // Prevent body scroll when modal is open
             document.body.style.overflow = 'hidden';
         }
 
@@ -508,14 +553,11 @@
             }
         }
 
-        // Close modal when clicking outside
         document.getElementById('deleteModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideDeleteModal();
             }
         });
-
-        // Close modal with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 hideDeleteModal();
@@ -523,4 +565,5 @@
         });
     </script>
 </body>
+
 </html>

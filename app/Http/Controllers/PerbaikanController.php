@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/PerbaikanController.php
 
 namespace App\Http\Controllers;
 
@@ -39,7 +38,6 @@ class PerbaikanController extends Controller
             ->whereYear('tanggal_perbaikan', date('Y'))
             ->count();
 
-        // Load data with garansi relationship
         $perbaikan = Perbaikan::where('user_id', $user->id)
             ->with(['pelanggan', 'garansi'])
             ->orderBy('created_at', 'desc')
@@ -56,16 +54,10 @@ class PerbaikanController extends Controller
     {
         $user = Auth::user();
         $perbaikan = Perbaikan::findOrFail($id);
-
-        // Make sure the repair belongs to the logged-in user or user is admin
         if ($perbaikan->user_id != $user->id && !in_array($user->role, ['admin', 'kepala teknisi'])) {
             return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
         }
-
-        // Load data with garansi relationship
         $perbaikan->load(['pelanggan', 'garansi']);
-
-        // Get process history
         $processHistory = DetailPerbaikan::getProcessHistory($id);
 
         return view('teknisi.detail_perbaikan', compact(
@@ -79,13 +71,9 @@ class PerbaikanController extends Controller
     {
         $user = Auth::user();
         $perbaikan = Perbaikan::findOrFail($id);
-
-        // Make sure the repair belongs to the logged-in user or user is admin
         if ($perbaikan->user_id != $user->id && !in_array($user->role, ['admin', 'kepala teknisi'])) {
             return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
         }
-
-        // Load data with garansi relationship
         $perbaikan->load(['pelanggan', 'garansi']);
 
         return view('teknisi.edit_perbaikan', compact(
@@ -98,7 +86,6 @@ class PerbaikanController extends Controller
     {
         $perbaikan = Perbaikan::findOrFail($id);
 
-        // Make sure the repair belongs to the logged-in user or user is admin
         if ($perbaikan->user_id != Auth::id() && !in_array(Auth::user()->role, ['admin', 'kepala teknisi'])) {
             return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
         }
@@ -126,7 +113,6 @@ class PerbaikanController extends Controller
         }
 
         try {
-            // Process garansi items
             $newGaransiItems = [];
             if (!empty($request->garansi_items) && is_array($request->garansi_items)) {
                 foreach ($request->garansi_items as $item) {
@@ -138,21 +124,14 @@ class PerbaikanController extends Controller
                     }
                 }
             }
-
-            // Check if garansi changed
             $garansiChanged = $perbaikan->hasGaransiChanged($newGaransiItems);
-
-            // Update main perbaikan data
             $perbaikan->update([
                 'kategori_device' => $request->kategori_device,
                 'masalah' => $request->masalah,
                 'tindakan_perbaikan' => $request->tindakan_perbaikan,
                 'harga' => $request->harga
             ]);
-
-            // Handle garansi changes
             if ($garansiChanged) {
-                // Sync garansi items to garansi table
                 $perbaikan->syncGaransiItems($newGaransiItems);
 
                 if (empty($newGaransiItems)) {
@@ -172,7 +151,6 @@ class PerbaikanController extends Controller
 
             return redirect()->route('teknisi.dashboard')
                 ->with('success', $messageText);
-
         } catch (\Exception $e) {
             logger()->error('Error updating perbaikan: ' . $e->getMessage());
 
@@ -187,8 +165,6 @@ class PerbaikanController extends Controller
         $perbaikan = Perbaikan::findOrFail($id);
         $currentStatus = $perbaikan->status;
         $newStatus = $request->status;
-
-        // Make sure the repair belongs to the logged-in user or user is admin
         if ($perbaikan->user_id != Auth::id() && !in_array(Auth::user()->role, ['admin', 'kepala teknisi'])) {
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses'], 403);
@@ -196,7 +172,6 @@ class PerbaikanController extends Controller
             return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
         }
 
-        // Validate status
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:Menunggu,Proses,Selesai',
             'tindakan_perbaikan' => 'nullable|string',
@@ -210,8 +185,6 @@ class PerbaikanController extends Controller
             }
             return redirect()->back()->withErrors($validator)->withInput();
         }
-
-        // Prevent invalid status transitions
         if (
             $currentStatus == 'Selesai' ||
             ($currentStatus == 'Proses' && $newStatus == 'Menunggu')
@@ -226,7 +199,6 @@ class PerbaikanController extends Controller
         }
 
         try {
-            // Update main perbaikan record
             $updates = [];
             if ($request->has('tindakan_perbaikan') && !empty($request->tindakan_perbaikan)) {
                 $updates['tindakan_perbaikan'] = $request->tindakan_perbaikan;
@@ -240,8 +212,6 @@ class PerbaikanController extends Controller
                 $perbaikan->fill($updates);
             }
             $perbaikan->save();
-
-            // Add status change message
             $statusMessage = null;
             if ($currentStatus !== $newStatus) {
                 if ($newStatus == 'Menunggu') {
@@ -252,13 +222,9 @@ class PerbaikanController extends Controller
                     $statusMessage = "Device Anda Telah Selesai";
                 }
             }
-
-            // Create process step record only
             if ($statusMessage) {
                 DetailPerbaikan::createProcessStep($perbaikan->id, $statusMessage);
             }
-
-            // Add custom process step if provided
             if ($request->filled('proses_step')) {
                 DetailPerbaikan::createProcessStep($perbaikan->id, $request->proses_step);
             }
@@ -290,13 +256,9 @@ class PerbaikanController extends Controller
     public function addProcessStep(Request $request, $id)
     {
         $perbaikan = Perbaikan::findOrFail($id);
-
-        // Make sure the repair belongs to the logged-in user or user is admin
         if ($perbaikan->user_id != Auth::id() && !in_array(Auth::user()->role, ['admin', 'kepala teknisi'])) {
             return redirect()->route('teknisi.dashboard')->with('error', 'Anda tidak memiliki akses');
         }
-
-        // Validate input
         $validator = Validator::make($request->all(), [
             'proses_step' => 'required|string|max:255',
         ], [
@@ -309,12 +271,10 @@ class PerbaikanController extends Controller
         }
 
         try {
-            // Create process step record only
             DetailPerbaikan::createProcessStep($perbaikan->id, $request->proses_step);
 
             return redirect()->route('perbaikan.show', $id)
                 ->with('success', 'Langkah proses pengerjaan berhasil ditambahkan.');
-
         } catch (\Exception $e) {
             logger()->error('Error adding process step: ' . $e->getMessage());
 
@@ -326,17 +286,12 @@ class PerbaikanController extends Controller
     public function laporan(Request $request)
     {
         $user = Auth::user();
-
-        // Get filter parameters
         $month = $request->input('month');
         $year = $request->input('year');
 
-        // Base query for completed repairs by this technician
         $query = Perbaikan::where('user_id', $user->id)
             ->with(['pelanggan', 'garansi'])
             ->where('status', 'Selesai');
-
-        // Apply filters if provided
         if ($month) {
             $query->whereMonth('tanggal_perbaikan', $month);
         }
@@ -358,17 +313,12 @@ class PerbaikanController extends Controller
     public function exportLaporan(Request $request)
     {
         $user = Auth::user();
-
-        // Get filter parameters
         $month = $request->input('month');
         $year = $request->input('year');
-
-        // Base query for completed repairs by this technician
         $query = Perbaikan::where('user_id', $user->id)
             ->with(['pelanggan', 'garansi'])
             ->where('status', 'Selesai');
 
-        // Apply filters if provided
         if ($month) {
             $query->whereMonth('tanggal_perbaikan', $month);
         }
@@ -378,37 +328,50 @@ class PerbaikanController extends Controller
         }
 
         $perbaikan = $query->orderBy('tanggal_perbaikan', 'desc')->get();
-
-        // Create a new spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Set document properties
         $spreadsheet->getProperties()
             ->setCreator('MG Tech')
             ->setTitle('Laporan Perbaikan - ' . $user->name)
             ->setSubject('Laporan Perbaikan')
             ->setDescription('Laporan data perbaikan yang telah selesai');
 
-        // Add headers
         $sheet->setCellValue('A1', 'LAPORAN PERBAIKAN');
         $sheet->setCellValue('A2', 'Teknisi: ' . $user->name);
         $sheet->setCellValue('A3', 'Tanggal Export: ' . now()->format('d/m/Y H:i:s'));
 
-        // Filter info
         $filterInfo = 'Filter: ';
         if ($month && $year) {
             $monthNames = [
-                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember'
             ];
             $filterInfo .= $monthNames[$month] . ' ' . $year;
         } elseif ($month) {
             $monthNames = [
-                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember'
             ];
             $filterInfo .= 'Bulan ' . $monthNames[$month];
         } elseif ($year) {
@@ -418,7 +381,6 @@ class PerbaikanController extends Controller
         }
         $sheet->setCellValue('A4', $filterInfo);
 
-        // Add table headers
         $sheet->setCellValue('A6', 'No.');
         $sheet->setCellValue('B6', 'Kode Perbaikan');
         $sheet->setCellValue('C6', 'Tanggal');
@@ -431,7 +393,6 @@ class PerbaikanController extends Controller
         $sheet->setCellValue('J6', 'Harga');
         $sheet->setCellValue('K6', 'Status');
 
-        // Style the headers
         $headerStyle = [
             'font' => ['bold' => true],
             'fill' => [
@@ -446,7 +407,6 @@ class PerbaikanController extends Controller
         ];
         $sheet->getStyle('A6:K6')->applyFromArray($headerStyle);
 
-        // Add data
         $row = 7;
         foreach ($perbaikan as $index => $p) {
             $sheet->setCellValue('A' . $row, $index + 1);
@@ -463,7 +423,6 @@ class PerbaikanController extends Controller
             $row++;
         }
 
-        // Style the data rows
         if ($row > 7) {
             $dataRange = 'A7:K' . ($row - 1);
             $dataStyle = [
@@ -476,26 +435,20 @@ class PerbaikanController extends Controller
             $sheet->getStyle($dataRange)->applyFromArray($dataStyle);
         }
 
-        // Auto-size columns
         foreach (range('A', 'K') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
-        // Add summary
         $summaryRow = $row + 1;
         $sheet->setCellValue('A' . $summaryRow, 'Total Perbaikan Selesai: ' . $perbaikan->count());
         $totalHarga = $perbaikan->sum('harga');
         $sheet->setCellValue('A' . ($summaryRow + 1), 'Total Pendapatan: Rp ' . number_format($totalHarga, 0, ',', '.'));
-
-        // Generate filename
         $filename = 'laporan_perbaikan_' . strtolower(str_replace(' ', '_', $user->name)) . '_' . date('YmdHis') . '.xlsx';
 
-        // Set headers for download
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
 
-        // Create writer and output file
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
 

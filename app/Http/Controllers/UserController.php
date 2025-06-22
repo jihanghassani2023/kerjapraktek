@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    // CRUD Methods for User Management
     public function index()
     {
         $user = Auth::user();
@@ -45,7 +44,6 @@ class UserController extends Controller
                 ->withInput();
         }
 
-        // Determine user role based on jabatan
         $userRole = 'user';
         if ($request->jabatan == 'Admin') {
             $userRole = 'admin';
@@ -107,7 +105,6 @@ class UserController extends Controller
                 ->withInput();
         }
 
-        // Determine user role based on jabatan
         $userRole = 'user';
         if ($request->jabatan == 'Admin') {
             $userRole = 'admin';
@@ -135,23 +132,17 @@ class UserController extends Controller
         return redirect()->route('user.index')->with('success', 'User berhasil dihapus');
     }
 
-    // Password Update Method
     public function updatePassword(Request $request, $userId)
     {
-        // Validasi input password
         $request->validate([
             'new_password' => 'required|string|min:8|max:100|confirmed',
         ]);
 
-        // Mencari pengguna berdasarkan ID
         $userData = User::find($userId);
 
-        // Periksa apakah pengguna ada
         if (!$userData) {
             return redirect()->back()->withErrors(['user' => 'Pengguna tidak ditemukan.']);
         }
-
-        // Meng-hash password baru dan menyimpannya
         $userData->password = Hash::make($request->new_password);
         $userData->save();
 

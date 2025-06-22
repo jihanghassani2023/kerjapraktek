@@ -439,7 +439,7 @@
             <span>Dashboard</span>
         </a>
         <a href="{{ route('admin.transaksi') }}" class="menu-item active">
-             <i class="fas fa-chart-bar"></i>
+            <i class="fas fa-chart-bar"></i>
             <span>Laporan</span>
         </a>
         <a href="{{ route('admin.pelanggan') }}" class="menu-item">
@@ -463,7 +463,7 @@
     <div class="main-content">
         <div class="header">
             <div>
-                <h2>Transaksi</h2>
+                <h2>Laporan</h2>
             </div>
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
@@ -477,13 +477,13 @@
         </div>
 
         <div style="margin-top: 2%"></div>
-        <!-- BARU: Tambah title section dengan tombol export -->
-<div class="title-section">
-    <h1 class="page-title">Data Laporan</h1>
-    <a href="{{ route('admin.transaksi.export') }}" class="btn btn-export">
-        <i class="fas fa-file-export"></i> Export Data
-    </a>
-</div>
+
+        <div class="title-section">
+            <h1 class="page-title">Data Laporan</h1>
+            <a href="#" id="export-btn" class="btn btn-export">
+                <i class="fas fa-file-export"></i> Export Data
+            </a>
+        </div>
 
         @if (session('info'))
             <div class="alert alert-info">
@@ -501,8 +501,7 @@
                 <div class="filter-group">
                     <span class="filter-label">Filter:</span>
                     <form action="{{ route('admin.transaksi') }}" method="GET" id="filterForm">
-                        <select name="month" class="filter-select"
-                            onchange="document.getElementById('filterForm').submit()">
+                        <select name="month" id="monthFilter" class="filter-select">
                             <option value="">Semua Bulan</option>
                             @php
                                 $namaBulan = [
@@ -512,22 +511,34 @@
                                 ];
                             @endphp
                             @for ($i = 1; $i <= 12; $i++)
-                                <option value="{{ $i }}" {{ $month == $i ? 'selected' : '' }}>
+                                <option value="{{ $i }}" {{ request('month') == $i ? 'selected' : '' }}>
                                     {{ $namaBulan[$i] }}
                                 </option>
                             @endfor
                         </select>
-                        <select name="year" class="filter-select"
-                            onchange="document.getElementById('filterForm').submit()">
+
+                        <select name="year" id="yearFilter" class="filter-select">
                             <option value="">Semua Tahun</option>
                             @for ($i = 2023; $i <= date('Y'); $i++)
-                                <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>
-                                    {{ $i }}</option>
+                                <option value="{{ $i }}" {{ request('year') == $i ? 'selected' : '' }}>
+                                    {{ $i }}
+                                </option>
                             @endfor
                         </select>
+
+                        {{-- <!-- Tombol filter manual -->
+                        <button type="submit" class="btn btn-filter">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+
+                        <!-- Tombol reset filter -->
+                        <a href="{{ route('admin.transaksi') }}" class="btn btn-reset">
+                            <i class="fas fa-times"></i> Reset --}}
+                        </a>
                     </form>
                 </div>
             </div>
+
 
             <div class="summary-cards">
                 <div class="summary-card">
@@ -618,26 +629,66 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tab functionality
-            const tabItems = document.querySelectorAll('.tab-item');
-            const tabContents = document.querySelectorAll('.tab-content');
+ <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- EXPORT BUTTON DYNAMIC UPDATE ---
+        function updateExportLink() {
+            const monthSelect = document.querySelector('select[name="month"]');
+            const yearSelect = document.querySelector('select[name="year"]');
+            const exportBtn = document.getElementById('export-btn');
 
-            tabItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    // Remove active class from all tabs
-                    tabItems.forEach(tab => tab.classList.remove('active'));
-                    tabContents.forEach(content => content.classList.remove('active'));
+            if (exportBtn) {
+                const baseUrl = "{{ route('admin.transaksi.export') }}";
+                const params = new URLSearchParams();
 
-                    // Add active class to clicked tab
-                    this.classList.add('active');
-                    const tabId = this.getAttribute('data-tab');
-                    document.getElementById(tabId + '-tab').classList.add('active');
-                });
+                if (monthSelect && monthSelect.value) {
+                    params.append('month', monthSelect.value);
+                }
+                if (yearSelect && yearSelect.value) {
+                    params.append('year', yearSelect.value);
+                }
+
+                exportBtn.href = baseUrl + (params.toString() ? '?' + params.toString() : '');
+            }
+        }
+
+        updateExportLink(); // Initial call
+
+        const filterSelects = document.querySelectorAll('.filter-select');
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function () {
+                updateExportLink();
+                setTimeout(() => {
+                    document.getElementById('filterForm').submit();
+                }, 100);
             });
         });
-    </script>
+
+        // --- TAB SWITCHING ---
+        const tabItems = document.querySelectorAll('.tab-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabItems.forEach(tab => {
+            tab.addEventListener('click', function () {
+                const targetTab = this.getAttribute('data-tab');
+
+                if (!targetTab) return;
+
+                tabItems.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                this.classList.add('active');
+                const content = document.getElementById(targetTab + '-tab');
+                if (content) {
+                    content.classList.add('active');
+                }
+            });
+        });
+    });
+</script>
+
+
+
 </body>
 
 </html>
