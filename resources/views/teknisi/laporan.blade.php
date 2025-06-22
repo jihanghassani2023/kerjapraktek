@@ -294,7 +294,7 @@
         <div class="filter-container">
             <div class="filter-group">
                 <div class="filter-label">Filter:</div>
-                <form action="{{ route('teknisi.laporan.export') }}" method="GET" id="filterForm">
+                <form action="{{ route('teknisi.laporan') }}" method="GET" id="filterForm">
                     <select name="month" class="filter-select"
                         onchange="document.getElementById('filterForm').submit()">
                         <option value="">Semua Bulan</option>

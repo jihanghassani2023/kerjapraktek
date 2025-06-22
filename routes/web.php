@@ -103,7 +103,6 @@ Route::middleware(['auth'])->group(function () {
          Route::get('/laporan', [PerbaikanController::class, 'laporan'])->name('teknisi.laporan');
 
         // // Export laporan route - mengarah ke method yang benar
-         Route::get('/laporan/export', [PerbaikanController::class, 'exportLaporan'])->name('teknisi.laporan.export');
 
         // Perbaikan routes (hanya untuk view, edit, dan update status)
         Route::get('/perbaikan/{id}', [PerbaikanController::class, 'show'])->name('perbaikan.show');

@@ -74,7 +74,7 @@ class SearchController extends Controller
         if ($user->role === 'admin') {
             return route('admin.transaksi.show', $perbaikanId);
         } elseif ($user->role === 'kepala_toko') {
-            return route('kepala-toko.transaksi.show', $perbaikanId);
+            return route('laporan.show', $perbaikanId);
         } elseif ($user->role === 'teknisi') {
             return route('teknisi.transaksi.show', $perbaikanId);
         }
