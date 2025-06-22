@@ -525,8 +525,6 @@
                             </div>
                         @endif
                     </div>
-
-                    <!-- Status Perbaikan -->
                     <div class="section-title">
                         <i class="fas fa-tools icon"></i>
                         Status Perbaikan
@@ -596,10 +594,8 @@
                                         device di toko kami.
                                     </div>
                                 @endif
-
-                                <!-- Progress terakhir -->
                                 @php
-                                    // FIXED: Gunakan method yang sudah difilter untuk menghindari duplikasi
+
                                     $distinctProses = $perbaikan->getDistinctProsesPengerjaan();
                                 @endphp
 
@@ -622,12 +618,10 @@
                                 @endif
                             </div>
 
-                            <!-- Progress lengkap -->
                             @if ($distinctProses && $distinctProses->count() > 0)
                                 <div id="progress-{{ $perbaikan->id }}" class="full-progress" style="display: none;">
                                     <div class="progress-title">Riwayat Proses Pengerjaan</div>
                                     <div class="progress-timeline">
-                                        {{-- FIXED: Gunakan $distinctProses yang sudah difilter --}}
                                         @foreach ($distinctProses as $process)
                                             <div class="progress-item">
                                                 <div class="progress-dot"></div>
@@ -680,7 +674,6 @@
     </div>
 
     <script>
-        // Script untuk toggle progress
         function toggleProgress(id) {
             const progressElement = document.getElementById(id);
             const icon = event.target.tagName === 'I' ? event.target : event.target.querySelector('i');
@@ -693,22 +686,15 @@
                 if (icon) icon.className = 'fas fa-chevron-down';
             }
         }
-
-        // Script validasi nomor telepon - HANYA TIDAK BOLEH KOSONG
         document.addEventListener('DOMContentLoaded', function() {
             const phoneInput = document.getElementById('phoneInput');
             const errorMessage = document.getElementById('errorMessage');
             const trackingForm = document.getElementById('trackingForm');
-
-            // Jika tidak ada element, keluar dari script
             if (!phoneInput) return;
 
-            // Fungsi untuk filter hanya angka
             function filterNumbers(value) {
                 return value.replace(/[^0-9]/g, '');
             }
-
-            // Auto filter input hanya angka
             phoneInput.addEventListener('input', function(e) {
                 let value = e.target.value;
                 const numbersOnly = filterNumbers(value);
@@ -718,7 +704,6 @@
                 }
             });
 
-            // Filter paste input
             phoneInput.addEventListener('paste', function(e) {
                 setTimeout(() => {
                     const value = filterNumbers(e.target.value);
@@ -726,15 +711,12 @@
                 }, 0);
             });
 
-            // Prevent non-numeric keypress
             phoneInput.addEventListener('keypress', function(e) {
                 const char = String.fromCharCode(e.which);
                 if (!/[0-9]/.test(char)) {
                     e.preventDefault();
                 }
             });
-
-            // Validasi HANYA tidak boleh kosong saat submit
             if (trackingForm) {
                 trackingForm.addEventListener('submit', function(e) {
                     const phoneValue = phoneInput.value.trim();
@@ -747,8 +729,6 @@
                         phoneInput.focus();
                         return false;
                     }
-
-                    // Hide error jika ada isi
                     if (errorMessage) {
                         errorMessage.classList.remove('show');
                     }

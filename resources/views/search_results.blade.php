@@ -1,4 +1,3 @@
-<!-- resources/views/search_results.blade.php -->
 <!DOCTYPE html>
 <html lang="id">
 <head>

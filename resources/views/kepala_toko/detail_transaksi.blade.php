@@ -697,7 +697,6 @@
     </div>
 
     <script>
-        // Real-time clock function
         function updateRealTimeClock() {
             try {
                 const now = new Date();
@@ -733,7 +732,7 @@
                 timelineContainer.style.display = 'none';
                 toggleIcon.className = 'fas fa-chevron-down';
                 showAllLink.innerHTML =
-                'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
+                    'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
     </script>

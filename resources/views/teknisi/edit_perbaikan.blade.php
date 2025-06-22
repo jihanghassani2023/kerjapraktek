@@ -651,8 +651,6 @@
                     <div class="invalid-feedback" id="harga-error" style="display: none;"></div>
                 </div>
 
-                <!-- UNTUK EDIT PERBAIKAN BLADE - UPDATE BAGIAN GARANSI -->
-
                 <div class="form-group">
                     <label for="garansi" class="required">Garansi</label>
                     <div class="garansi-container">
@@ -666,7 +664,6 @@
                             @php
                                 $garansiItems = [];
 
-                                // Get garansi from direct relationship
                                 if ($perbaikan->garansi && $perbaikan->garansi->count() > 0) {
                                     foreach ($perbaikan->garansi as $garansi) {
                                         $garansiItems[] = [
@@ -676,7 +673,6 @@
                                     }
                                 }
 
-                                // If no garansi items, show at least one empty item
                                 if (empty($garansiItems)) {
                                     $garansiItems[] = ['sparepart' => '', 'periode' => ''];
                                 }
@@ -737,8 +733,6 @@
             const garansiContainer = document.getElementById('garansiContainer');
 
             let garansiIndex = {{ count($garansiItems) }};
-
-            // Error elements (removed garansi hidden input error)
             const errorElements = {
                 'kategori_device': document.getElementById('kategori-device-error'),
                 'masalah': document.getElementById('masalah-error'),
@@ -746,7 +740,6 @@
                 'harga': document.getElementById('harga-error')
             };
 
-            // Fungsi untuk menampilkan error
             function showError(fieldName, message) {
                 const field = document.getElementById(fieldName);
                 const errorDiv = errorElements[fieldName];
@@ -765,8 +758,6 @@
                     errorDiv.style.display = 'block';
                 }
             }
-
-            // Fungsi untuk menghilangkan error
             function hideError(fieldName) {
                 const field = document.getElementById(fieldName);
                 const errorDiv = errorElements[fieldName];
@@ -780,7 +771,6 @@
                 }
             }
 
-            // Garansi Management Functions
             function updateRemoveButtons() {
                 const garansiItems = garansiContainer.querySelectorAll('.garansi-item');
                 garansiItems.forEach((item, index) => {
@@ -824,7 +814,6 @@
                 garansiIndex++;
                 updateRemoveButtons();
 
-                // Add event listener for remove button
                 const removeBtn = newItem.querySelector('.remove-garansi');
                 removeBtn.addEventListener('click', function() {
                     removeGaransiItem(newItem);
@@ -836,7 +825,6 @@
                 updateRemoveButtons();
             }
 
-            // Validate garansi items - check if at least one is complete
             function validateGaransiItems() {
                 const garansiItems = garansiContainer.querySelectorAll('.garansi-item');
                 let hasValidGaransi = false;
@@ -853,10 +841,8 @@
                 return hasValidGaransi;
             }
 
-            // Add garansi button event listener
             addGaransiBtn.addEventListener('click', addGaransiItem);
 
-            // Setup existing remove buttons
             const existingRemoveBtns = garansiContainer.querySelectorAll('.remove-garansi');
             existingRemoveBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -865,10 +851,8 @@
                 });
             });
 
-            // Initialize remove buttons
             updateRemoveButtons();
 
-            // Add input event listeners to hide errors when typing/selecting
             ['kategori_device', 'masalah', 'tindakan_perbaikan', 'harga'].forEach(fieldName => {
                 const field = document.getElementById(fieldName);
                 if (field) {
@@ -877,8 +861,6 @@
                             hideError(fieldName);
                         }
                     });
-
-                    // For select elements, also listen to change event
                     if (field.tagName === 'SELECT') {
                         field.addEventListener('change', function() {
                             if (this.value.trim()) {
@@ -889,33 +871,24 @@
                 }
             });
 
-            // Numeric validation for harga
             const hargaInput = document.getElementById('harga');
             if (hargaInput) {
                 hargaInput.addEventListener('input', function() {
-                    // Remove non-numeric characters
                     this.value = this.value.replace(/[^0-9]/g, '');
 
-                    // Hide error if value is entered
                     if (this.value.trim()) {
                         hideError('harga');
                     }
                 });
             }
-
-            // Form submit handler
             form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Always prevent default
+                event.preventDefault();
 
                 let isValid = true;
                 let firstErrorField = null;
-
-                // Reset all errors
                 Object.keys(errorElements).forEach(fieldName => {
                     hideError(fieldName);
                 });
-
-                // Validate required fields
                 const requiredFields = [{
                         name: 'kategori_device',
                         message: 'Kategori device wajib dipilih.'
@@ -943,7 +916,6 @@
                     }
                 });
 
-                // Validate harga is number and > 0
                 const hargaInput = document.getElementById('harga');
                 if (hargaInput && hargaInput.value.trim()) {
                     const hargaValue = parseFloat(hargaInput.value);
@@ -954,11 +926,6 @@
                     }
                 }
 
-                // FLEXIBLE: Validate garansi - allow empty garansi (user can delete all)
-                // No longer require at least one garansi item
-                // This allows users to delete all warranty items if needed
-
-                // Show warning if no garansi items are filled (optional)
                 if (!validateGaransiItems()) {
                     const confirmResult = confirm(
                         'Anda tidak mengisi garansi apapun. ' +
@@ -966,16 +933,13 @@
                     );
 
                     if (!confirmResult) {
-                        // User cancelled, focus on first garansi input
                         const firstGaransiInput = garansiContainer.querySelector('input, select');
                         if (firstGaransiInput) {
                             firstGaransiInput.focus();
                         }
-                        return; // Stop form submission
+                        return;
                     }
                 }
-
-                // If validation passes, submit form
                 if (isValid) {
                     form.submit();
                 } else {

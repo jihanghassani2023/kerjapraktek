@@ -579,7 +579,7 @@
                                 <div class="garansi-sparepart">
                                     <label>Sparepart</label>
                                     <input type="text" name="garansi_items[0][sparepart]" class="form-control"
-                                           placeholder="Contoh: Baterai, LCD, Mesin, dll">
+                                        placeholder="Contoh: Baterai, LCD, Mesin, dll">
                                 </div>
                                 <div class="garansi-periode">
                                     <label>Garansi</label>
@@ -591,7 +591,8 @@
                                     </select>
                                 </div>
                                 <div class="garansi-actions">
-                                    <button type="button" class="btn btn-danger btn-sm remove-garansi" style="display: none;">
+                                    <button type="button" class="btn btn-danger btn-sm remove-garansi"
+                                        style="display: none;">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -651,7 +652,10 @@
 
                 if (field) {
                     field.classList.add('is-invalid');
-                    field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    field.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                     field.focus();
                 }
 
@@ -674,7 +678,6 @@
                 }
             }
 
-            // Function to fetch customers from the database
             function fetchCustomers() {
                 fetch('{{ route('admin.api.customers') }}', {
                         headers: {
@@ -691,7 +694,6 @@
                     });
             }
 
-            // Filter function for customer search
             function filterCustomers(query) {
                 if (!query) return [];
 
@@ -701,7 +703,6 @@
                 );
             }
 
-            // Function to display autocomplete results
             function displayAutocompleteResults(results) {
                 autocompleteResults.innerHTML = '';
 
@@ -736,21 +737,17 @@
                 autocompleteResults.classList.add('show');
             }
 
-            // Function to select a customer
             function selectCustomer(customer) {
                 namaPelangganInput.value = customer.nama_pelanggan;
                 pelangganIdInput.value = customer.id;
                 nomorTelpInput.value = customer.nomor_telp;
                 emailInput.value = customer.email || '';
 
-                // Hide autocomplete results
                 autocompleteResults.classList.remove('show');
 
-                // Hide error for nama_pelanggan
                 hideError('nama_pelanggan');
             }
 
-            // Customer name input event
             namaPelangganInput.addEventListener('input', function() {
                 const query = this.value.trim();
 
@@ -761,13 +758,11 @@
                     autocompleteResults.classList.remove('show');
                 }
 
-                // Hide error when typing
                 if (query.length > 0) {
                     hideError('nama_pelanggan');
                 }
             });
 
-            // Blur event for customer name
             namaPelangganInput.addEventListener('blur', function() {
                 const query = this.value.trim();
 
@@ -782,14 +777,12 @@
                 }
             });
 
-            // Close autocomplete results when clicking outside
             document.addEventListener('click', function(event) {
                 if (!autocompleteResults.contains(event.target) && event.target !== namaPelangganInput) {
                     autocompleteResults.classList.remove('show');
                 }
             });
 
-            // Add input event listeners to hide errors when typing
             ['user_id', 'nama_device', 'kategori_device', 'masalah', 'harga'].forEach(fieldName => {
                 const field = document.getElementById(fieldName);
                 if (field) {
@@ -801,7 +794,6 @@
                 }
             });
 
-            // Garansi Management Functions
             function updateRemoveButtons() {
                 const garansiItems = garansiContainer.querySelectorAll('.garansi-item');
                 garansiItems.forEach((item, index) => {
@@ -845,14 +837,11 @@
                 garansiIndex++;
                 updateRemoveButtons();
                 updateGaransiHiddenField();
-
-                // Add event listener for remove button
                 const removeBtn = newItem.querySelector('.remove-garansi');
                 removeBtn.addEventListener('click', function() {
                     removeGaransiItem(newItem);
                 });
 
-                // Add event listeners for inputs to update hidden field
                 const inputs = newItem.querySelectorAll('input, select');
                 inputs.forEach(input => {
                     input.addEventListener('input', updateGaransiHiddenField);
@@ -881,23 +870,19 @@
 
                 garansiHiddenInput.value = garansiData.join('; ');
 
-                // Hide garansi error when there's valid data
                 if (garansiData.length > 0) {
                     hideError('garansi');
                 }
             }
 
-            // Add garansi button event listener
             addGaransiBtn.addEventListener('click', addGaransiItem);
 
-            // Initial setup for first garansi item
             const initialInputs = garansiContainer.querySelectorAll('input, select');
             initialInputs.forEach(input => {
                 input.addEventListener('input', updateGaransiHiddenField);
                 input.addEventListener('change', updateGaransiHiddenField);
             });
 
-            // Initial remove button setup
             const initialRemoveBtn = garansiContainer.querySelector('.remove-garansi');
             if (initialRemoveBtn) {
                 initialRemoveBtn.addEventListener('click', function() {
@@ -908,35 +893,43 @@
 
             updateRemoveButtons();
 
-            // Form submit handler
             form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Always prevent default
+                event.preventDefault();
 
                 let isValid = true;
                 let firstErrorField = null;
 
-                // Reset all errors
                 Object.keys(errorElements).forEach(fieldName => {
                     hideError(fieldName);
                 });
 
-                // Update garansi hidden field before validation
                 updateGaransiHiddenField();
-
-                // Validate customer selection
                 if (!pelangganIdInput.value || !namaPelangganInput.value.trim()) {
                     isValid = false;
-                    showError('nama_pelanggan', 'Nama pelanggan wajib diisi. Pilih dari daftar pelanggan yang tersedia.');
+                    showError('nama_pelanggan',
+                        'Nama pelanggan wajib diisi. Pilih dari daftar pelanggan yang tersedia.');
                     if (!firstErrorField) firstErrorField = namaPelangganInput;
                 }
-
-                // Validate required fields
-                const requiredFields = [
-                    { name: 'user_id', message: 'Teknisi wajib dipilih.' },
-                    { name: 'nama_device', message: 'Nama device wajib diisi.' },
-                    { name: 'kategori_device', message: 'Kategori device wajib dipilih.' },
-                    { name: 'masalah', message: 'Masalah wajib diisi.' },
-                    { name: 'harga', message: 'Harga wajib diisi.' }
+                const requiredFields = [{
+                        name: 'user_id',
+                        message: 'Teknisi wajib dipilih.'
+                    },
+                    {
+                        name: 'nama_device',
+                        message: 'Nama device wajib diisi.'
+                    },
+                    {
+                        name: 'kategori_device',
+                        message: 'Kategori device wajib dipilih.'
+                    },
+                    {
+                        name: 'masalah',
+                        message: 'Masalah wajib diisi.'
+                    },
+                    {
+                        name: 'harga',
+                        message: 'Harga wajib diisi.'
+                    }
                 ];
 
                 requiredFields.forEach(field => {
@@ -947,8 +940,6 @@
                         if (!firstErrorField) firstErrorField = input;
                     }
                 });
-
-                // Validate harga is number and > 0
                 const hargaInput = document.getElementById('harga');
                 if (hargaInput && hargaInput.value.trim()) {
                     const hargaValue = parseFloat(hargaInput.value);
@@ -959,7 +950,6 @@
                     }
                 }
 
-                // Validate garansi
                 if (!garansiHiddenInput.value.trim()) {
                     isValid = false;
                     showError('garansi', 'Minimal satu item garansi harus diisi dengan lengkap.');
@@ -969,7 +959,6 @@
                     }
                 }
 
-                // If validation passes, submit form
                 if (isValid) {
                     form.submit();
                 } else {
@@ -979,7 +968,6 @@
                 }
             });
 
-            // Numeric validation for harga
             const hargaInput = document.getElementById('harga');
             if (hargaInput) {
                 hargaInput.addEventListener('input', function() {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,22 +11,22 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            overflow: hidden; /* Mencegah scroll */
+            overflow: hidden;
         }
 
         html {
-            overflow: hidden; /* Mencegah scroll pada html juga */
+            overflow: hidden;
         }
 
         .login-container {
             display: flex;
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* Pastikan container tidak scroll */
+            overflow: hidden;
         }
 
         .left-panel {
-            background-color: #9D4E4E; /* Reddish-brown as shown in image */
+            background-color: #9D4E4E;
             flex: 1;
             display: flex;
             align-items: center;
@@ -39,7 +40,7 @@
 
         .logo-container img {
             max-width: 500px;
-            max-height: 80vh; /* Batasi tinggi gambar */
+            max-height: 80vh;
             width: auto;
             height: auto;
         }
@@ -66,14 +67,14 @@
         }
 
         .login-form {
-            background-color: #FAF0F0; /* Light pink background */
+            background-color: #FAF0F0;
             padding: 30px;
             border-radius: 8px;
             width: 300px;
-            max-width: 90%; /* Responsif untuk layar kecil */
+            max-width: 90%;
             z-index: 2;
-            max-height: 90vh; /* Batasi tinggi form */
-            overflow-y: auto; /* Scroll internal jika diperlukan */
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .form-group {
@@ -111,14 +112,13 @@
             margin-top: 5px;
         }
 
-        /* Style for the password input and eye icon */
         .password-container {
             position: relative;
         }
 
         #password {
             width: 100%;
-            padding: 8px 30px 8px 10px;  /* Padding for the eye icon */
+            padding: 8px 30px 8px 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
@@ -134,7 +134,6 @@
             color: #666;
         }
 
-        /* Validation styles */
         .form-group input.is-invalid {
             border-color: #dc3545;
         }
@@ -147,7 +146,6 @@
             color: #dc3545;
         }
 
-        /* Media queries untuk responsivitas tanpa scroll */
         @media (max-width: 900px) {
             .login-container {
                 flex-direction: column;
@@ -288,6 +286,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="left-panel">
@@ -302,7 +301,8 @@
                     @csrf
                     <div class="form-group">
                         <label for="email">EMAIL</label>
-                        <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Email" class="{{ $errors->has('email') ? 'is-invalid' : '' }}">
+                        <input type="email" id="email" name="email" value="{{ old('email') }}" required
+                            autofocus placeholder="Email" class="{{ $errors->has('email') ? 'is-invalid' : '' }}">
                         @error('email')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @else
@@ -312,7 +312,8 @@
                     <div class="form-group">
                         <label for="password">PASSWORD</label>
                         <div class="password-container">
-                            <input type="password" id="password" name="password" required placeholder="Password" class="{{ $errors->has('password') ? 'is-invalid' : '' }}">
+                            <input type="password" id="password" name="password" required placeholder="Password"
+                                class="{{ $errors->has('password') ? 'is-invalid' : '' }}">
                             <i class="fas fa-eye-slash eye-icon" id="eye-icon" onclick="togglePassword()"></i>
                         </div>
                         @error('password')
@@ -345,11 +346,8 @@
             }
         }
 
-        // Client-side validation
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             let isValid = true;
-
-            // Email validation
             const emailInput = document.getElementById('email');
             const emailError = document.getElementById('email-error');
 
@@ -368,7 +366,6 @@
                 emailError.style.display = 'none';
             }
 
-            // Password validation
             const passwordInput = document.getElementById('password');
             const passwordError = document.getElementById('password-error');
 
@@ -387,11 +384,11 @@
             }
         });
 
-        // Email validation helper function
         function isValidEmail(email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
     </script>
 </body>
+
 </html>

@@ -423,114 +423,123 @@ class AdminController extends Controller
         return view('admin.tambah_perbaikan', compact('user', 'pelanggan', 'teknisi'));
     }
 
-public function exportTransaksi(Request $request)
-{
-    $month = $request->input('month');
-    $year = $request->input('year');
+    public function exportTransaksi(Request $request)
+    {
+        $month = $request->input('month');
+        $year = $request->input('year');
 
-    Log::info('Export parameters:', ['month' => $month, 'year' => $year]);
+        Log::info('Export parameters:', ['month' => $month, 'year' => $year]);
 
-    $query = Perbaikan::query();
+        $query = Perbaikan::query();
 
-    if ($month && $year) {
-        $query->whereMonth('tanggal_perbaikan', $month)->whereYear('tanggal_perbaikan', $year);
-    } elseif ($month) {
-        $query->whereMonth('tanggal_perbaikan', $month)->whereYear('tanggal_perbaikan', date('Y'));
-    } elseif ($year) {
-        $query->whereYear('tanggal_perbaikan', $year);
+        if ($month && $year) {
+            $query->whereMonth('tanggal_perbaikan', $month)->whereYear('tanggal_perbaikan', $year);
+        } elseif ($month) {
+            $query->whereMonth('tanggal_perbaikan', $month)->whereYear('tanggal_perbaikan', date('Y'));
+        } elseif ($year) {
+            $query->whereYear('tanggal_perbaikan', $year);
+        }
+
+        $transaksi = $query->with(['user', 'pelanggan', 'garansi'])->orderBy('tanggal_perbaikan', 'desc')->get();
+        if ($transaksi->isEmpty()) {
+            return back()->with('info', 'Tidak ada data yang bisa diekspor.');
+        }
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'LAPORAN PERBAIKAN');
+        $sheet->mergeCells('A1:K1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+        $namaBulan = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        ];
+
+        $filterText = 'Filter: ';
+        if ($month && $year) {
+            $filterText .= $namaBulan[(int)$month] . ' ' . $year;
+        } elseif ($month) {
+            $filterText .= $namaBulan[(int)$month] . ' ' . date('Y');
+        } elseif ($year) {
+            $filterText .= $year;
+        } else {
+            $filterText .= 'Semua Data';
+        }
+
+        $sheet->setCellValue('A2', $filterText);
+        $sheet->mergeCells('A2:K2');
+
+        $headers = [
+            'No.',
+            'Kode Perbaikan',
+            'Tanggal',
+            'Device',
+            'Pelanggan',
+            'Teknisi',
+            'Harga',
+            'Status',
+            'Masalah',
+            'Tindakan',
+            'Garansi'
+        ];
+
+        $column = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($column . '4', $header);
+            $sheet->getStyle($column . '4')->getFont()->setBold(true);
+            $column++;
+        }
+
+        $row = 5;
+        foreach ($transaksi as $index => $t) {
+            $garansiText = $t->garansi->map(function ($g) {
+                return $g->sparepart . ' (' . $g->periode . ')';
+            })->implode(', ');
+
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $t->id);
+            $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
+            $sheet->setCellValue('D' . $row, $t->nama_device);
+            $sheet->setCellValue('E' . $row, $t->pelanggan->nama_pelanggan ?? 'N/A');
+            $sheet->setCellValue('F' . $row, $t->user->name ?? 'N/A');
+            $sheet->setCellValue('G' . $row, 'Rp. ' . number_format($t->harga, 0, ',', '.'));
+            $sheet->setCellValue('H' . $row, $t->status);
+            $sheet->setCellValue('I' . $row, $t->masalah ?? '-');
+            $sheet->setCellValue('J' . $row, $t->tindakan_perbaikan ?? '-');
+            $sheet->setCellValue('K' . $row, $garansiText ?: '-');
+            $row++;
+        }
+
+        foreach (range('A', 'K') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        $filterInfo = '';
+        if ($month && $year) {
+            $filterInfo = '_' . $namaBulan[(int)$month] . '_' . $year;
+        } elseif ($month) {
+            $filterInfo = '_' . $namaBulan[(int)$month] . '_' . date('Y');
+        } elseif ($year) {
+            $filterInfo = '_' . $year;
+        }
+
+        $fileName = 'admin_transaksi' . $filterInfo . '_' . date('YmdHis') . '.xlsx';
+        $filePath = storage_path('app/public/' . $fileName);
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
+
+        return response()->download($filePath)->deleteFileAfterSend(true);
     }
-
-    // Include relasi user, pelanggan, garansi
-    $transaksi = $query->with(['user', 'pelanggan', 'garansi'])->orderBy('tanggal_perbaikan', 'desc')->get();
-     if ($transaksi->isEmpty()) {
-        return back()->with('info', 'Tidak ada data yang bisa diekspor.');
-    }
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-
-    // === Judul & Filter Info ===
-    $sheet->setCellValue('A1', 'LAPORAN PERBAIKAN');
-    $sheet->mergeCells('A1:K1');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-
-    $namaBulan = [
-        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-    ];
-
-    $filterText = 'Filter: ';
-    if ($month && $year) {
-        $filterText .= $namaBulan[(int)$month] . ' ' . $year;
-    } elseif ($month) {
-        $filterText .= $namaBulan[(int)$month] . ' ' . date('Y');
-    } elseif ($year) {
-        $filterText .= $year;
-    } else {
-        $filterText .= 'Semua Data';
-    }
-
-    $sheet->setCellValue('A2', $filterText);
-    $sheet->mergeCells('A2:K2');
-
-    // === Header Tabel ===
-    $headers = [
-        'No.', 'Kode Perbaikan', 'Tanggal', 'Device', 'Pelanggan',
-        'Teknisi', 'Harga', 'Status', 'Masalah', 'Tindakan', 'Garansi'
-    ];
-
-    $column = 'A';
-    foreach ($headers as $header) {
-        $sheet->setCellValue($column . '4', $header);
-        $sheet->getStyle($column . '4')->getFont()->setBold(true);
-        $column++;
-    }
-
-    // === Isi Data ===
-    $row = 5;
-    foreach ($transaksi as $index => $t) {
-        // Format garansi: sparepart (periode), ...
-        $garansiText = $t->garansi->map(function ($g) {
-            return $g->sparepart . ' (' . $g->periode . ')';
-        })->implode(', ');
-
-        $sheet->setCellValue('A' . $row, $index + 1);
-        $sheet->setCellValue('B' . $row, $t->id);
-        $sheet->setCellValue('C' . $row, \Carbon\Carbon::parse($t->tanggal_perbaikan)->format('d M Y'));
-        $sheet->setCellValue('D' . $row, $t->nama_device);
-        $sheet->setCellValue('E' . $row, $t->pelanggan->nama_pelanggan ?? 'N/A');
-        $sheet->setCellValue('F' . $row, $t->user->name ?? 'N/A');
-        $sheet->setCellValue('G' . $row, 'Rp. ' . number_format($t->harga, 0, ',', '.'));
-        $sheet->setCellValue('H' . $row, $t->status);
-        $sheet->setCellValue('I' . $row, $t->masalah ?? '-');
-        $sheet->setCellValue('J' . $row, $t->tindakan_perbaikan ?? '-');
-        $sheet->setCellValue('K' . $row, $garansiText ?: '-');
-        $row++;
-    }
-
-    // Auto-size kolom
-    foreach (range('A', 'K') as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
-
-    // Nama file
-    $filterInfo = '';
-    if ($month && $year) {
-        $filterInfo = '_' . $namaBulan[(int)$month] . '_' . $year;
-    } elseif ($month) {
-        $filterInfo = '_' . $namaBulan[(int)$month] . '_' . date('Y');
-    } elseif ($year) {
-        $filterInfo = '_' . $year;
-    }
-
-    $fileName = 'admin_transaksi' . $filterInfo . '_' . date('YmdHis') . '.xlsx';
-    $filePath = storage_path('app/public/' . $fileName);
-
-    $writer = new Xlsx($spreadsheet);
-    $writer->save($filePath);
-
-    return response()->download($filePath)->deleteFileAfterSend(true);
-}
 
 
 

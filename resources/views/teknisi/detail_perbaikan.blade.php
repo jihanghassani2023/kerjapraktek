@@ -111,7 +111,7 @@
             margin-right: 10px;
         }
 
-         .main-content {
+        .main-content {
             flex: 1;
             margin-left: 220px;
             padding: 20px;
@@ -978,8 +978,6 @@
                     'Lihat semua progress <i class="fas fa-chevron-down" id="timeline-toggle-icon"></i>';
             }
         }
-
-        // Status update functionality
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('confirmationModal');
             const confirmText = document.getElementById('confirmationText');

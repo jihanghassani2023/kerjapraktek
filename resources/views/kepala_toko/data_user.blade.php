@@ -7,7 +7,6 @@
     <title>User - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Keep the same styles */
         * {
             margin: 0;
             padding: 0;
@@ -490,7 +489,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- Pastikan loop menggunakan $users dan $u --}}
                         @forelse($users as $index => $u)
                             <tr onclick="window.location='{{ route('user.show', $u->id) }}';" style="cursor: pointer;">
                                 <td>{{ $u->id }}</td>
@@ -519,7 +517,6 @@
         </div>
     </div>
 
-    <!-- Custom Delete Confirmation Modal -->
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-container">
             <div class="modal-header">
@@ -540,7 +537,6 @@
         </div>
     </div>
 
-    <!-- Hidden form for deletion -->
     <form id="deleteForm" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
@@ -556,8 +552,6 @@
 
             document.getElementById('userNameDisplay').textContent = userName;
             document.getElementById('deleteModal').style.display = 'block';
-
-            // Prevent body scroll when modal is open
             document.body.style.overflow = 'hidden';
         }
 
@@ -575,15 +569,12 @@
                 form.submit();
             }
         }
-
-        // Close modal when clicking outside
         document.getElementById('deleteModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideDeleteModal();
             }
         });
 
-        // Close modal with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 hideDeleteModal();

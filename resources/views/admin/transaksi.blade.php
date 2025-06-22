@@ -277,6 +277,7 @@
         table tr:hover {
             background-color: #f5f5f5;
         }
+
         .status-menunggu {
             color: #dc3545;
             font-weight: bold;
@@ -532,16 +533,6 @@
                                 </option>
                             @endfor
                         </select>
-
-                        {{-- <!-- Tombol filter manual -->
-                        <button type="submit" class="btn btn-filter">
-                            <i class="fas fa-filter"></i> Filter
-                        </button>
-
-                        <!-- Tombol reset filter -->
-                        <a href="{{ route('admin.transaksi') }}" class="btn btn-reset">
-                            <i class="fas fa-times"></i> Reset --}}
-                        </a>
                     </form>
                 </div>
             </div>

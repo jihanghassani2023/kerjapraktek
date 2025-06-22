@@ -321,7 +321,6 @@
             background-color: #2d6d2d;
         }
 
-        /* Search box styles */
         .search-container {
             margin: 20px 0;
             display: flex;

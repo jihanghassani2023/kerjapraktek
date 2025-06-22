@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +13,13 @@
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
+
         body {
             background-color: #f5f5f5;
             display: flex;
             min-height: 100vh;
         }
+
         .sidebar {
             width: 220px;
             background-color: #8c3a3a;
@@ -28,20 +31,24 @@
             height: 100vh;
             overflow-y: auto;
         }
+
         .sidebar-logo {
             padding: 15px 20px 30px;
             text-align: center;
         }
+
         .sidebar-logo img {
             width: 80px;
             height: auto;
         }
+
         .sidebar-logo span {
             display: block;
             font-weight: bold;
             font-size: 20px;
             margin-top: 10px;
         }
+
         .menu-item {
             padding: 15px 20px;
             display: flex;
@@ -50,17 +57,21 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .menu-item.active {
             background-color: #6d2d2d;
         }
+
         .menu-item:hover {
             background-color: #6d2d2d;
         }
+
         .menu-item i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
+
         .logout {
             margin-top: auto;
             padding: 15px 20px;
@@ -70,19 +81,23 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .logout:hover {
             background-color: #6d2d2d;
         }
+
         .logout i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
+
         .main-content {
             flex: 1;
             margin-left: 220px;
             padding: 20px;
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -90,19 +105,23 @@
             padding: 15px 20px;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .user-info {
             text-align: right;
         }
+
         .user-name {
             color: #8c3a3a;
             font-weight: bold;
         }
+
         .user-role {
             color: #888;
             font-size: 0.9em;
         }
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -113,20 +132,24 @@
             justify-content: center;
             margin-left: 15px;
         }
+
         .user-avatar i {
             color: #8c3a3a;
             font-size: 20px;
         }
+
         .title-section {
             margin: 25px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+
         .page-title {
             font-size: 1.5em;
             color: #333;
         }
+
         .btn {
             padding: 10px 15px;
             border-radius: 5px;
@@ -138,63 +161,77 @@
             display: inline-flex;
             align-items: center;
         }
+
         .btn i {
             margin-right: 8px;
         }
+
         .btn-primary {
             background-color: #8c3a3a;
             color: white;
         }
+
         .btn-primary:hover {
             background-color: #6d2d2d;
         }
+
         .btn-secondary {
             background-color: #6c757d;
             color: white;
         }
+
         .btn-secondary:hover {
             background-color: #5a6268;
         }
+
         .btn-export {
             background-color: #28a745;
             color: white;
         }
+
         .btn-export:hover {
             background-color: #218838;
         }
+
         .content-section {
             background-color: white;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .filter-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
+
         .filter-group {
             display: flex;
             gap: 10px;
             align-items: center;
         }
+
         .filter-label {
             font-weight: bold;
             color: #555;
         }
+
         .filter-select {
             padding: 8px 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
             background-color: white;
         }
+
         .summary-cards {
             display: flex;
             gap: 20px;
             margin-bottom: 20px;
         }
+
         .summary-card {
             flex: 1;
             background-color: #f8f9fa;
@@ -202,81 +239,98 @@
             padding: 15px;
             border-left: 5px solid #8c3a3a;
         }
+
         .summary-title {
             font-size: 0.9em;
             color: #666;
             margin-bottom: 5px;
         }
+
         .summary-value {
             font-size: 1.5em;
             font-weight: bold;
             color: #333;
         }
+
         .table-responsive {
             overflow-x: auto;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
         table th,
         table td {
             text-align: left;
             padding: 12px 15px;
             border-bottom: 1px solid #eee;
         }
+
         table th {
             background-color: #f8f9fa;
             font-weight: bold;
             color: #333;
         }
+
         table tr:hover {
             background-color: #f5f5f5;
         }
+
         .status-selesai {
             color: #28a745;
             font-weight: bold;
         }
+
         .alert {
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
         .alert-info {
             background-color: #d1ecf1;
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+
         .section-tabs {
             display: flex;
             margin-bottom: 20px;
             border-bottom: 1px solid #dee2e6;
         }
+
         .tab-item {
             padding: 10px 20px;
             cursor: pointer;
             border-bottom: 3px solid transparent;
             transition: all 0.3s;
         }
+
         .tab-item.active {
             border-bottom-color: #8c3a3a;
             font-weight: bold;
         }
+
         .tab-content {
             display: none;
         }
+
         .tab-content.active {
             display: block;
         }
+
         .teknisi-card {
             background-color: white;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             display: flex;
             align-items: center;
         }
+
         .teknisi-avatar {
             width: 50px;
             height: 50px;
@@ -287,22 +341,27 @@
             justify-content: center;
             margin-right: 15px;
         }
+
         .teknisi-avatar i {
             color: #8c3a3a;
             font-size: 24px;
         }
+
         .teknisi-info {
             flex: 1;
         }
+
         .teknisi-name {
             font-weight: bold;
             margin-bottom: 5px;
         }
+
         .teknisi-stats {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
         }
+
         .teknisi-stat {
             background-color: #f8f9fa;
             padding: 8px 12px;
@@ -311,47 +370,58 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             min-width: 120px;
         }
+
         .teknisi-stat i {
             margin-right: 5px;
             width: 16px;
             text-align: center;
         }
+
         .teknisi-stat .fa-check-circle {
             color: #28a745;
         }
+
         .teknisi-stat .fa-clock {
             color: #ffc107;
         }
+
         .teknisi-stat .fa-money-bill {
             color: #8c3a3a;
         }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
                 overflow: hidden;
             }
+
             .sidebar-logo span,
             .menu-item span,
             .logout span {
                 display: none;
             }
+
             .main-content {
                 margin-left: 70px;
             }
+
             .summary-cards,
             .filter-container {
                 flex-direction: column;
             }
+
             .filter-group {
                 margin-bottom: 10px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo"
+                onerror="this.src='https://via.placeholder.com/80'">
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -367,7 +437,8 @@
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
-            <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
+            <button type="submit" class="logout"
+                style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </button>
@@ -392,14 +463,15 @@
 
         <div class="title-section">
             <div></div>
-          <a href="{{ route('laporan.export', ['month' => request('month'), 'year' => request('year')]) }}" class="btn btn-export">
-    <i class="fas fa-file-export"></i> Export Data
-</a>
+            <a href="{{ route('laporan.export', ['month' => request('month'), 'year' => request('year')]) }}"
+                class="btn btn-export">
+                <i class="fas fa-file-export"></i> Export Data
+            </a>
 
 
         </div>
 
-        @if(session('info'))
+        @if (session('info'))
             <div class="alert alert-info">
                 {{ session('info') }}
             </div>
@@ -415,25 +487,37 @@
                 <div class="filter-group">
                     <span class="filter-label">Filter:</span>
                     <form action="{{ route('laporan.index') }}" method="GET" id="filterForm">
-                        <select name="month" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+                        <select name="month" class="filter-select"
+                            onchange="document.getElementById('filterForm').submit()">
                             <option value="">Semua Bulan</option>
                             @php
                                 $namaBulan = [
-                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                    1 => 'Januari',
+                                    2 => 'Februari',
+                                    3 => 'Maret',
+                                    4 => 'April',
+                                    5 => 'Mei',
+                                    6 => 'Juni',
+                                    7 => 'Juli',
+                                    8 => 'Agustus',
+                                    9 => 'September',
+                                    10 => 'Oktober',
+                                    11 => 'November',
+                                    12 => 'Desember',
                                 ];
                             @endphp
-                            @for($i = 1; $i <= 12; $i++)
+                            @for ($i = 1; $i <= 12; $i++)
                                 <option value="{{ $i }}" {{ $month == $i ? 'selected' : '' }}>
                                     {{ $namaBulan[$i] }}
                                 </option>
                             @endfor
                         </select>
-                        <select name="year" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+                        <select name="year" class="filter-select"
+                            onchange="document.getElementById('filterForm').submit()">
                             <option value="">Semua Tahun</option>
-                            @for($i = 2023; $i <= date('Y'); $i++)
-                                <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>{{ $i }}</option>
+                            @for ($i = 2023; $i <= date('Y'); $i++)
+                                <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>
+                                    {{ $i }}</option>
                             @endfor
                         </select>
                     </form>
@@ -472,10 +556,12 @@
                         </thead>
                         <tbody>
                             @forelse($transaksi as $index => $t)
-                                <tr onclick="window.location='{{ route('laporan.show', $t->id) }}';" style="cursor: pointer;">
+                                <tr onclick="window.location='{{ route('laporan.show', $t->id) }}';"
+                                    style="cursor: pointer;">
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $t->id }}</td>
-                                   <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}</td>
+                                    <td>{{ $t->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($t->tanggal_perbaikan) }}
+                                    </td>
                                     <td>{{ $t->nama_device }}</td>
                                     <td>{{ $t->pelanggan->nama_pelanggan ?? 'N/A' }}</td>
                                     <td>{{ $t->user->name ?? 'N/A' }}</td>
@@ -527,17 +613,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Tab functionality
             const tabItems = document.querySelectorAll('.tab-item');
             const tabContents = document.querySelectorAll('.tab-content');
 
             tabItems.forEach(item => {
                 item.addEventListener('click', function() {
-                    // Remove active class from all tabs
                     tabItems.forEach(tab => tab.classList.remove('active'));
                     tabContents.forEach(content => content.classList.remove('active'));
-
-                    // Add active class to clicked tab
                     this.classList.add('active');
                     const tabId = this.getAttribute('data-tab');
                     document.getElementById(tabId + '-tab').classList.add('active');
@@ -546,4 +628,5 @@
         });
     </script>
 </body>
+
 </html>

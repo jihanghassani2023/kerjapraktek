@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +13,13 @@
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
+
         body {
             background-color: #f5f5f5;
             display: flex;
             min-height: 100vh;
         }
+
         .sidebar {
             width: 220px;
             background-color: #8c3a3a;
@@ -28,7 +31,8 @@
             height: 100vh;
             overflow-y: auto;
         }
-          .sidebar-logo {
+
+        .sidebar-logo {
             padding: 15px 20px 30px;
             text-align: center;
         }
@@ -53,12 +57,14 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 20px;
         }
+
         .logo-text {
             color: white;
             font-size: 1.5rem;
             font-weight: bold;
             margin-left: 10px;
         }
+
         .menu-item {
             padding: 15px 20px;
             display: flex;
@@ -67,18 +73,22 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .menu-item.active {
             background-color: #6d2d2d;
             border-left: 4px solid white;
         }
+
         .menu-item:hover {
             background-color: #6d2d2d;
         }
+
         .menu-item i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
+
         .logout-btn {
             margin-top: auto;
             padding: 15px 20px;
@@ -93,12 +103,15 @@
             text-align: left;
             font-size: 1rem;
         }
+
         .logout-btn:hover {
             background-color: #6d2d2d;
         }
+
         .logout-btn i {
             margin-right: 10px;
         }
+
         .back-btn {
             padding: 15px 20px;
             display: flex;
@@ -108,17 +121,21 @@
             margin-top: auto;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         .back-btn:hover {
             background-color: #6d2d2d;
         }
+
         .back-btn i {
             margin-right: 10px;
         }
-      .main-content {
-    flex: 1;
-    margin-left: 220px;
-    padding: 20px;
-}
+
+        .main-content {
+            flex: 1;
+            margin-left: 220px;
+            padding: 20px;
+        }
+
         .top-header {
             background-color: white;
             padding: 20px;
@@ -127,26 +144,32 @@
             align-items: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         .page-title {
             font-size: 1.5rem;
             font-weight: bold;
         }
+
         .user-profile {
             display: flex;
             align-items: center;
         }
+
         .user-info {
             text-align: right;
             margin-right: 15px;
         }
+
         .user-name {
             color: #8c3a3a;
             font-weight: bold;
         }
+
         .user-role {
             color: #888;
             font-size: 0.9em;
         }
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -158,16 +181,19 @@
             color: white;
             font-weight: bold;
         }
+
         .content-wrapper {
             padding: 30px;
             flex: 1;
         }
+
         .content-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
         }
+
         .content-title {
             font-size: 1.2rem;
             font-weight: bold;
@@ -175,6 +201,7 @@
             position: relative;
             padding-bottom: 10px;
         }
+
         .content-title::after {
             content: '';
             position: absolute;
@@ -184,10 +211,12 @@
             height: 3px;
             background-color: #8c3a3a;
         }
+
         .action-buttons {
             display: flex;
             gap: 10px;
         }
+
         .btn {
             padding: 8px 16px;
             border: none;
@@ -200,23 +229,29 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .btn i {
             margin-right: 8px;
         }
+
         .btn-edit {
             background-color: #8c3a3a;
             color: white;
         }
+
         .btn-edit:hover {
             background-color: #6d2d2d;
         }
+
         .btn-delete {
             background-color: #6c757d;
             color: white;
         }
+
         .btn-delete:hover {
             background-color: #5a6268;
         }
+
         .card {
             background-color: white;
             border-radius: 10px;
@@ -224,40 +259,48 @@
             margin-bottom: 30px;
             overflow: hidden;
         }
+
         .card-header {
             background-color: #f8f9fa;
             padding: 15px 20px;
             border-bottom: 1px solid #eee;
         }
+
         .card-title {
             font-size: 1.1rem;
             font-weight: bold;
             color: #333;
             margin: 0;
         }
+
         .card-body {
             padding: 20px;
         }
+
         .data-row {
             display: flex;
             margin-bottom: 15px;
             padding-bottom: 15px;
             border-bottom: 1px solid #eee;
         }
+
         .data-row:last-child {
             margin-bottom: 0;
             padding-bottom: 0;
             border-bottom: none;
         }
+
         .data-label {
             width: 200px;
             font-weight: bold;
             color: #555;
         }
+
         .data-value {
             flex: 1;
             color: #333;
         }
+
         .info-box {
             background-color: #f8f9fa;
             border-left: 4px solid #8c3a3a;
@@ -266,53 +309,65 @@
             display: flex;
             align-items: flex-start;
         }
+
         .info-box i {
             font-size: 24px;
             color: #8c3a3a;
             margin-right: 15px;
         }
+
         .info-text {
             color: #555;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
         table th,
         table td {
             text-align: left;
             padding: 12px 15px;
             border-bottom: 1px solid #eee;
         }
+
         table th {
             background-color: #f8f9fa;
             font-weight: bold;
             color: #333;
         }
+
         table tr:hover {
             background-color: #f5f5f5;
         }
+
         .status-menunggu {
             color: #ff6b6b;
             font-weight: bold;
         }
+
         .status-proses {
             color: #ff9f43;
             font-weight: bold;
         }
+
         .status-selesai {
             color: #28a745;
             font-weight: bold;
         }
+
         .empty-state {
             text-align: center;
             padding: 40px 0;
         }
+
         .empty-state i {
             font-size: 48px;
             color: #ccc;
             margin-bottom: 15px;
         }
+
         .empty-state-text {
             color: #888;
             font-size: 16px;
@@ -348,6 +403,7 @@
                 opacity: 0;
                 transform: translate(-50%, -60%);
             }
+
             to {
                 opacity: 1;
                 transform: translate(-50%, -50%);
@@ -423,22 +479,27 @@
             .sidebar {
                 width: 60px;
             }
+
             .sidebar .logo-text,
             .sidebar .menu-item span,
             .sidebar .logout-btn span,
             .sidebar .back-btn span {
                 display: none;
             }
+
             .main-content {
                 margin-left: 60px;
             }
+
             .data-row {
                 flex-direction: column;
             }
+
             .data-label {
                 width: 100%;
                 margin-bottom: 5px;
             }
+
             .modal-container {
                 width: 95%;
                 margin: 20px;
@@ -446,9 +507,10 @@
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
-       <div class="sidebar-logo">
+        <div class="sidebar-logo">
             <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo"
                 onerror="this.src='https://via.placeholder.com/80'">
         </div>
@@ -485,7 +547,8 @@
             <div class="user-profile">
                 <div class="user-info">
                     <div class="user-name">{{ $user->name }}</div>
-                    <div class="user-role">{{ $user->isKepalaToko() ? 'Kepala Toko' : ($user->isAdmin() ? 'Admin' : 'Teknisi') }}</div>
+                    <div class="user-role">
+                        {{ $user->isKepalaToko() ? 'Kepala Toko' : ($user->isAdmin() ? 'Admin' : 'Teknisi') }}</div>
                 </div>
                 <div class="user-avatar">
                     {{ substr($user->name, 0, 1) }}
@@ -501,7 +564,8 @@
                         <i class="fas fa-edit"></i> Edit
                     </a>
 
-                    <button type="button" class="btn btn-delete" onclick="showDeleteModal('{{ $userData->id }}', '{{ $userData->name }}')">
+                    <button type="button" class="btn btn-delete"
+                        onclick="showDeleteModal('{{ $userData->id }}', '{{ $userData->name }}')">
                         <i class="fas fa-trash"></i> Hapus
                     </button>
                 </div>
@@ -531,13 +595,13 @@
                 </div>
             </div>
 
-            @if($userData->jabatan == 'Teknisi' || $userData->jabatan == 'Kepala Teknisi')
+            @if ($userData->jabatan == 'Teknisi' || $userData->jabatan == 'Kepala Teknisi')
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Riwayat Perbaikan</h3>
                     </div>
                     <div class="card-body">
-                        @if(count($perbaikanList) > 0)
+                        @if (count($perbaikanList) > 0)
                             <table>
                                 <thead>
                                     <tr>
@@ -550,14 +614,17 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($perbaikanList as $index => $perbaikan)
+                                    @foreach ($perbaikanList as $index => $perbaikan)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
-                                            <td>{{ $perbaikan->nama_device }}</td> <!-- UPDATED: langsung dari perbaikan -->
-                                            <td>{{ $perbaikan->masalah }}</td> <!-- UPDATED: langsung dari perbaikan -->
-                                            <td>{{ $perbaikan->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan) }}</td>
-                                            <td>Rp {{ number_format($perbaikan->harga, 0, ',', '.') }}</td> <!-- UPDATED: dari accessor -->
-                                            <td><span class="status-{{ strtolower($perbaikan->status) }}">{{ $perbaikan->status }}</span></td>
+                                            <td>{{ $perbaikan->nama_device }}</td>
+                                            <td>{{ $perbaikan->masalah }}</td>
+                                            <td>{{ $perbaikan->tanggal_formatted ?? \App\Helpers\DateHelper::formatTanggalIndonesia($perbaikan->tanggal_perbaikan) }}
+                                            </td>
+                                            <td>Rp {{ number_format($perbaikan->harga, 0, ',', '.') }}</td>
+                                            <td><span
+                                                    class="status-{{ strtolower($perbaikan->status) }}">{{ $perbaikan->status }}</span>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -602,7 +669,7 @@
         </div>
     </div>
 
-    <!-- Hidden form for deletion -->
+
     <form id="deleteForm" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
@@ -615,11 +682,8 @@
         function showDeleteModal(userId, userName) {
             currentUserId = userId;
             currentUserName = userName;
-
             document.getElementById('userNameDisplay').textContent = userName;
             document.getElementById('deleteModal').style.display = 'block';
-
-            // Prevent body scroll when modal is open
             document.body.style.overflow = 'hidden';
         }
 
@@ -637,15 +701,11 @@
                 form.submit();
             }
         }
-
-        // Close modal when clicking outside
         document.getElementById('deleteModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideDeleteModal();
             }
         });
-
-        // Close modal with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 hideDeleteModal();
@@ -653,4 +713,5 @@
         });
     </script>
 </body>
+
 </html>

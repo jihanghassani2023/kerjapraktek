@@ -9,12 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class SearchController extends Controller
 {
-    /**
-     * Get search suggestions based on input.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function suggestions(Request $request)
     {
         $query = $request->input('query');
@@ -39,7 +33,6 @@ class SearchController extends Controller
         $suggestions = [];
 
         foreach ($perbaikan as $item) {
-            // Determine URL based on user role
             $url = $this->getDetailUrlByRole($item->id);
 
             $suggestions[] = [
@@ -56,21 +49,14 @@ class SearchController extends Controller
         return response()->json($suggestions);
     }
 
-    /**
-     * Get detail URL based on user role
-     *
-     * @param int $perbaikanId
-     * @return string
-     */
     private function getDetailUrlByRole($perbaikanId)
     {
         $user = Auth::user();
 
         if (!$user) {
-            return '#'; // Fallback if no user
+            return '#';
         }
 
-        // Check user role and return appropriate route
         if ($user->role === 'admin') {
             return route('admin.transaksi.show', $perbaikanId);
         } elseif ($user->role === 'kepala_toko') {
@@ -79,16 +65,9 @@ class SearchController extends Controller
             return route('teknisi.transaksi.show', $perbaikanId);
         }
 
-        // Fallback to admin route if role is not recognized
         return route('admin.transaksi.show', $perbaikanId);
     }
 
-    /**
-     * Handle search functionality for different roles
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
-     */
     public function search(Request $request)
     {
         $searchTerm = $request->get('search');
@@ -99,30 +78,23 @@ class SearchController extends Controller
         }
 
         $perbaikanList = Perbaikan::with(['pelanggan', 'teknisi'])
-            ->where(function($query) use ($searchTerm) {
+            ->where(function ($query) use ($searchTerm) {
                 $query->where('id', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('nama_device', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('keluhan', 'LIKE', "%{$searchTerm}%")
-                      ->orWhereHas('pelanggan', function($q) use ($searchTerm) {
-                          $q->where('nama_pelanggan', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('nama_device', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('keluhan', 'LIKE', "%{$searchTerm}%")
+                    ->orWhereHas('pelanggan', function ($q) use ($searchTerm) {
+                        $q->where('nama_pelanggan', 'LIKE', "%{$searchTerm}%")
                             ->orWhere('nomor_telp', 'LIKE', "%{$searchTerm}%");
-                      });
+                    });
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        // Return appropriate view based on user role
         $viewName = $this->getSearchViewByRole($user);
 
         return view($viewName, compact('perbaikanList', 'searchTerm'));
     }
 
-    /**
-     * Redirect to dashboard based on user role
-     *
-     * @param \App\Models\User $user
-     * @return \Illuminate\Http\RedirectResponse
-     */
     private function redirectToDashboard($user)
     {
         if ($user->role === 'admin') {
@@ -136,12 +108,6 @@ class SearchController extends Controller
         return redirect()->route('admin.dashboard');
     }
 
-    /**
-     * Get search results view based on user role
-     *
-     * @param \App\Models\User $user
-     * @return string
-     */
     private function getSearchViewByRole($user)
     {
         if ($user->role === 'admin') {

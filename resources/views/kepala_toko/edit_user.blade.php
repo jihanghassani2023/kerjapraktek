@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,11 +14,13 @@
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
+
         body {
             background-color: #f5f5f5;
             display: flex;
             min-height: 100vh;
         }
+
         .sidebar {
             width: 220px;
             background-color: #8c3a3a;
@@ -29,20 +32,24 @@
             height: 100vh;
             overflow-y: auto;
         }
+
         .sidebar-logo {
             padding: 15px 20px 30px;
             text-align: center;
         }
+
         .sidebar-logo img {
             width: 80px;
             height: auto;
         }
+
         .sidebar-logo span {
             display: block;
             font-weight: bold;
             font-size: 20px;
             margin-top: 10px;
         }
+
         .menu-item {
             padding: 15px 20px;
             display: flex;
@@ -51,17 +58,21 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .menu-item.active {
             background-color: #6d2d2d;
         }
+
         .menu-item:hover {
             background-color: #6d2d2d;
         }
+
         .menu-item i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
+
         .logout {
             margin-top: auto;
             padding: 15px 20px;
@@ -71,19 +82,23 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .logout:hover {
             background-color: #6d2d2d;
         }
+
         .logout i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
+
         .main-content {
             flex: 1;
             margin-left: 220px;
             padding: 20px;
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -91,19 +106,23 @@
             padding: 15px 20px;
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .user-info {
             text-align: right;
         }
+
         .user-name {
             color: #8c3a3a;
             font-weight: bold;
         }
+
         .user-role {
             color: #888;
             font-size: 0.9em;
         }
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -114,20 +133,24 @@
             justify-content: center;
             margin-left: 15px;
         }
+
         .user-avatar i {
             color: #8c3a3a;
             font-size: 20px;
         }
+
         .title-section {
             margin: 25px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+
         .page-title {
             font-size: 1.5em;
             color: #333;
         }
+
         .btn {
             padding: 10px 15px;
             border-radius: 5px;
@@ -139,39 +162,48 @@
             display: inline-flex;
             align-items: center;
         }
+
         .btn i {
             margin-right: 8px;
         }
+
         .btn-primary {
             background-color: #8c3a3a;
             color: white;
         }
+
         .btn-primary:hover {
             background-color: #6d2d2d;
         }
+
         .btn-secondary {
             background-color: #6c757d;
             color: white;
         }
+
         .btn-secondary:hover {
             background-color: #5a6268;
         }
+
         .content-section {
             background-color: white;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .form-group {
             margin-bottom: 20px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
             color: #333;
         }
+
         .form-control {
             width: 100%;
             padding: 10px 12px;
@@ -180,21 +212,26 @@
             font-size: 1em;
             transition: border-color 0.3s;
         }
+
         .form-control:focus {
             border-color: #8c3a3a;
             outline: none;
             box-shadow: 0 0 0 0.2rem rgba(140, 58, 58, 0.25);
         }
+
         .form-control:disabled {
             background-color: #e9ecef;
         }
+
         .form-control.is-invalid {
             border-color: #dc3545;
         }
+
         textarea.form-control {
             min-height: 100px;
             resize: vertical;
         }
+
         select.form-control {
             cursor: pointer;
             padding-right: 30px;
@@ -206,48 +243,57 @@
             -moz-appearance: none;
             appearance: none;
         }
+
         .invalid-feedback {
             color: #dc3545;
             font-size: 0.9em;
             margin-top: 5px;
             display: block;
         }
+
         .alert {
             padding: 12px 15px;
             margin-bottom: 20px;
             border-radius: 5px;
             border-left: 4px solid;
         }
+
         .alert-danger {
             background-color: #f8d7da;
             border-color: #dc3545;
             color: #721c24;
         }
+
         .name-requirements {
             font-size: 0.85em;
             color: #666;
             margin-top: 5px;
         }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
                 overflow: hidden;
             }
+
             .sidebar-logo span,
             .menu-item span,
             .logout span {
                 display: none;
             }
+
             .main-content {
                 margin-left: 70px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <div class="sidebar-logo">
-            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo" onerror="this.src='https://via.placeholder.com/80'">
+            <img src="{{ asset('img/Mg-Tech.png') }}" alt="MG Tech Logo"
+                onerror="this.src='https://via.placeholder.com/80'">
         </div>
         <a href="{{ route('kepala-toko.dashboard') }}" class="menu-item">
             <i class="fas fa-home"></i>
@@ -263,7 +309,8 @@
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
             @csrf
-            <button type="submit" class="logout" style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
+            <button type="submit" class="logout"
+                style="width: 100%; border: none; cursor: pointer; background: none; text-align: left;">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </button>
@@ -278,7 +325,8 @@
             <div style="display: flex; align-items: center;">
                 <div class="user-info">
                     <div class="user-name">{{ $user->name }}</div>
-                    <div class="user-role">{{ $user->isKepalaToko() ? 'Kepala Toko' : ($user->isAdmin() ? 'Admin' : 'Teknisi') }}</div>
+                    <div class="user-role">
+                        {{ $user->isKepalaToko() ? 'Kepala Toko' : ($user->isAdmin() ? 'Admin' : 'Teknisi') }}</div>
                 </div>
                 <div class="user-avatar">
                     <i class="fas fa-user"></i>
@@ -311,42 +359,50 @@
 
                 <div class="form-group">
                     <label for="user">ID User</label>
-                    <input type="text" class="form-control" id="user_id" value="{{ $userData->id }}" readonly disabled>
+                    <input type="text" class="form-control" id="user_id" value="{{ $userData->id }}" readonly
+                        disabled>
                     <input type="hidden" name="user_id" value="{{ $userData->id }}">
                 </div>
 
                 <div class="form-group">
-                   <label for="name">Nama User</label>
-<input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $userData->name) }}">
-@error('name')
-    <div class="invalid-feedback">{{ $message }}</div>
-@enderror
-<div class="invalid-feedback" id="name-error" style="display: none;"></div>
-</div>
+                    <label for="name">Nama User</label>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
+                        name="name" value="{{ old('name', $userData->name) }}">
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <div class="invalid-feedback" id="name-error" style="display: none;"></div>
+                </div>
 
-<div class="form-group">
-    <label for="alamat">Alamat</label>
-    <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat">{{ old('alamat', $userData->alamat) }}</textarea>
-    @error('alamat')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-    <div class="invalid-feedback" id="alamat-error" style="display: none;"></div>
-</div>
+                <div class="form-group">
+                    <label for="alamat">Alamat</label>
+                    <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat">{{ old('alamat', $userData->alamat) }}</textarea>
+                    @error('alamat')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <div class="invalid-feedback" id="alamat-error" style="display: none;"></div>
+                </div>
 
-<div class="form-group">
-    <label for="jabatan">Jabatan</label>
-    <select class="form-control @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan">
-        <option value="">-- Pilih Jabatan --</option>
-        <option value="Kepala Toko" {{ old('jabatan', $userData->jabatan) == 'Kepala Toko' ? 'selected' : '' }}>Kepala Toko</option>
-        <option value="Kepala Teknisi" {{ old('jabatan', $userData->jabatan) == 'Kepala Teknisi' ? 'selected' : '' }}>Kepala Teknisi</option>
-        <option value="Teknisi" {{ old('jabatan', $userData->jabatan) == 'Teknisi' ? 'selected' : '' }}>Teknisi</option>
-        <option value="Admin" {{ old('jabatan', $userData->jabatan) == 'Admin' ? 'selected' : '' }}>Admin</option>
-    </select>
-    @error('jabatan')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-    <div class="invalid-feedback" id="jabatan-error" style="display: none;"></div>
-</div>
+                <div class="form-group">
+                    <label for="jabatan">Jabatan</label>
+                    <select class="form-control @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan">
+                        <option value="">-- Pilih Jabatan --</option>
+                        <option value="Kepala Toko"
+                            {{ old('jabatan', $userData->jabatan) == 'Kepala Toko' ? 'selected' : '' }}>Kepala Toko
+                        </option>
+                        <option value="Kepala Teknisi"
+                            {{ old('jabatan', $userData->jabatan) == 'Kepala Teknisi' ? 'selected' : '' }}>Kepala
+                            Teknisi</option>
+                        <option value="Teknisi"
+                            {{ old('jabatan', $userData->jabatan) == 'Teknisi' ? 'selected' : '' }}>Teknisi</option>
+                        <option value="Admin" {{ old('jabatan', $userData->jabatan) == 'Admin' ? 'selected' : '' }}>
+                            Admin</option>
+                    </select>
+                    @error('jabatan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <div class="invalid-feedback" id="jabatan-error" style="display: none;"></div>
+                </div>
 
                 <div style="text-align: right;">
                     <button type="submit" class="btn btn-primary">
@@ -361,18 +417,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('editUserForm');
             const nameInput = document.getElementById('name');
-
-            // Error elements
             const errorElements = {
                 'name': document.getElementById('name-error'),
                 'alamat': document.getElementById('alamat-error'),
                 'jabatan': document.getElementById('jabatan-error')
             };
-
-            // Validasi nama - hanya huruf dan spasi
             nameInput.addEventListener('input', function(e) {
                 let value = e.target.value;
-                // Hapus karakter yang bukan huruf, spasi, atau tanda baca umum dalam nama
                 let cleanedValue = value.replace(/[^a-zA-Z\s\.']/g, '');
 
                 if (value !== cleanedValue) {
@@ -383,21 +434,15 @@
                 }
             });
 
-            // Prevent paste dengan angka di nama
             nameInput.addEventListener('paste', function(e) {
                 e.preventDefault();
                 let paste = (e.clipboardData || window.clipboardData).getData('text');
                 let cleanedPaste = paste.replace(/[^a-zA-Z\s\.']/g, '');
 
-                // Get current cursor position
                 let start = this.selectionStart;
                 let end = this.selectionEnd;
                 let currentValue = this.value;
-
-                // Insert cleaned paste at cursor position
                 this.value = currentValue.slice(0, start) + cleanedPaste + currentValue.slice(end);
-
-                // Set cursor position after pasted text
                 this.setSelectionRange(start + cleanedPaste.length, start + cleanedPaste.length);
 
                 if (paste !== cleanedPaste) {
@@ -405,14 +450,16 @@
                 }
             });
 
-            // Fungsi untuk menampilkan error
             function showError(fieldName, message) {
                 const field = document.getElementById(fieldName);
                 const errorDiv = errorElements[fieldName];
 
                 if (field) {
                     field.classList.add('is-invalid');
-                    field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    field.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                 }
 
                 if (errorDiv) {
@@ -421,7 +468,6 @@
                 }
             }
 
-            // Fungsi untuk menghilangkan error
             function hideError(fieldName) {
                 const field = document.getElementById(fieldName);
                 const errorDiv = errorElements[fieldName];
@@ -435,23 +481,19 @@
                 }
             }
 
-            // Validasi nama - hanya huruf dan spasi
             function isValidName(name) {
                 const nameRegex = /^[a-zA-Z\s\.\']+$/;
                 return nameRegex.test(name);
             }
-
-            // Add input event listeners to hide errors when typing/selecting
             ['name', 'alamat', 'jabatan'].forEach(fieldName => {
                 const field = document.getElementById(fieldName);
-                if (field && fieldName !== 'name') { // name sudah dihandle di atas
+                if (field && fieldName !== 'name') {
                     field.addEventListener('input', function() {
                         if (this.value.trim()) {
                             hideError(fieldName);
                         }
                     });
 
-                    // For select elements, also listen to change event
                     if (field.tagName === 'SELECT') {
                         field.addEventListener('change', function() {
                             if (this.value.trim()) {
@@ -462,23 +504,26 @@
                 }
             });
 
-            // Form submit handler
             form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Always prevent default
+                event.preventDefault();
 
                 let isValid = true;
                 let firstErrorField = null;
-
-                // Reset all errors
                 Object.keys(errorElements).forEach(fieldName => {
                     hideError(fieldName);
                 });
-
-                // Validate required fields
-                const requiredFields = [
-                    { name: 'name', message: 'Nama user wajib diisi.' },
-                    { name: 'alamat', message: 'Alamat wajib diisi.' },
-                    { name: 'jabatan', message: 'Jabatan wajib dipilih.' }
+                const requiredFields = [{
+                        name: 'name',
+                        message: 'Nama user wajib diisi.'
+                    },
+                    {
+                        name: 'alamat',
+                        message: 'Alamat wajib diisi.'
+                    },
+                    {
+                        name: 'jabatan',
+                        message: 'Jabatan wajib dipilih.'
+                    }
                 ];
 
                 requiredFields.forEach(field => {
@@ -490,7 +535,6 @@
                     }
                 });
 
-                // Validate nama format
                 const nameInput = document.getElementById('name');
                 if (nameInput && nameInput.value.trim()) {
                     if (!isValidName(nameInput.value.trim())) {
@@ -499,8 +543,6 @@
                         if (!firstErrorField) firstErrorField = nameInput;
                     }
                 }
-
-                // If validation passes, submit form
                 if (isValid) {
                     form.submit();
                 } else {
@@ -512,4 +554,5 @@
         });
     </script>
 </body>
+
 </html>

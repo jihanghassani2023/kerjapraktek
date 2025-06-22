@@ -311,7 +311,7 @@
             <span>User</span>
         </a>
         <a href="{{ route('laporan.index') }}" class="menu-item">
-             <i class="fas fa-chart-bar"></i>
+            <i class="fas fa-chart-bar"></i>
             <span>Laporan</span>
         </a>
         <form method="POST" action="{{ route('logout') }}" style="margin-top: auto;">
@@ -409,7 +409,8 @@
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
-                        name="email" value="{{ old('email') }}" autocomplete="new-email" autocorrect="off" autocapitalize="off" spellcheck="false">
+                        name="email" value="{{ old('email') }}" autocomplete="new-email" autocorrect="off"
+                        autocapitalize="off" spellcheck="false">
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -418,8 +419,8 @@
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password"
-                        name="password" autocomplete="new-password">
+                    <input type="password" class="form-control @error('password') is-invalid @enderror"
+                        id="password" name="password" autocomplete="new-password">
                     <div class="password-requirements">
                         Password minimal 6 karakter
                     </div>
@@ -442,8 +443,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('tambahKaryawanForm');
             const nameInput = document.getElementById('name');
-
-            // Error elements
             const errorElements = {
                 'name': document.getElementById('name-error'),
                 'alamat': document.getElementById('alamat-error'),
@@ -451,11 +450,8 @@
                 'email': document.getElementById('email-error'),
                 'password': document.getElementById('password-error')
             };
-
-            // Validasi nama - hanya huruf dan spasi
             nameInput.addEventListener('input', function(e) {
                 let value = e.target.value;
-                // Hapus karakter yang bukan huruf, spasi, atau tanda baca umum dalam nama
                 let cleanedValue = value.replace(/[^a-zA-Z\s\.']/g, '');
 
                 if (value !== cleanedValue) {
@@ -465,8 +461,6 @@
                     hideError('name');
                 }
             });
-
-            // Prevent paste dengan angka di nama
             nameInput.addEventListener('paste', function(e) {
                 e.preventDefault();
                 let paste = (e.clipboardData || window.clipboardData).getData('text');
@@ -477,8 +471,6 @@
                     showError('name', 'Nama hanya boleh berisi huruf dan spasi.');
                 }
             });
-
-            // Prevent autofill on form load
             setTimeout(function() {
                 const emailInput = document.getElementById('email');
                 const passwordInput = document.getElementById('password');
@@ -491,14 +483,16 @@
                 }
             }, 100);
 
-            // Fungsi untuk menampilkan error
             function showError(fieldName, message) {
                 const field = document.getElementById(fieldName);
                 const errorDiv = errorElements[fieldName];
 
                 if (field) {
                     field.classList.add('is-invalid');
-                    field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    field.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                 }
 
                 if (errorDiv) {
@@ -507,7 +501,6 @@
                 }
             }
 
-            // Fungsi untuk menghilangkan error
             function hideError(fieldName) {
                 const field = document.getElementById(fieldName);
                 const errorDiv = errorElements[fieldName];
@@ -521,23 +514,18 @@
                 }
             }
 
-            // Validasi nama - hanya huruf dan spasi
             function isValidName(name) {
                 const nameRegex = /^[a-zA-Z\s\.\']+$/;
                 return nameRegex.test(name);
             }
-
-            // Add input event listeners to hide errors when typing/selecting
             ['name', 'alamat', 'jabatan', 'email', 'password'].forEach(fieldName => {
                 const field = document.getElementById(fieldName);
-                if (field && fieldName !== 'name') { // name sudah dihandle di atas
+                if (field && fieldName !== 'name') {
                     field.addEventListener('input', function() {
                         if (this.value.trim()) {
                             hideError(fieldName);
                         }
                     });
-
-                    // For select elements, also listen to change event
                     if (field.tagName === 'SELECT') {
                         field.addEventListener('change', function() {
                             if (this.value.trim()) {
@@ -548,31 +536,39 @@
                 }
             });
 
-            // Email validation helper
             function isValidEmail(email) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return emailRegex.test(email);
             }
 
-            // Form submit handler
             form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Always prevent default
+                event.preventDefault();
 
                 let isValid = true;
                 let firstErrorField = null;
-
-                // Reset all errors
                 Object.keys(errorElements).forEach(fieldName => {
                     hideError(fieldName);
                 });
-
-                // Validate required fields
-                const requiredFields = [
-                    { name: 'name', message: 'Nama user wajib diisi.' },
-                    { name: 'alamat', message: 'Alamat wajib diisi.' },
-                    { name: 'jabatan', message: 'Jabatan wajib dipilih.' },
-                    { name: 'email', message: 'Email wajib diisi.' },
-                    { name: 'password', message: 'Password wajib diisi.' }
+                const requiredFields = [{
+                        name: 'name',
+                        message: 'Nama user wajib diisi.'
+                    },
+                    {
+                        name: 'alamat',
+                        message: 'Alamat wajib diisi.'
+                    },
+                    {
+                        name: 'jabatan',
+                        message: 'Jabatan wajib dipilih.'
+                    },
+                    {
+                        name: 'email',
+                        message: 'Email wajib diisi.'
+                    },
+                    {
+                        name: 'password',
+                        message: 'Password wajib diisi.'
+                    }
                 ];
 
                 requiredFields.forEach(field => {
@@ -583,8 +579,6 @@
                         if (!firstErrorField) firstErrorField = input;
                     }
                 });
-
-                // Validate nama format
                 const nameInput = document.getElementById('name');
                 if (nameInput && nameInput.value.trim()) {
                     if (!isValidName(nameInput.value.trim())) {
@@ -593,8 +587,6 @@
                         if (!firstErrorField) firstErrorField = nameInput;
                     }
                 }
-
-                // Validate email format
                 const emailInput = document.getElementById('email');
                 if (emailInput && emailInput.value.trim()) {
                     if (!isValidEmail(emailInput.value.trim())) {
@@ -603,8 +595,6 @@
                         if (!firstErrorField) firstErrorField = emailInput;
                     }
                 }
-
-                // Validate password length
                 const passwordInput = document.getElementById('password');
                 if (passwordInput && passwordInput.value.trim()) {
                     if (passwordInput.value.length < 6) {
@@ -614,7 +604,6 @@
                     }
                 }
 
-                // If validation passes, submit form
                 if (isValid) {
                     form.submit();
                 } else {
@@ -623,8 +612,6 @@
                     }
                 }
             });
-
-            // Prevent browser autofill
             document.getElementById('email').addEventListener('focus', function() {
                 this.setAttribute('autocomplete', 'new-email');
             });
