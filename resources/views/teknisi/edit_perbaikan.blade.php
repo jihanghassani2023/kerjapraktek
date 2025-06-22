@@ -531,11 +531,11 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">Edit Perbaikan <span>TEKNISI</span></h1>
+            <h1 class="page-title">Edit Perbaikan <span class="user-role">{{ strtoupper($user->jabatan) }}</span></h1>
             <div class="user-info">
                 <div class="user-name">
                     <div>{{ $user->name }}</div>
-                    <div class="user-role">{{ $user->role }}</div>
+                    <div class="user-role">{{ $user->jabatan }}</div>
                 </div>
                 <div class="user-avatar">
                     <img src="{{ asset('img/user.png') }}" alt="User"

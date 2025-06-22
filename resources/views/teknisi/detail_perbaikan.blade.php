@@ -721,11 +721,11 @@
 
     <div class="main-content">
         <div class="header">
-            <h1 class="page-title">Detail Perbaikan <span>TEKNISI</span></h1>
+            <h1 class="page-title">Detail Perbaikan <span class="user-role">{{ strtoupper($user->jabatan) }}</span></h1>
             <div class="user-info">
                 <div class="user-name">
                     <div>{{ $user->name }}</div>
-                    <div class="user-role">{{ $user->role }}</div>
+                    <div class="user-role">{{ $user->jabatan }}</div>
                 </div>
                 <div class="user-avatar">
                     <img src="{{ asset('img/user.png') }}" alt="User"
@@ -940,10 +940,18 @@
                                 </div>
                             </div>
                             <div class="actions mt-3">
-                                <a href="{{ route('perbaikan.edit', $perbaikan->id) }}" class="btn btn-primary">
-                                    <i class="fas fa-edit"></i> Edit Perbaikan
-                                </a>
+                                @if ($perbaikan->status !== 'Selesai')
+                                    <a href="{{ route('perbaikan.edit', $perbaikan->id) }}" class="btn btn-primary">
+                                        <i class="fas fa-edit"></i> Edit Perbaikan
+                                    </a>
+                                @else
+                                    <div class="status-completed-message">
+                                        <i class="fas fa-info-circle"></i>
+                                        Perbaikan telah selesai. Data tidak dapat diedit lagi.
+                                    </div>
+                                @endif
                             </div>
+
                         </div>
                     </div>
                 </div>
