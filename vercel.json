@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "public": true,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.php"
+    }
+  ],
+  "env": {
+    "APP_ENV": "production",
+    "APP_DEBUG": "false",
+    "APP_URL": "https://kerjapraktek-88deugv3t-bryant-anskys-projects.vercel.app",
+    "APP_CONFIG_CACHE": "/tmp/config.php",
+    "APP_EVENTS_CACHE": "/tmp/events.php",
+    "APP_PACKAGES_CACHE": "/tmp/packages.php",
+    "APP_ROUTES_CACHE": "/tmp/routes.php",
+    "APP_SERVICES_CACHE": "/tmp/services.php",
+    "VIEW_COMPILED_PATH": "/tmp",
+    "CACHE_DRIVER": "array",
+    "LOG_CHANNEL": "stderr",
+    "SESSION_DRIVER": "cookie"
+  },
+  "installCommand": "composer install --no-dev --optimize-autoloader",
+  "outputDirectory": "public",
+  "framework": null,
+  "builds": [
+    {
+      "src": "api/index.php",
+      "use": "@php-on-vercel/php"
+    },
+    {
+      "src": "**/*", 
+      "use": "@vercel/static"
+    }
+  ]
+}
