@@ -552,43 +552,53 @@
 
             document.getElementById('userNameDisplay').textContent = userName;
             document.getElementById('deleteModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden'; // Mencegah scroll body saat modal terbuka
         }
 
         function hideDeleteModal() {
             document.getElementById('deleteModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = 'auto'; // Mengizinkan scroll body kembali
             currentUserId = null;
             currentUserName = null;
         }
 
         function confirmDelete() {
-    if (currentUserId) {
-        const form = document.getElementById('deleteForm');
-        
-        // Debug log untuk troubleshooting
-        console.log('Current User ID:', currentUserId);
-        console.log('Base URL:', window.location.origin);
-        
-        // Gunakan URL lengkap untuk hosting
-        form.action = window.location.origin + '/user/' + currentUserId;
-        
-        console.log('Form action will be:', form.action);
-        form.submit();
-    }
-}
+            if (currentUserId) {
+                const form = document.getElementById('deleteForm');
+                
+                // Mengambil base URL dari elemen tersembunyi yang kita tambahkan
+                const deleteUrlTemplate = document.getElementById('deleteUserUrlTemplate').dataset.url;
+                
+                // Mengganti placeholder {id} dengan currentUserId
+                form.action = deleteUrlTemplate.replace('{id}', currentUserId);
+                
+                // Debug log untuk troubleshooting (Anda bisa hapus ini setelah berfungsi)
+                console.log('Current User ID:', currentUserId);
+                console.log('Form action will be:', form.action);
+                
+                form.submit();
+            }
+        }
+
+        // Menutup modal jika klik di luar area modal content
         document.getElementById('deleteModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideDeleteModal();
             }
         });
 
+        // Menutup modal jika menekan tombol Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 hideDeleteModal();
             }
         });
     </script>
+
+    {{-- Tambahkan elemen tersembunyi ini untuk menyimpan URL delete --}}
+    {{-- Ini akan di-render oleh Blade dengan route yang benar --}}
+    <div id="deleteUserUrlTemplate" data-url="{{ route('user.destroy', ['user' => '{id}']) }}" style="display: none;"></div>
+
 </body>
 
 </html>
