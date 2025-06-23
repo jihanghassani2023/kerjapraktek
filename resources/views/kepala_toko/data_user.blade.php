@@ -563,12 +563,20 @@
         }
 
         function confirmDelete() {
-            if (currentUserId) {
-                const form = document.getElementById('deleteForm');
-                form.action = `/user/${currentUserId}`;
-                form.submit();
-            }
-        }
+    if (currentUserId) {
+        const form = document.getElementById('deleteForm');
+        
+        // Debug log untuk troubleshooting
+        console.log('Current User ID:', currentUserId);
+        console.log('Base URL:', window.location.origin);
+        
+        // Gunakan URL lengkap untuk hosting
+        form.action = window.location.origin + '/user/' + currentUserId;
+        
+        console.log('Form action will be:', form.action);
+        form.submit();
+    }
+}
         document.getElementById('deleteModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideDeleteModal();
