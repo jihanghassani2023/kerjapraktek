@@ -584,13 +584,15 @@
             if (currentUserId) {
                 const form = document.getElementById('deleteForm');
                 
-                // Mengatur action form dengan URL penghapusan yang benar.
-                // {{ url('user') }} akan menghasilkan base URL Laravel + '/user' (misal: http://namadomain.com/user)
-                // Kemudian, currentUserId ditambahkan untuk membentuk URL lengkap (misal: http://namadomain.com/user/1)
-                form.action = `{{ url('user') }}/${currentUserId}`;
+                // *** PERBAIKAN DI SINI ***
+                // Perbandingan dengan halaman pelanggan menunjukkan bahwa kita perlu hardcode path
+                // yang tepat sesuai dengan definisi route di Laravel.
+                // Berdasarkan `routes/web.php` yang Anda berikan,
+                // `Route::resource('user', UserController::class);` didefinisikan tanpa prefix.
+                // Jadi, URL yang tepat adalah `/user/{id}`.
+                form.action = `/user/${currentUserId}`; // Ini seharusnya cocok dengan Route::resource('user')
                 
                 // Log untuk debugging: Menampilkan ID pengguna dan URL form yang akan disubmit.
-                // Anda bisa menghapus baris ini setelah memastikan fitur berfungsi.
                 console.log('Current User ID:', currentUserId);
                 console.log('Form action will be:', form.action);
                 
@@ -599,7 +601,7 @@
             }
         }
 
-        // Event listener untuk menutup modal jika mengklik di luar area modal content
+        // Event listener untuk menutup modal jika klik di luar area modal content
         document.getElementById('deleteModal').addEventListener('click', function(e) {
             // Jika target klik adalah overlay modal itu sendiri (bukan konten di dalamnya)
             if (e.target === this) {
