@@ -7,6 +7,7 @@
     <title>User - MG TECH</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* (SEMUA CSS ANDA YANG SEBELUMNYA TETAP SAMA DI SINI) */
         * {
             margin: 0;
             padding: 0;
@@ -566,11 +567,9 @@
             if (currentUserId) {
                 const form = document.getElementById('deleteForm');
                 
-                // Mengambil base URL dari elemen tersembunyi yang kita tambahkan
-                const deleteUrlTemplate = document.getElementById('deleteUserUrlTemplate').dataset.url;
-                
-                // Mengganti placeholder {id} dengan currentUserId
-                form.action = deleteUrlTemplate.replace('{id}', currentUserId);
+                // Gunakan base URL yang Anda harapkan, atau sesuaikan dengan struktur route Anda
+                // Jika route 'user.destroy' didefinisikan sebagai 'user/{user}', maka:
+                form.action = `{{ url('user') }}/${currentUserId}`;
                 
                 // Debug log untuk troubleshooting (Anda bisa hapus ini setelah berfungsi)
                 console.log('Current User ID:', currentUserId);
@@ -594,11 +593,6 @@
             }
         });
     </script>
-
-    {{-- Tambahkan elemen tersembunyi ini untuk menyimpan URL delete --}}
-    {{-- Ini akan di-render oleh Blade dengan route yang benar --}}
-    <div id="deleteUserUrlTemplate" data-url="{{ route('user.destroy', ['user' => '{id}']) }}" style="display: none;"></div>
-
 </body>
 
 </html>
