@@ -118,7 +118,7 @@
             align-items: center;
             color: white;
             text-decoration: none;
-            margin-top: auto;
+            margin-top: auto; /* Disesuaikan untuk menempatkan tombol Kembali di atas Logout */
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -565,7 +565,7 @@
                     </a>
 
                     <button type="button" class="btn btn-delete"
-                        onclick="showDeleteModal('{{ $userData->id }}', '{{ $userData->name }}')">
+                        onclick="showDeleteModal('{{ $userData->id }}', '{{ addslashes($userData->name) }}')">
                         <i class="fas fa-trash"></i> Hapus
                     </button>
                 </div>
@@ -679,6 +679,11 @@
         let currentUserId = null;
         let currentUserName = null;
 
+        /**
+         * Menampilkan modal konfirmasi penghapusan.
+         * @param {string} userId - ID pengguna yang akan dihapus.
+         * @param {string} userName - Nama pengguna yang akan dihapus.
+         */
         function showDeleteModal(userId, userName) {
             currentUserId = userId;
             currentUserName = userName;
@@ -687,6 +692,9 @@
             document.body.style.overflow = 'hidden';
         }
 
+        /**
+         * Menyembunyikan modal konfirmasi penghapusan.
+         */
         function hideDeleteModal() {
             document.getElementById('deleteModal').style.display = 'none';
             document.body.style.overflow = 'auto';
@@ -694,10 +702,22 @@
             currentUserName = null;
         }
 
+        /**
+         * Mengirimkan form penghapusan setelah konfirmasi.
+         */
         function confirmDelete() {
             if (currentUserId) {
                 const form = document.getElementById('deleteForm');
+                // Mengatur action form dengan URL penghapusan yang benar.
+                // Berdasarkan routes/web.php Anda, Route::resource('user', UserController::class);
+                // didefinisikan tanpa prefix, jadi URL yang tepat adalah '/user/{id}'.
                 form.action = `/user/${currentUserId}`;
+                
+                // Log untuk debugging: Menampilkan ID pengguna dan URL form yang akan disubmit.
+                console.log('Current User ID:', currentUserId);
+                console.log('Form action will be:', form.action);
+                
+                // Mengirimkan form, yang akan memicu permintaan DELETE ke server Laravel.
                 form.submit();
             }
         }
