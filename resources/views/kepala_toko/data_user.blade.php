@@ -547,49 +547,70 @@
         let currentUserId = null;
         let currentUserName = null;
 
+        /**
+         * Menampilkan modal konfirmasi penghapusan.
+         * @param {string} userId - ID pengguna yang akan dihapus.
+         * @param {string} userName - Nama pengguna yang akan dihapus.
+         */
         function showDeleteModal(userId, userName) {
             currentUserId = userId;
             currentUserName = userName;
 
+            // Memperbarui teks di modal dengan nama pengguna yang akan dihapus
             document.getElementById('userNameDisplay').textContent = userName;
+            // Menampilkan modal
             document.getElementById('deleteModal').style.display = 'block';
-            document.body.style.overflow = 'hidden'; // Mencegah scroll body saat modal terbuka
+            // Mencegah body halaman di-scroll saat modal terbuka
+            document.body.style.overflow = 'hidden';
         }
 
+        /**
+         * Menyembunyikan modal konfirmasi penghapusan.
+         */
         function hideDeleteModal() {
+            // Menyembunyikan modal
             document.getElementById('deleteModal').style.display = 'none';
-            document.body.style.overflow = 'auto'; // Mengizinkan scroll body kembali
+            // Mengizinkan body halaman di-scroll kembali
+            document.body.style.overflow = 'auto';
+            // Mengatur ulang variabel ID dan nama pengguna
             currentUserId = null;
             currentUserName = null;
         }
 
+        /**
+         * Mengirimkan form penghapusan setelah konfirmasi.
+         */
         function confirmDelete() {
             if (currentUserId) {
                 const form = document.getElementById('deleteForm');
                 
-                // Gunakan base URL yang Anda harapkan, atau sesuaikan dengan struktur route Anda
-                // Jika route 'user.destroy' didefinisikan sebagai 'user/{user}', maka:
+                // Mengatur action form dengan URL penghapusan yang benar.
+                // {{ url('user') }} akan menghasilkan base URL Laravel + '/user' (misal: http://namadomain.com/user)
+                // Kemudian, currentUserId ditambahkan untuk membentuk URL lengkap (misal: http://namadomain.com/user/1)
                 form.action = `{{ url('user') }}/${currentUserId}`;
                 
-                // Debug log untuk troubleshooting (Anda bisa hapus ini setelah berfungsi)
+                // Log untuk debugging: Menampilkan ID pengguna dan URL form yang akan disubmit.
+                // Anda bisa menghapus baris ini setelah memastikan fitur berfungsi.
                 console.log('Current User ID:', currentUserId);
                 console.log('Form action will be:', form.action);
                 
+                // Mengirimkan form, yang akan memicu permintaan DELETE ke server Laravel.
                 form.submit();
             }
         }
 
-        // Menutup modal jika klik di luar area modal content
+        // Event listener untuk menutup modal jika mengklik di luar area modal content
         document.getElementById('deleteModal').addEventListener('click', function(e) {
+            // Jika target klik adalah overlay modal itu sendiri (bukan konten di dalamnya)
             if (e.target === this) {
-                hideDeleteModal();
+                hideDeleteModal(); // Sembunyikan modal
             }
         });
 
-        // Menutup modal jika menekan tombol Escape
+        // Event listener untuk menutup modal jika menekan tombol Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                hideDeleteModal();
+                hideDeleteModal(); // Sembunyikan modal
             }
         });
     </script>
