@@ -502,7 +502,7 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <button type="button" class="action-btn" title="Hapus"
-                                        onclick="showDeleteModal('{{ $u->id }}', '{{ $u->name }}')">
+                                        onclick="showDeleteModal('{{ $u->id }}', '{{ addslashes($u->name) }}')">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -584,13 +584,10 @@
             if (currentUserId) {
                 const form = document.getElementById('deleteForm');
                 
-                // *** PERBAIKAN DI SINI ***
-                // Perbandingan dengan halaman pelanggan menunjukkan bahwa kita perlu hardcode path
-                // yang tepat sesuai dengan definisi route di Laravel.
-                // Berdasarkan `routes/web.php` yang Anda berikan,
-                // `Route::resource('user', UserController::class);` didefinisikan tanpa prefix.
-                // Jadi, URL yang tepat adalah `/user/{id}`.
-                form.action = `/user/${currentUserId}`; // Ini seharusnya cocok dengan Route::resource('user')
+                // Mengatur action form dengan URL penghapusan yang benar.
+                // Berdasarkan routes/web.php Anda, Route::resource('user', UserController::class);
+                // didefinisikan tanpa prefix, jadi URL yang tepat adalah '/user/{id}'.
+                form.action = `/user/${currentUserId}`;
                 
                 // Log untuk debugging: Menampilkan ID pengguna dan URL form yang akan disubmit.
                 console.log('Current User ID:', currentUserId);
